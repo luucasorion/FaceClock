@@ -32,6 +32,11 @@ class Colaborador(Base):
         nullable=False
     )
 
+    batidas = relationship(
+        "BatidaPonto",
+        back_populates="colaborador"
+    )
+
     status = Column(Boolean, default=True)
 
     facial = Column(JSON, nullable=True)
