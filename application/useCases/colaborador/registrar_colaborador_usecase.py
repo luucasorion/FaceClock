@@ -1,13 +1,18 @@
 from fastapi import HTTPException, status
 
-from domain.models.colaborador import Colaborador
+from domains.models.colaborador import Colaborador
 
 
 class RegistrarColaboradorUseCase:
 
-    def __init__(self, colaborador_repository):
+    def __init__(
+        self,
+        colaborador_repository,
+        hash_service
+    ):
 
         self.colaborador_repository = colaborador_repository
+        self.hash_service = hash_service
 
     def execute(
         self,
@@ -41,11 +46,13 @@ class RegistrarColaboradorUseCase:
                 status_code=status.HTTP_409_CONFLICT
             )
 
+        senha_hash = self.hash_service.hash(senha)
+
         colaborador = Colaborador(
             cpf=cpf,
             nome=nome,
             login=login,
-            senha=senha,
+            senha=senha_hash,
             empresa_id=empresa_id,
             status=True,
             facial=facial

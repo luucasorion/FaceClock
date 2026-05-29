@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from domain.models.colaborador import Colaborador
+from domains.models.colaborador import Colaborador
 
 
 class ColaboradorRepository:
