@@ -17,8 +17,8 @@ from presentation.schema.requests.registro_colaborador_request import (
 
 
 router = APIRouter(
-    prefix="/colaboradores",
-    tags=["Colaboradores"]
+    prefix="/colaborador/registro",
+    tags=["Colaborador"]
 )
 
 

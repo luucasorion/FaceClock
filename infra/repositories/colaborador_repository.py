@@ -38,5 +38,5 @@ class ColaboradorRepository:
 
     def deletar(self, colaborador: Colaborador):
 
-        self.db.delete(colaborador)
+        self.db.update(colaborador.status, False)
         self.db.commit()
