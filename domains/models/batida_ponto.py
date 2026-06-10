@@ -1,3 +1,5 @@
+import uuid
+
 from sqlalchemy import (
     Column,
     String,
@@ -15,7 +17,11 @@ from infra.db.base import Base
 class BatidaPonto(Base):
     __tablename__ = "batidas_ponto"
 
-    id = Column(String, primary_key=True)
+    id = Column(
+    String,
+    primary_key=True,
+    default=lambda: str(uuid.uuid4())
+)
 
     colaborador_id = Column(
         String,

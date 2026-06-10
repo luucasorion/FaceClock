@@ -14,9 +14,15 @@ from infra.db.base import Base
 class Colaborador(Base):
     __tablename__ = "colaboradores"
 
-    cpf = Column(String, primary_key=True)
+    cpf = Column(
+        String,
+        primary_key=True
+    )
 
-    nome = Column(String, nullable=False)
+    nome = Column(
+        String,
+        nullable=False
+    )
 
     login = Column(
         String,
@@ -24,24 +30,32 @@ class Colaborador(Base):
         nullable=False
     )
 
-    senha = Column(String, nullable=False)
+    senha = Column(
+        String,
+        nullable=False
+    )
+
+    status = Column(
+        Boolean,
+        default=True
+    )
+
+    facial = Column(
+        JSON,
+        nullable=True
+    )
 
     empresa_id = Column(
         String,
-        ForeignKey("empresas.cnpj"),
-        nullable=False
+        ForeignKey("empresas.cnpj")
+    )
+
+    empresa = relationship(
+        "Empresa",
+        back_populates="colaboradores"
     )
 
     batidas = relationship(
         "BatidaPonto",
         back_populates="colaborador"
-    )
-
-    status = Column(Boolean, default=True)
-
-    facial = Column(JSON, nullable=True)
-
-    empresa = relationship(
-        "Empresa",
-        back_populates="colaboradores"
     )

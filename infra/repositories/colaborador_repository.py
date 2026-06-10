@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 
+from domains.models import colaborador
 from domains.models.colaborador import Colaborador
 
 
@@ -35,8 +36,19 @@ class ColaboradorRepository:
     def listar(self):
 
         return self.db.query(Colaborador).all()
+    
+    def atualizar(self, colaborador: Colaborador):
+
+        self.db.commit()
+        self.db.refresh(colaborador)
+
+        return colaborador
 
     def deletar(self, colaborador: Colaborador):
 
-        self.db.update(colaborador.status, False)
+        colaborador.status = False
+
         self.db.commit()
+        self.db.refresh(colaborador)
+
+        return colaborador
