@@ -44,7 +44,6 @@ class BaterPontoUseCase:
             .gerar_embedding(imagem)
         )
 
-        # Sem biometria cadastrada
         if len(colaborador.facial) < 128:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
