@@ -1,6 +1,14 @@
-from fastapi import APIRouter, Depends
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    UploadFile
+)
 from sqlalchemy.orm import Session
 
+from application.services.facial_service import FacialService
+from application.useCases.ponto.cadastrar_biometria_usecase import CadastrarBiometriaUseCase
 from infra.db.database import SessionLocal
 
 from infra.repositories.colaborador_repository import ColaboradorRepository
@@ -58,3 +66,28 @@ def registro_colaborador(
     )
 
     return colaborador
+
+@router.post("/cadastrar-biometria")
+async def cadastrar_biometria(
+    login: str = Form(...),
+    imagem: UploadFile = File(...),
+    db=Depends(get_db)
+):
+
+    colaborador_repository = (
+        ColaboradorRepository(db)
+    )
+
+    facial_service = FacialService()
+
+    usecase = CadastrarBiometriaUseCase(
+        colaborador_repository,
+        facial_service
+    )
+
+    imagem_bytes = await imagem.read()
+
+    return usecase.execute(
+        login=login,
+        imagem=imagem_bytes
+    )
