@@ -63,17 +63,15 @@ textarea {
   color: inherit;
 }
 
-/* App shell: full-bleed on mobile, centered max-width on desktop. */
+/* App shell (FE-SHARED-9): the hard 480px desktop lock is retired. The MUI
+   `Container` inside AppLayout now owns the max content width (sm for
+   collaborator/auth/punch screens, lg for manager screens), so the shell only
+   stays full-width and guards against horizontal overflow. Kept for any markup
+   still referencing it and as the mobile-first overflow guard. */
 .app-shell {
   width: 100%;
-  max-width: var(--shell-max-width);
   min-height: 100dvh;
-  margin: 0 auto;
-  padding: var(--space-md);
-  background: var(--color-surface);
   overflow-x: hidden;
-  /* Reserve room so thumb-zone content never sits under the home indicator. */
-  padding-bottom: calc(var(--space-md) + var(--safe-bottom));
   display: flex;
   flex-direction: column;
 }

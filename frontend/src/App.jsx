@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext.jsx';
 import { RequireAuth, RequireManager } from './auth/guards.jsx';
+import AppLayout from './components/AppLayout.jsx';
 import MenuPage from './pages/MenuPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import RegistroColaboradorPage from './pages/RegistroColaboradorPage.jsx';
@@ -24,14 +25,20 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <div className="app-shell">
-          <Routes>
+        <Routes>
+          {/* Kiosk is a public full-bleed totem — rendered OUTSIDE AppLayout
+              so it has NO app bar / content column (FE-PUNCH-4 redesigns it). */}
+          <Route path="/kiosk" element={<KioskPage />} />
+
+          {/* Everything else lives inside the responsive AppLayout shell
+              (AppBar + width-adaptive Container). FE-SHARED-9. Guards still
+              wrap the protected branches, composed inside the layout. */}
+          <Route element={<AppLayout />}>
             {/* Public routes */}
             <Route path="/" element={<MenuPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/registro/colaborador" element={<RegistroColaboradorPage />} />
             <Route path="/registro/empresa" element={<RegistroEmpresaPage />} />
-            <Route path="/kiosk" element={<KioskPage />} />
 
             {/* Authenticated routes (any logged-in collaborator) */}
             <Route element={<RequireAuth />}>
@@ -48,8 +55,8 @@ export default function App() {
             </Route>
 
             <Route path="*" element={<NotFound />} />
-          </Routes>
-        </div>
+          </Route>
+        </Routes>
       </BrowserRouter>
     </AuthProvider>
   );
