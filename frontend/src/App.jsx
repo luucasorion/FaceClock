@@ -2,15 +2,15 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext.jsx';
 import { RequireAuth, RequireManager } from './auth/guards.jsx';
 import MenuPage from './pages/MenuPage.jsx';
+import LoginPage from './pages/LoginPage.jsx';
+import RegistroColaboradorPage from './pages/RegistroColaboradorPage.jsx';
+import RegistroEmpresaPage from './pages/RegistroEmpresaPage.jsx';
 
 // Placeholder pages for FE-SHARED-1. Real screens land in their own tasks.
 function Placeholder({ name }) {
   return <h1>{name}</h1>;
 }
 
-const LoginPage = () => <Placeholder name="LoginPage" />;
-const RegistroColaboradorPage = () => <Placeholder name="RegistroColaboradorPage" />;
-const RegistroEmpresaPage = () => <Placeholder name="RegistroEmpresaPage" />;
 const EnrollPage = () => <Placeholder name="EnrollPage" />;
 const KioskPage = () => <Placeholder name="KioskPage" />;
 const PunchHomePage = () => <Placeholder name="PunchHomePage" />;

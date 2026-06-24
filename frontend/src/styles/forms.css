@@ -1,0 +1,138 @@
+/* Shared form styles for the auth/registration screens
+   (FE-AUTH-1/2/3). Mobile-first, reuses base.css tokens.
+   Keeps no horizontal scroll and primary actions in thumb reach. */
+
+.auth-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+}
+
+.auth-header {
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+
+.auth-title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.auth-subtitle {
+  margin: var(--space-sm) 0 0;
+  color: var(--color-text-muted);
+}
+
+/* The form fills available space; the submit lives in the thumb zone. */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.form-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.form-input {
+  width: 100%;
+  min-height: var(--tap-target);
+  padding: 0 var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.form-input:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -1px;
+}
+
+.form-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* Inline error message surfaced from a thrown ApiError. */
+.form-error {
+  margin: 0 0 var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius);
+  background: #fdecec;
+  color: #9b1c1c;
+  border: 1px solid #f5c2c2;
+  font-size: 0.95rem;
+}
+
+/* Success confirmation panel (company registration). */
+.form-success {
+  margin-bottom: var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius);
+  background: #e8f5ed;
+  color: #14633a;
+  border: 1px solid #bfe3cd;
+}
+
+.form-success strong {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* Stack the primary action(s) and pin them to the thumb zone. */
+.auth-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-top: auto;
+  padding-bottom: var(--safe-bottom);
+}
+
+/* Secondary link styled as an outlined button. */
+.btn-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--tap-target);
+  padding: 0 var(--space-lg);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+}
+
+.auth-actions .btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  text-align: center;
+}
+
+@media (min-width: 481px) {
+  .auth-actions {
+    align-items: center;
+  }
+
+  .btn-secondary {
+    width: auto;
+    min-width: 200px;
+  }
+}
