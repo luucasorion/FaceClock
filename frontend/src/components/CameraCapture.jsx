@@ -22,6 +22,13 @@
 //   onError(err)     optional — called when getUserMedia/capture fails.
 //   captureLabel     optional — capture button text (default "Capturar").
 //   quality          optional — JPEG quality 0..1 (default 0.92).
+//   autoCaptureCountdown  optional — when set to a positive integer (e.g. 3),
+//                    the component runs a visible N…2…1 countdown over the live
+//                    video as soon as the stream is ready, then auto-captures —
+//                    turning the capture into a single deliberate action for the
+//                    kiosk/totem (FE-PUNCH-4). DEFAULT OFF (undefined): the manual
+//                    capture button is shown and behavior is identical to before,
+//                    so the punch-home and enroll consumers are UNAFFECTED.
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import './CameraCapture.css';
@@ -32,6 +39,7 @@ export default function CameraCapture({
   onError,
   captureLabel = 'Capturar',
   quality = 0.92,
+  autoCaptureCountdown,
 }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -39,6 +47,8 @@ export default function CameraCapture({
 
   const [status, setStatus] = useState('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  // Remaining seconds for the optional auto-capture countdown (null = inactive).
+  const [countdown, setCountdown] = useState(null);
 
   // Stop every track and drop the stream reference. Safe to call repeatedly.
   const stopStream = useCallback(() => {
@@ -166,6 +176,35 @@ export default function CameraCapture({
     );
   }, [status, onCapture, quality, stopStream]);
 
+  // Optional auto-capture countdown (kiosk/totem). Off unless the prop is a
+  // positive integer. Runs once the stream is live: ticks N…1 (one per second)
+  // then fires the same handleCapture used by the manual button. The interval is
+  // cleared on unmount / status change, so NFR05 teardown is unaffected.
+  const autoEnabled =
+    Number.isFinite(autoCaptureCountdown) && autoCaptureCountdown > 0;
+
+  useEffect(() => {
+    if (!autoEnabled || status !== 'streaming') {
+      setCountdown(null);
+      return undefined;
+    }
+
+    setCountdown(Math.floor(autoCaptureCountdown));
+    const id = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev === null) return null;
+        if (prev <= 1) {
+          clearInterval(id);
+          handleCapture();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(id);
+  }, [autoEnabled, autoCaptureCountdown, status, handleCapture]);
+
   if (status === 'error') {
     return (
       <div className="camera-capture camera-capture--error" role="alert">
@@ -191,21 +230,33 @@ export default function CameraCapture({
         {status === 'starting' && (
           <p className="camera-capture__hint">Iniciando a câmera…</p>
         )}
+        {/* Large countdown digit over the video while auto-capture runs. */}
+        {autoEnabled && countdown !== null && countdown > 0 && (
+          <div className="camera-capture__countdown" aria-live="assertive">
+            {countdown}
+          </div>
+        )}
+        {autoEnabled && status === 'streaming' && (
+          <p className="camera-capture__hint">Olhe para a câmera…</p>
+        )}
       </div>
 
       {/* Off-screen canvas used only to grab a frame; never displayed. */}
       <canvas ref={canvasRef} className="camera-capture__canvas" />
 
-      <div className="thumb-zone">
-        <button
-          type="button"
-          className="btn-primary"
-          onClick={handleCapture}
-          disabled={busy}
-        >
-          {status === 'capturing' ? 'Capturando…' : captureLabel}
-        </button>
-      </div>
+      {/* Manual capture button — hidden when auto-capture drives the capture. */}
+      {!autoEnabled && (
+        <div className="thumb-zone">
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={handleCapture}
+            disabled={busy}
+          >
+            {status === 'capturing' ? 'Capturando…' : captureLabel}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,54 +1,11 @@
-/* FE-PUNCH-1: kiosk punch screen. Mobile-first, no horizontal scroll. */
+/* FE-PUNCH-4: kiosk/totem screen.
+   Layout is driven by MUI `sx` in KioskPage.jsx (full-bleed Box + Container).
+   This file only carries kiosk-specific tweaks not expressible inline. */
 
-.kiosk-page {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  width: 100%;
-}
-
-.kiosk-header {
-  margin-top: var(--space-lg);
-  text-align: center;
-}
-
-.kiosk-title {
-  margin: 0;
-  font-size: 1.75rem;
-  font-weight: 700;
-}
-
-.kiosk-subtitle {
-  margin: var(--space-sm) 0 0;
-  color: var(--color-text-muted);
-}
-
-/* Ready / status / result panels fill the shell and push actions to the bottom. */
-.kiosk-ready,
-.kiosk-status,
-.kiosk-result {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  width: 100%;
-}
-
-.kiosk-instruction {
-  margin: var(--space-lg) 0;
-  text-align: center;
-  font-size: 1.125rem;
-  color: var(--color-text-muted);
-}
-
-.kiosk-link {
-  display: block;
-  margin-top: var(--space-md);
-  text-align: center;
-  color: var(--color-text-muted);
-}
-
-/* Result feedback now lives in the shared PunchResult component
-   (components/PunchResult.css). The kiosk centers it vertically. */
-.kiosk-result {
-  justify-content: center;
+/* The totem is a public, full-screen device — never show a horizontal scroll,
+   and disable text selection / tap-highlight so taps feel like a kiosk. */
+.kiosk-stage {
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }

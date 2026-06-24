@@ -58,6 +58,21 @@
   pointer-events: none;
 }
 
+/* Large auto-capture countdown digit centered over the video (FE-PUNCH-4).
+   Only rendered when the optional autoCaptureCountdown prop is on. */
+.camera-capture__countdown {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: clamp(5rem, 22vmin, 12rem);
+  font-weight: 800;
+  line-height: 1;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+}
+
 /* The capture canvas is never shown; it only grabs a frame. */
 .camera-capture__canvas {
   display: none;
