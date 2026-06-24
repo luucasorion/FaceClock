@@ -234,6 +234,14 @@ All user-requested frontend work done: **FE-PROFILE-2** (self-edit fix, runtime-
 
 **Remaining backend (deferred):** BIO-1, RECOG-2, API-1, AUTHZ-4 (P2); ARCH-1..4 (P3) — all have the smoke gate.
 
+---
+
+## Post-run user fixes (2026-06-24)
+
+- **AUTHZ-3 not firing for the user → diagnosed as a stale running backend.** DB inspection: companies the user created (`1234`,`12345`,`1`,`1111`,`888`) had NO `gestor_` row, while companies created against the current committed code (`9112726775`,`dbg3351442`) had `gerente=1`. Controller wiring + use case are correct; `uvicorn` without `--reload` was running pre-AUTHZ-3 code. Advised restart (`--reload`); offered a backfill script for the 5 pre-existing companies (not yet written — awaiting user).
+- **Employee self-edit deactivated per user request** ("autoedit not working, just deactivate"). Added `readOnly` prop to `ProfileForm` (default false) + `ProfilePage` passes it → `/perfil` is read-only, no `PUT /colaborador/me`. Manager edit unaffected; wiring left intact to re-enable. Build green. Commit `1f83d5b`. (Likely same stale-backend cause — COLAB-3's `PUT /colaborador/me` absent on the old process.)
+
+
 
 
 
