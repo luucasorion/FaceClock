@@ -475,6 +475,7 @@ FaceClock/
 - `POST /colaborador/registro/` accepts JSON body: `cpf`, `nome`, `login`, `senha`, `empresa_id`, `facial` (list of floats)
 - `RegistrarColaboradorUseCase` checks CPF and login uniqueness, hashes password with bcrypt, creates and persists `Colaborador`
 - The embedding is accepted directly from the client as `facial: list[float]` — not extracted server-side at registration
+- Registration returns `AuthTokenResponse` — a signed bearer token (same claims as login, including `gerente`) plus a safe `ColaboradorResponse`, so a new collaborator is auto-logged-in (AUTH-4 done). The public request no longer carries `gerente` and the controller forces `gerente=False` (AUTHZ-1)
 
 ### What is missing
 - No server-side facial image processing at registration time (embedding must be pre-computed by the client)

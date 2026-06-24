@@ -42,5 +42,16 @@ for AUTHZ-2, AUTH-4 claims shape, and the frontend manager flow.
 - **⚠ Human attention — bootstrap blocker:** with AUTHZ-1/2 done, **no API path mints the first manager** (registration forces `gerente=False`; the only promotion is the manager-gated `PUT /colaborador/{cpf}`, which itself needs a manager token). Until a seed/CLI/one-time bootstrap exists, every manager route 403s and the manager frontend flow (FE-MANAGER-1/2) cannot be exercised end-to-end. This is a product/ops decision — flagged, not resolved.
 - **Next:** AUTH-4 (P1) — issue bearer token on registration (already partly present; claims shape now finalized by AUTHZ-1).
 
+### Cycle 4 — AUTH-4 (P1, `TASKS.md`) — ✅ DONE (verify-only, no code change)
+- **Selected:** AUTH-4 (issue bearer token on registration).
+- **Finding:** already fully implemented — `POST /colaborador/registro/` declares `response_model=AuthTokenResponse` and returns `access_token` + `token_type="bearer"` + `ColaboradorResponse`, with the same claims as login (incl. `gerente`, finalized by AUTHZ-1). All three "Done when" criteria met by existing code.
+- **Implementation:** none needed. Closed by verification (read `colaborador_controller.py`, `auth_response.py`, `login_controller.py`).
+- **Verify:** no code changed; smoke remained green from cycle 3. No senha/facial in response (`ColaboradorResponse`).
+- **Commit:** none for code; doc-only closure folded into the cycle-4 docs commit.
+- **Task files:** AUTH-4 moved to §4 done; §3 snapshot + PROJECT_CONTEXT §16.1 updated.
+- **Note:** AUTH-4's "typed login/registration response" intent (API-1 overlap) is also already satisfied via `AuthTokenResponse` — relevant when API-1 is reached.
+- **Next:** REPORT-6 (P1) — daily punch-summary self endpoint (`GET /relatorio/dia`); the frontend contract already references it (`ResumoDiarioResponse`).
+
+
 
 

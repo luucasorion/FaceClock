@@ -54,9 +54,9 @@ Based on the real code review of 2026-06-23 (re-audited against code on 2026-06-
 
 | Group | Tasks |
 |---|---|
-| ✅ Done | AUTH-1, AUTH-2, AUTH-3, BIO-3, PUNCH-1, EMPRESA-1, EMPRESA-2, REPORT-1, REPORT-2, REPORT-3, REPORT-4, COLAB-1, COLAB-2, PUNCH-2, BIO-2, RECOG-1, AUTHZ-1, AUTHZ-2 |
+| ✅ Done | AUTH-1, AUTH-2, AUTH-3, BIO-3, PUNCH-1, EMPRESA-1, EMPRESA-2, REPORT-1, REPORT-2, REPORT-3, REPORT-4, COLAB-1, COLAB-2, PUNCH-2, BIO-2, RECOG-1, AUTHZ-1, AUTHZ-2, AUTH-4 |
 | 🚧 In progress | API-1 |
-| ⬜ To do | AUTH-4, COLAB-3, REPORT-6, REPORT-5, PUNCH-3, BIO-1, RECOG-2, ARCH-1, ARCH-2, ARCH-3, ARCH-4 |
+| ⬜ To do | COLAB-3, REPORT-6, REPORT-5, PUNCH-3, BIO-1, RECOG-2, ARCH-1, ARCH-2, ARCH-3, ARCH-4 |
 
 > Note (2026-06-23 re-audit): `application/use_cases/ponto/get_ponto_usecase.py` no longer exists — its history-grouping logic was relocated to `application/use_cases/relatorio/` (`_agrupamento.py` + the report use cases). Task file-references were corrected accordingly.
 
@@ -90,7 +90,6 @@ Based on the real code review of 2026-06-23 (re-audited against code on 2026-06-
 - **Domain model**: no dedicated PunchProfile entity — `Empresa.limite_hora` is the only hour limit.
 
 ### Still missing
-- Bearer token issued on registration (AUTH-4).
 - Daily self punch-summary endpoint — "today's punches" (REPORT-6).
 - Composite DB indexes + pagination on punch history queries (REPORT-5).
 - Punch robustness: a live `TypeError` when an unenrolled collaborator punches via the login flow (`None`-guard on `colaborador.facial`), plus FacialService error translation and upload validation (PUNCH-3).
@@ -439,6 +438,20 @@ Completed tasks, grouped by priority. Retained for traceability and acceptance e
   - ✅ `require_manager` reads the role from the JWT claim (no DB re-query).
 - **Accepted trade-off:** a demoted/deactivated manager keeps manager access until their token expires (≤ `JWT_EXPIRY_MINUTES`, default 60). Live revocation/short-expiry deferred as a separate decision. Legacy pre-AUTHZ-1 tokens get a clean 403 and self-heal on re-login.
 
+### [AUTH-4] Issue a bearer token on collaborator registration
+- **Priority:** P1
+- **Status:** done
+- **Why it existed:** A collaborator must receive a bearer token upon registration so a newly-registered user reaches protected endpoints without a separate `/auth/login` call.
+- **What was done (verified 2026-06-23):** Confirmed already implemented in `presentation/controller/colaborador_controller.py` — `POST /colaborador/registro/` declares `response_model=AuthTokenResponse`, mints a JWT via `TokenService.gerar_token({...})` with the same claims shape as login (`sub`/`cpf`/`empresa_id`/`gerente` — `gerente` finalized by AUTHZ-1), and returns `AuthTokenResponse(access_token, token_type="bearer", colaborador=ColaboradorResponse)`. No code change was required this cycle; closed by verification.
+- **Relevant files / areas:**
+  - `presentation/controller/colaborador_controller.py` (`registro_colaborador`)
+  - `presentation/schema/responses/auth_response.py` (`AuthTokenResponse`, `token_type` defaults to `"bearer"`)
+  - `infra/security/token_service.py`
+- **Done when:**
+  - ✅ Registration returns a valid signed bearer token plus the safe collaborator DTO.
+  - ✅ The token authenticates against protected endpoints without a separate login call (identical claims to login).
+  - ✅ The response contains no `senha`/`facial` data (`ColaboradorResponse`).
+
 ---
 
 ## 5. 🚧 To do / In progress
@@ -446,24 +459,6 @@ Completed tasks, grouped by priority. Retained for traceability and acceptance e
 The live work queue. Work top-down by priority: **P0 → P1 → P2 → P3**.
 
 ### P1 — Core product completion tasks
-
-#### [AUTH-4] Issue a bearer token on collaborator registration
-- **Priority:** P1
-- **Status:** todo
-- **Why it exists:** Requirement: a collaborator must receive a bearer token upon registration. Today `POST /colaborador/registro/` returns only a `ColaboradorResponse` (no token), so a newly-registered collaborator must make a separate `/auth/login` call before reaching any protected endpoint. The token-issuing logic already exists in `TokenService`.
-- **What must be done:**
-  - After a successful `RegistrarColaboradorUseCase.execute(...)`, mint a JWT with `TokenService.gerar_token(...)` using the same claims shape as login (`sub`=login, `cpf`, `empresa_id` — and `gerente` once AUTHZ-1 adds it to claims).
-  - Return a typed response wrapping `access_token`, `token_type: "bearer"`, and the existing `ColaboradorResponse` — mirror the login response shape (ties into API-1).
-  - Do not leak the password hash or facial vector in the response (reuse `ColaboradorResponse`).
-- **Relevant files / areas:**
-  - `presentation/controller/colaborador_controller.py` (`registro_colaborador`)
-  - `infra/security/token_service.py`
-  - `presentation/controller/login_controller.py` (claims shape to mirror)
-  - `presentation/schema/responses/` (typed registration/login response model — ties into API-1)
-- **Done when:**
-  - Registration returns a valid signed bearer token plus the safe collaborator DTO.
-  - The token authenticates against protected endpoints without a separate login call.
-  - The response contains no `senha` or `facial` data.
 
 #### [REPORT-6] Implement a daily punch-summary endpoint for the authenticated collaborator (RF09)
 - **Priority:** P1
