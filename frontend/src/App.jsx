@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './auth/AuthContext.jsx';
+import { RequireAuth, RequireManager } from './auth/guards.jsx';
 
 // Placeholder pages for FE-SHARED-1. Real screens land in their own tasks.
 function Placeholder({ name }) {
@@ -20,23 +22,35 @@ const NotFound = () => <Placeholder name="NotFound" />;
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <div className="app-shell">
-        <Routes>
-          <Route path="/" element={<MenuPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/registro/colaborador" element={<RegistroColaboradorPage />} />
-          <Route path="/registro/empresa" element={<RegistroEmpresaPage />} />
-          <Route path="/enroll" element={<EnrollPage />} />
-          <Route path="/kiosk" element={<KioskPage />} />
-          <Route path="/home" element={<PunchHomePage />} />
-          <Route path="/perfil" element={<ProfilePage />} />
-          <Route path="/gerente/colaboradores" element={<ManagerEmployeesPage />} />
-          <Route path="/gerente/colaboradores/:cpf" element={<EmployeeFilePage />} />
-          <Route path="/gerente/relatorio" element={<ManagerReportPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </div>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <div className="app-shell">
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<MenuPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/registro/colaborador" element={<RegistroColaboradorPage />} />
+            <Route path="/registro/empresa" element={<RegistroEmpresaPage />} />
+            <Route path="/kiosk" element={<KioskPage />} />
+
+            {/* Authenticated routes (any logged-in collaborator) */}
+            <Route element={<RequireAuth />}>
+              <Route path="/enroll" element={<EnrollPage />} />
+              <Route path="/home" element={<PunchHomePage />} />
+              <Route path="/perfil" element={<ProfilePage />} />
+            </Route>
+
+            {/* Manager-only routes (gated on the AUTHZ-1 `gerente` claim) */}
+            <Route element={<RequireManager />}>
+              <Route path="/gerente/colaboradores" element={<ManagerEmployeesPage />} />
+              <Route path="/gerente/colaboradores/:cpf" element={<EmployeeFilePage />} />
+              <Route path="/gerente/relatorio" element={<ManagerReportPage />} />
+            </Route>
+
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
