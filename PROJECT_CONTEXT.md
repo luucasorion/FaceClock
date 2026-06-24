@@ -730,8 +730,11 @@ FaceClock/
 ### `empresa_controller.py`
 - Empty file — no routes defined
 
-### `relatorio_controller.py`
-- Empty file — no routes defined
+### `relatorio_controller.py` — prefix `/relatorio`, tag `Relatorio` (mounted)
+- `GET /relatorio/historico` — self history for a date range (bearer)
+- `GET /relatorio/dia` — self daily punch summary (`ResumoDiarioResponse`), defaults to today (bearer) — REPORT-6
+- `GET /relatorio/empresa/{empresa_id}` — manager company report, JSON/CSV (manager)
+- (See `TASKS.md §3` for canonical status — REPORT-1..4 + REPORT-6 done.)
 
 ## Status
 - partially implemented

@@ -52,6 +52,16 @@ for AUTHZ-2, AUTH-4 claims shape, and the frontend manager flow.
 - **Note:** AUTH-4's "typed login/registration response" intent (API-1 overlap) is also already satisfied via `AuthTokenResponse` — relevant when API-1 is reached.
 - **Next:** REPORT-6 (P1) — daily punch-summary self endpoint (`GET /relatorio/dia`); the frontend contract already references it (`ResumoDiarioResponse`).
 
+### Cycle 5 — REPORT-6 (P1, `TASKS.md`) — ✅ DONE (verify-only, no code change)
+- **Selected:** REPORT-6 (daily punch-summary self endpoint).
+- **Finding:** already implemented end-to-end — `GET /relatorio/dia` (`relatorio_controller.py:121-139`), `resumo_diario` use-case method reusing `historico_colaborador`+`_agrupamento` (no new repo query, `tipo` single-sourced), `ResumoDiarioResponse` DTO reusing `BatidaItemResponse`. Route confirmed registered. Matches the frontend contract.
+- **Implementation:** none needed. Closed by verification.
+- **Verify:** route present (grep); smoke green from prior cycle (code unchanged).
+- **Task files:** REPORT-6 → §4 done; §3 snapshot updated; PROJECT_CONTEXT §20 relatorio_controller corrected (was stale "empty").
+- **Observation:** `TASKS.md §5` had drifted ahead of the code — AUTH-4 and REPORT-6 were both already implemented but listed `todo`. Per-task I now verify real code state before planning (architecture is doing this). PROJECT_CONTEXT §19/§20/§24 are broadly stale vs §3 (canonical per §26) — not reconciling wholesale; correcting only lines that would be outright false.
+- **Next:** COLAB-3 (P1) — authenticated self-edit endpoint `PUT /colaborador/me` (verify if already present, else implement).
+
+
 
 
 

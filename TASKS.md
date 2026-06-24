@@ -54,9 +54,9 @@ Based on the real code review of 2026-06-23 (re-audited against code on 2026-06-
 
 | Group | Tasks |
 |---|---|
-| ✅ Done | AUTH-1, AUTH-2, AUTH-3, BIO-3, PUNCH-1, EMPRESA-1, EMPRESA-2, REPORT-1, REPORT-2, REPORT-3, REPORT-4, COLAB-1, COLAB-2, PUNCH-2, BIO-2, RECOG-1, AUTHZ-1, AUTHZ-2, AUTH-4 |
+| ✅ Done | AUTH-1, AUTH-2, AUTH-3, BIO-3, PUNCH-1, EMPRESA-1, EMPRESA-2, REPORT-1, REPORT-2, REPORT-3, REPORT-4, COLAB-1, COLAB-2, PUNCH-2, BIO-2, RECOG-1, AUTHZ-1, AUTHZ-2, AUTH-4, REPORT-6 |
 | 🚧 In progress | API-1 |
-| ⬜ To do | COLAB-3, REPORT-6, REPORT-5, PUNCH-3, BIO-1, RECOG-2, ARCH-1, ARCH-2, ARCH-3, ARCH-4 |
+| ⬜ To do | COLAB-3, REPORT-5, PUNCH-3, BIO-1, RECOG-2, ARCH-1, ARCH-2, ARCH-3, ARCH-4 |
 
 > Note (2026-06-23 re-audit): `application/use_cases/ponto/get_ponto_usecase.py` no longer exists — its history-grouping logic was relocated to `application/use_cases/relatorio/` (`_agrupamento.py` + the report use cases). Task file-references were corrected accordingly.
 
@@ -90,7 +90,6 @@ Based on the real code review of 2026-06-23 (re-audited against code on 2026-06-
 - **Domain model**: no dedicated PunchProfile entity — `Empresa.limite_hora` is the only hour limit.
 
 ### Still missing
-- Daily self punch-summary endpoint — "today's punches" (REPORT-6).
 - Composite DB indexes + pagination on punch history queries (REPORT-5).
 - Punch robustness: a live `TypeError` when an unenrolled collaborator punches via the login flow (`None`-guard on `colaborador.facial`), plus FacialService error translation and upload validation (PUNCH-3).
 - Single hardened enrollment path — registration still accepts a client-supplied `facial` list alongside the dedicated server-side endpoint (BIO-1).
@@ -452,6 +451,23 @@ Completed tasks, grouped by priority. Retained for traceability and acceptance e
   - ✅ The token authenticates against protected endpoints without a separate login call (identical claims to login).
   - ✅ The response contains no `senha`/`facial` data (`ColaboradorResponse`).
 
+### [REPORT-6] Implement a daily punch-summary endpoint for the authenticated collaborator (RF09)
+- **Priority:** P1
+- **Status:** done
+- **Why it existed:** A collaborator needs a quick "today's punches" self-view (count + times) distinct from the arbitrary-range `/historico` and the manager company report.
+- **What was done (verified 2026-06-23):** Confirmed already implemented and mounted.
+  - `GET /relatorio/dia` — `presentation/controller/relatorio_controller.py:121-139`, protected by `Depends(get_current_colaborador)`, identity from the `cpf` claim; optional `data: date | None` query param defaulting to `datetime.utcnow().date()`.
+  - `HistoricoColaboradorUseCase.resumo_diario(colaborador_id, dia)` builds the single-day window (`time.min`/`time.max`) and **reuses** `historico_colaborador` + `agrupar_por_dia` — no new repository query; `tipo` derivation single-sourced from `_agrupamento.py`.
+  - `ResumoDiarioResponse { colaborador_id, data, total, batidas: list[BatidaItemResponse] }` — `presentation/schema/responses/resumo_diario_response.py`; reuses `BatidaItemResponse`. Matches the frontend contract.
+- **Relevant files / areas:**
+  - `presentation/controller/relatorio_controller.py`
+  - `application/use_cases/relatorio/historico_colaborador_usecase.py`, `_agrupamento.py`
+  - `presentation/schema/responses/resumo_diario_response.py`, `historico_ponto_response.py`
+- **Done when:**
+  - ✅ An authenticated collaborator fetches their own punches for a day: a count plus each punch time and derived entrada/saida type.
+  - ✅ Self-scoped and mounted in OpenAPI (route registered).
+  - ✅ Defaults to today; a specific day via `?data=` is supported.
+
 ---
 
 ## 5. 🚧 To do / In progress
@@ -459,26 +475,6 @@ Completed tasks, grouped by priority. Retained for traceability and acceptance e
 The live work queue. Work top-down by priority: **P0 → P1 → P2 → P3**.
 
 ### P1 — Core product completion tasks
-
-#### [REPORT-6] Implement a daily punch-summary endpoint for the authenticated collaborator (RF09)
-- **Priority:** P1
-- **Status:** todo
-- **Why it exists:** A collaborator must be able to see, for the current day, **how many punches they have recorded so far and at what times**. The existing history endpoints (REPORT-3) cover arbitrary date ranges and a manager's company-wide report, but there is no quick "today's punches" self-view.
-- **What must be done:**
-  - Add a self-access endpoint (e.g. `GET /relatorio/hoje` or `GET /relatorio/dia`) protected by `Depends(get_current_colaborador)`; identity from the `cpf` claim (matches `BatidaPonto.colaborador_id`, **not** `sub`).
-  - Default the day to "today" (server clock); optionally accept a `data` query param.
-  - Reuse the existing history retrieval (`historico_colaborador` in the `relatorio/` package / `BatidaPontoRepository.listar_por_colaborador`) with `data_inicio`/`data_fim` set to the start/end of the chosen day rather than adding a new repository query.
-  - Return a typed response with the punch `total` (count) and the ordered list of times (reuse/compose `BatidaItemResponse`, including the derived `tipo`).
-- **Relevant files / areas:**
-  - `presentation/controller/relatorio_controller.py` (new endpoint)
-  - `application/use_cases/relatorio/historico_colaborador_usecase.py`
-  - `infra/repositories/batida_ponto_repository.py` (`listar_por_colaborador`)
-  - new/extend: `presentation/schema/responses/` (daily-summary response DTO: `total` + ordered punch items)
-  - `presentation/dependencies/auth.py` (`get_current_colaborador`)
-- **Done when:**
-  - An authenticated collaborator can fetch their own punches for the current day: a count plus each punch time (and derived entrada/saida type).
-  - The endpoint is self-scoped and mounted in OpenAPI.
-  - Defaults to today; querying a specific day is supported.
 
 #### [COLAB-3] Add an authenticated self-edit endpoint for a collaborator's own profile
 - **Priority:** P1
