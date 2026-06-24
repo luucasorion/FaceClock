@@ -25,6 +25,7 @@ import { listar } from '../api/colaborador.js';
 import Spinner from '../components/Spinner.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import ErrorBanner from '../components/ErrorBanner.jsx';
+import { isAtivo, statusLabel } from '../lib/status.js';
 
 // Column model for the DataGrid. Sortable by default; the grid handles sort/
 // filter client-side. `gerente` (boolean) and `status` render as readable text.
@@ -38,17 +39,14 @@ const COLUMNS = [
     flex: 0.8,
     minWidth: 110,
     renderCell: (params) => {
-      const status = params.value || '';
-      const active = String(status).toLowerCase() === 'ativo';
-      return status ? (
+      const active = isAtivo(params.value);
+      return (
         <Chip
           size="small"
-          label={status}
+          label={statusLabel(params.value)}
           color={active ? 'success' : 'default'}
           variant={active ? 'filled' : 'outlined'}
         />
-      ) : (
-        '—'
       );
     },
   },

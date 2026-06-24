@@ -40,6 +40,7 @@ import ConfirmModal from '../components/ConfirmModal.jsx';
 import Spinner from '../components/Spinner.jsx';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { listar, atualizar, desativar } from '../api/colaborador.js';
+import { isAtivo } from '../lib/status.js';
 
 // Manager may edit these fields (includes `gerente`, unlike employee self-edit).
 const EDITABLE_FIELDS = ['nome', 'login', 'gerente', 'senha'];
@@ -128,8 +129,7 @@ export default function EmployeeFilePage() {
     }
   }, [token, cpf, navigate]);
 
-  const isActive =
-    employee && String(employee.status || '').toLowerCase() === 'ativo';
+  const isActive = !!employee && isAtivo(employee.status);
 
   return (
     <Box component="main" sx={{ width: '100%', mt: 2 }}>
