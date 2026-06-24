@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
-import './MenuPage.css';
+import { Container, Stack, Button, Typography, Box } from '@mui/material';
 
 // FE-MENU-1: single app entry point. Four large, stacked entry points,
 // mobile-first with primary actions within thumb reach (NFR01).
+// FE-SHARED-8: migrated to MUI components to prove the ThemeProvider is wired.
 const ENTRY_POINTS = [
   { to: '/kiosk', label: 'Bater ponto (totem)' },
   { to: '/login', label: 'Entrar' },
@@ -12,19 +13,39 @@ const ENTRY_POINTS = [
 
 export default function MenuPage() {
   return (
-    <main className="menu-page">
-      <header className="menu-header">
-        <h1 className="menu-title">FaceClock</h1>
-        <p className="menu-subtitle">Controle de ponto por reconhecimento facial</p>
-      </header>
+    <Container
+      component="main"
+      maxWidth="sm"
+      sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', py: 3 }}
+    >
+      <Box component="header" sx={{ textAlign: 'center', mb: 4 }}>
+        <Typography variant="h4" component="h1" fontWeight={700}>
+          FaceClock
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Controle de ponto por reconhecimento facial
+        </Typography>
+      </Box>
 
-      <nav className="menu-actions" aria-label="Ações principais">
+      <Stack
+        component="nav"
+        aria-label="Ações principais"
+        spacing={2}
+        sx={{ mt: 'auto' }}
+      >
         {ENTRY_POINTS.map(({ to, label }) => (
-          <Link key={to} to={to} className="btn-primary menu-action">
+          <Button
+            key={to}
+            component={Link}
+            to={to}
+            variant="contained"
+            size="large"
+            fullWidth
+          >
             {label}
-          </Link>
+          </Button>
         ))}
-      </nav>
-    </main>
+      </Stack>
+    </Container>
   );
 }
