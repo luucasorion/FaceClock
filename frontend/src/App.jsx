@@ -9,15 +9,15 @@ import KioskPage from './pages/KioskPage.jsx';
 import PunchHomePage from './pages/PunchHomePage.jsx';
 import EnrollPage from './pages/EnrollPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
+import ManagerEmployeesPage from './pages/ManagerEmployeesPage.jsx';
+import EmployeeFilePage from './pages/EmployeeFilePage.jsx';
+import ManagerReportPage from './pages/ManagerReportPage.jsx';
 
 // Placeholder pages for FE-SHARED-1. Real screens land in their own tasks.
 function Placeholder({ name }) {
   return <h1>{name}</h1>;
 }
 
-const ManagerEmployeesPage = () => <Placeholder name="ManagerEmployeesPage" />;
-const EmployeeFilePage = () => <Placeholder name="EmployeeFilePage" />;
-const ManagerReportPage = () => <Placeholder name="ManagerReportPage" />;
 const NotFound = () => <Placeholder name="NotFound" />;
 
 export default function App() {

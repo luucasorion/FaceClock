@@ -1,0 +1,43 @@
+/* FE-MANAGER-1 — Employee file layout. Reuses forms.css/ProfileForm; adds the
+   deactivate (danger) zone. Degrades gracefully on small screens. */
+
+.employee-file {
+  gap: var(--space-lg);
+}
+
+.employee-file__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.employee-file__back {
+  width: auto;
+  min-width: 0;
+  flex: 0 0 auto;
+  padding: 0 var(--space-md);
+}
+
+.employee-file__danger {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--color-border);
+}
+
+.employee-file__deactivate {
+  border-color: #9b1c1c;
+  color: #9b1c1c;
+}
+
+.employee-file__deactivate:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (min-width: 481px) {
+  .employee-file__deactivate {
+    width: auto;
+    min-width: 220px;
+  }
+}

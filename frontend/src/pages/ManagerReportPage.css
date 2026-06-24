@@ -1,0 +1,132 @@
+/* FE-MANAGER-2 — Company report layout. Desktop-oriented table that degrades to
+   stacked label/value cards on narrow screens (no horizontal scroll). */
+
+.manager-report {
+  gap: var(--space-lg);
+}
+
+.manager-report__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.manager-report__nav {
+  width: auto;
+  min-width: 0;
+  flex: 0 0 auto;
+  padding: 0 var(--space-md);
+}
+
+.manager-report__filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.manager-report__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.manager-report__table {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+/* Mobile: each row is a stacked card; the header row is hidden. */
+.manager-report__row--head {
+  display: none;
+}
+
+.manager-report__row {
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-left-width: 4px;
+  border-left-color: var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.manager-report__row--flag {
+  border-left-color: #9b4d1c;
+}
+
+.manager-report__cell {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: 2px 0;
+  word-break: break-word;
+}
+
+.manager-report__cell[data-label]::before {
+  content: attr(data-label);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.manager-report__badge {
+  font-weight: 600;
+}
+
+.manager-report__badge--over {
+  color: #9b4d1c;
+}
+
+@media (min-width: 481px) {
+  .manager-report__filters {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+
+  .manager-report__filters .form-field {
+    flex: 1 1 160px;
+    margin-bottom: 0;
+  }
+
+  .manager-report__actions {
+    flex-direction: row;
+    flex: 1 1 100%;
+    margin-top: var(--space-md);
+  }
+
+  .manager-report__actions .btn-primary,
+  .manager-report__actions .btn-secondary {
+    width: auto;
+    min-width: 160px;
+  }
+}
+
+@media (min-width: 641px) {
+  .manager-report__row--head {
+    display: grid;
+  }
+
+  .manager-report__row {
+    display: grid;
+    grid-template-columns: 2fr 1.4fr 1.4fr 1.2fr;
+    gap: var(--space-md);
+    align-items: center;
+  }
+
+  .manager-report__cell {
+    display: block;
+    padding: 0;
+  }
+
+  .manager-report__cell[data-label]::before {
+    content: none;
+  }
+
+  .manager-report__row--head .manager-report__cell {
+    font-weight: 700;
+    color: var(--color-text-muted);
+  }
+}
