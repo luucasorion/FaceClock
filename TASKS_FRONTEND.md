@@ -70,8 +70,8 @@ The frontend scaffold now exists (`frontend/`, React+Vite); the screens are bein
 
 | Group | Tasks |
 |---|---|
-| ✅ Done | FE-SHARED-1, FE-SHARED-2, FE-SHARED-3, FE-SHARED-4, FE-MENU-1 |
-| ⬜ P0 | FE-AUTH-1, FE-AUTH-2, FE-AUTH-3, FE-PUNCH-1, FE-PUNCH-2 |
+| ✅ Done | FE-SHARED-1, FE-SHARED-2, FE-SHARED-3, FE-SHARED-4, FE-MENU-1, FE-AUTH-1, FE-AUTH-2, FE-AUTH-3 |
+| ⬜ P0 | FE-PUNCH-1, FE-PUNCH-2 |
 | ⬜ P1 | FE-SHARED-5, FE-SHARED-6, FE-ENROLL-1, FE-PROFILE-1, FE-MANAGER-1, FE-MANAGER-2 |
 | ⬜ P2 | FE-PUNCH-3, FE-SHARED-7 |
 
@@ -226,7 +226,7 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
 
 #### [FE-AUTH-1] Login screen
 - **Priority:** P0
-- **Status:** todo
+- **Status:** done — 2026-06-23. `src/pages/LoginPage.jsx`: login+senha → `auth.login` → `setSession` → `/home`; inline error on 401/403, no token on failure. Everyone routed to `/home` for now (managers too) until manager screens exist. Verified `npm run build` green.
 - **Why it exists:** Collaborators and managers authenticate here. `POST /auth/login` returns the token + `colaborador`; the session must be stored and the user routed to their home.
 - **What must be done:**
   - `frontend/src/pages/LoginPage.jsx`: `login` + `senha` fields → `api/auth.login` → `setSession(token, colaborador)` (FE-SHARED-3) → navigate to the employee punch home (`FE-PUNCH-2`).
@@ -243,7 +243,7 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
 
 #### [FE-AUTH-2] Employee registration screen
 - **Priority:** P0
-- **Status:** todo
+- **Status:** done — 2026-06-23. `src/pages/RegistroColaboradorPage.jsx`: cpf/nome/login/senha/empresa_id (typed), no `gerente`, sends `facial: []` (clears w/ BIO-1) → `colaborador.registrar` → auto-login `setSession` → `/enroll`. Company-not-found surfaces raw `ApiError` until RECOG-2. Verified `npm run build` green.
 - **Why it exists:** New collaborators self-register. `POST /colaborador/registro/` returns a token (auto-login), so registration flows straight into the punch experience.
 - **What must be done:**
   - `frontend/src/pages/RegistroColaboradorPage.jsx`: collect `cpf`, `nome`, `login`, `senha`, `empresa_id`. **Do not** list/suggest companies (`empresa_id` is typed in). **No manager flag** — do not send `gerente` (server forces `false` and ignores it).
@@ -261,7 +261,7 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
 
 #### [FE-AUTH-3] Company registration screen
 - **Priority:** P0
-- **Status:** todo
+- **Status:** done — 2026-06-23. `src/pages/RegistroEmpresaPage.jsx` (public): cnpj/razao_social/endereco/limite_hora → `empresa.cadastrar` → confirmation showing the `cnpj` (use as `empresa_id`) + links to menu and employee registration. Verified `npm run build` green.
 - **Why it exists:** Companies must exist before collaborators can register against them. `POST /empresa` is public.
 - **What must be done:**
   - `frontend/src/pages/RegistroEmpresaPage.jsx`: a simple form for `cnpj`, `razao_social`, `endereco`, `limite_hora` → `api/empresa.cadastrar` → confirmation, then back to the menu or to employee registration.

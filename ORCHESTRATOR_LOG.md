@@ -124,6 +124,15 @@ for AUTHZ-2, AUTH-4 claims shape, and the frontend manager flow.
 - `MenuPage.jsx` (+css): 4 thumb-reach entry points → kiosk/login/registro-colaborador/registro-empresa; wired into App `/`. Build green (CSS/JS grew). Commit `eb00d84`.
 - **Next:** FE-AUTH-1 (login screen → setSession → /home).
 
+### Cycle 14 — FE-AUTH-1/2/3 (P0) — ✅ DONE (batched: 3 sibling auth screens)
+- **Batching rationale:** three small sibling screens all touching `App.jsx` and sharing the `setSession` pattern — implemented as one unit (one build + commit) to avoid App.jsx churn; each task logged/marked individually. (Runbook prefers one-per-cycle; this is a pragmatic same-area grouping.)
+- **Implementation:** LoginPage, RegistroColaboradorPage (facial:[] until BIO-1; auto-login→/enroll), RegistroEmpresaPage (public, confirms cnpj) + shared forms.css; wired into App.
+- **Verify:** `npm run build` green; JS 167→177 kB and CSS grew, confirming all three compiled.
+- **Commit:** `268f402`.
+- **Deferrals carried in code comments:** manager routing →/home for now; facial:[] clears w/ BIO-1; clean company-not-found w/ RECOG-2.
+- **Next:** FE-PUNCH-1 (kiosk embarcado punch) then FE-PUNCH-2 (authenticated punch home).
+
+
 
 
 
