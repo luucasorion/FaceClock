@@ -83,6 +83,7 @@ def registro_colaborador(
         "sub": colaborador.login,
         "cpf": colaborador.cpf,
         "empresa_id": colaborador.empresa_id,
+        "gerente": colaborador.gerente,
     })
 
     return AuthTokenResponse(

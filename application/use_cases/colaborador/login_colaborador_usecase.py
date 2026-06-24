@@ -52,4 +52,5 @@ class LoginColaboradorUseCase:
             "login": colaborador.login,
             "empresa_id": colaborador.empresa_id,
             "status": colaborador.status,
+            "gerente": colaborador.gerente,
         }

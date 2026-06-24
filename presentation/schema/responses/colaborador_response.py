@@ -7,6 +7,7 @@ class ColaboradorResponse(BaseModel):
     login: str
     empresa_id: str
     status: bool
+    gerente: bool
 
     class Config:
         from_attributes = True
