@@ -75,6 +75,7 @@ The frontend scaffold now exists (`frontend/`, React+Vite); the screens are bein
 | ⬜ P0 | — (all done) |
 | ✅ Done (P1) | FE-SHARED-5, FE-SHARED-6, FE-ENROLL-1, FE-PROFILE-1, FE-MANAGER-1, FE-MANAGER-2 |
 | ✅ Done (P2) | FE-PUNCH-3, FE-SHARED-7 |
+| ⬜ Fixes | FE-PROFILE-2 (self-edit broken + lock fields to login/senha) |
 | ⬜ Enhancements | FE-SHARED-8, FE-SHARED-9, FE-PUNCH-4, FE-UI-1, FE-UI-2 |
 
 **MVP frontend complete (2026-06-23).** Verified via `npm run build` (Vite) on each cycle. Remaining caveats: (a) manager screens need a seeded manager to exercise end-to-end (backend bootstrap gap); (b) `facial: []` at registration clears when BIO-1 lands; (c) clean "company not found" message arrives with RECOG-2; (d) the build gate proves compilation, not runtime/visual behavior (no headless browser run this pass).
@@ -413,6 +414,31 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
   - Overtime flags appear in the table.
   - **Responsive:** desktop-oriented, degrades gracefully on small screens (no horizontal scroll at mobile widths).
   - Reachable only after AUTHZ-1 surfaces the role.
+
+#### [FE-PROFILE-2] Review & fix the employee self-profile edit flow
+- **Priority:** P1
+- **Status:** todo
+- **Why it exists:** The employee self-edit section (`FE-PROFILE-1`) currently does not work at runtime (the build gate only proves it compiles, not that the flow works), and it exposes too many editable fields. Two problems to resolve: **(1)** the self-edit flow is broken in the browser and must be diagnosed and fixed; **(2)** product decision (2026-06-24): a collaborator should edit **only `login` and `senha`** on their own profile — **`nome` becomes read-only** for self-edit. The manager edit screen (`EmployeeFilePage`, `PUT /colaborador/{cpf}`) is **out of scope** and must keep its current editable set (`nome`, `login`, `gerente`, `senha`).
+- **What must be done:**
+  - **Frontend-only** (per decision): do **not** modify `application/`, `domains/`, `infra/`, `presentation/`. The `/me` endpoint may still technically accept `nome`; the self-edit form simply must not offer it (the form patches only changed fields, so an un-editable `nome` is never sent).
+  - **Reduce the self-editable set:** in `ProfilePage.jsx`, change `editableFields` from `['nome','login','senha']` to **`['login','senha']`** so `nome` renders read-only. Leave `EmployeeFilePage.jsx` (manager) unchanged.
+  - **Diagnose the runtime breakage** by actually running the flow (not just `npm run build`): load `/perfil`, toggle Edit, change a field, Save, and observe the network call + response. Confirm whether the failure is the stale-JWT issue below, a form-state bug, a response-shape/`setSession` refresh bug, or something else; fix the real cause and note it in the task when closing.
+  - **Handle the `login`-change stale-token case (likely root cause):** the backend resolves identity from the JWT `sub` (= login) — see `presentation/dependencies/auth.py` (`get_current_colaborador`). `PUT /colaborador/me` does **not** reissue the token (documented COLAB-3 follow-up), so after a successful `login` change the stored token's `sub` is stale and subsequent calls (e.g. the post-save `GET /colaborador/me` / `setSession` refresh) can fail (401/404). Since the fix is frontend-only: when the Save changed `login`, **force a clean re-login** — `logout()` and redirect to `/login` with a clear message ("Login alterado, faça login novamente") instead of trying to refresh the session in place. A `senha`-only or no-`login` change keeps the current in-place refresh.
+  - **Clean up the dead/buggy display fields** while reviewing the shared form: `status` and `empresa_id` are rendered in `ProfileForm` but are never in any `editableFields` set; `status` is a `bool` defined as `type: 'text'`, so it renders as `"true"/"false"` instead of `Sim/Não`. Either give `status` `type: 'boolean'` (so it shows Sim/Não read-only) or drop the always-read-only noise fields from the self-profile view — keep the change minimal and do not regress the manager view that reuses the same form.
+- **Relevant files / areas:**
+  - `frontend/src/pages/ProfilePage.jsx` (`editableFields`, post-save session handling)
+  - `frontend/src/components/ProfileForm.jsx` (shared form — `status`/`empresa_id` display; must not regress `EmployeeFilePage`)
+  - `frontend/src/api/colaborador.js` (`editarPerfil` → `PUT /colaborador/me`)
+  - `frontend/src/auth/AuthContext.jsx` (`logout`/`setSession` for the re-login path)
+  - reference only (no edits): `presentation/dependencies/auth.py`, `presentation/schema/requests/edicao_perfil_request.py`
+- **Done when:**
+  - A collaborator can self-edit **only `login` and `senha`**; `nome` is read-only on `/perfil`; no field outside `{login, senha}` is sent to `PUT /colaborador/me`.
+  - The self-edit flow works end-to-end in the browser (the runtime breakage is reproduced, root-caused, and fixed — recorded in the task notes), not merely compiling.
+  - Changing `login` ends in a clean state: the user is sent to re-login with a clear message rather than left with a stale token that 401s.
+  - The manager edit screen (`EmployeeFilePage`, `PUT /colaborador/{cpf}`) is unchanged and still edits `nome/login/gerente/senha`.
+  - `status`/`empresa_id` no longer render as misleading `"true"/"false"` dead fields.
+  - **Mobile:** the profile edit is one-handed with primary actions in thumb reach and no horizontal scroll at mobile widths.
+  - `npm run build` green; no route/auth regression.
 
 ### P2 — Polish
 

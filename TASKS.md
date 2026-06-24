@@ -56,7 +56,7 @@ Based on the real code review of 2026-06-23 (re-audited against code on 2026-06-
 |---|---|
 | ✅ Done | AUTH-1, AUTH-2, AUTH-3, BIO-3, PUNCH-1, EMPRESA-1, EMPRESA-2, REPORT-1, REPORT-2, REPORT-3, REPORT-4, COLAB-1, COLAB-2, PUNCH-2, BIO-2, RECOG-1, AUTHZ-1, AUTHZ-2, AUTH-4, REPORT-6, COLAB-3, REPORT-5, PUNCH-3 |
 | 🚧 In progress | API-1 |
-| ⬜ To do | BIO-1, RECOG-2, ARCH-1, ARCH-2, ARCH-3, ARCH-4 |
+| ⬜ To do | AUTHZ-3, BIO-1, RECOG-2, ARCH-1, ARCH-2, ARCH-3, ARCH-4 |
 
 > Note (2026-06-23 re-audit): `application/use_cases/ponto/get_ponto_usecase.py` no longer exists — its history-grouping logic was relocated to `application/use_cases/relatorio/` (`_agrupamento.py` + the report use cases). Task file-references were corrected accordingly.
 
@@ -532,6 +532,34 @@ Completed tasks, grouped by priority. Retained for traceability and acceptance e
 The live work queue. Work top-down by priority: **P0 → P1 → P2 → P3**.
 
 ### P1 — Core product completion tasks
+
+#### [AUTHZ-3] Bootstrap the first manager atomically when a company is created
+- **Priority:** P1
+- **Status:** todo
+- **Why it exists:** There is a manager bootstrap chicken-and-egg gap (flagged as the follow-on in AUTHZ-1/AUTHZ-2 and the open point in EMPRESA-2). Public registration hard-codes `gerente=False`, and the only promotion path (`PUT /colaborador/{cpf}`) requires an *existing* manager. So a brand-new company has no API way to obtain its first manager. Decision (2026-06-24): create the first manager **atomically inside `POST /empresa`**, as a **company-named placeholder account** derived from the CNPJ.
+- **What must be done:**
+  - Extend `CadastroEmpresaUseCase` to create, in the **same transaction** as the `Empresa`, a placeholder manager `Colaborador`. Roll back the company if the collaborator insert fails (and vice versa) — no partial state.
+  - Derive the placeholder account from stable, unique inputs (NOT `razao_social`, which can repeat):
+    - `cpf` (PK): the company's `cnpj` (recommended: prefixed, e.g. `"gestor_" + cnpj`) — CNPJ is already globally unique, so the PK cannot collide.
+    - `login` (unique): the `cnpj` — derived from CNPJ guarantees global uniqueness.
+    - `nome`: the `razao_social` (display only — this is the "company-named" part).
+    - `senha`: the `razao_social` (company name), hashed via the existing `HashService` (bcrypt). **Never store plaintext.**
+    - `gerente=True`, `facial=None` (manager logs in with login/senha; biometrics stay a separate, deliberate step per the RF13 decision), `empresa_id = cnpj`, `status=True`.
+  - This must be the **only** code path that sets `gerente=True` at creation. Do **not** reopen public `/colaborador/registro` — its `gerente=False` lock stays intact.
+  - Reuse the existing `ColaboradorRepository` for the insert; keep the use case free of HTTP concerns (existing `HTTPException` debt tracked under ARCH-2 — match current convention, don't expand it).
+  - Leave a `# TODO(AUTHZ-4)` marker referencing the force-password-change follow-up (below).
+- **Relevant files / areas:**
+  - `application/use_cases/empresa/cadastro_empresa_usecase.py`
+  - `infra/repositories/empresa_repository.py`, `infra/repositories/colaborador_repository.py`
+  - `application/services/hash_service.py`
+  - `presentation/controller/empresa_controller.py` (`POST /empresa` — response may surface the created manager's `login`)
+  - `domains/models/colaborador.py`, `domains/models/empresa.py`
+- **Done when:**
+  - Creating a company also creates exactly one active manager (`gerente=True`) for that company, in one atomic operation (both persist or neither does).
+  - The first manager can log in immediately: `login` = the CNPJ, `senha` = the company name.
+  - No response or log leaks the password hash or plaintext (NFR04/NFR05); the manager's `facial` is `None`.
+  - Public `/colaborador/registro` still hard-codes `gerente=False`; AUTHZ-3 is the sole creation-time `gerente=True` path.
+- **Known security trade-off (accepted for MVP, tracked as AUTHZ-4):** the initial credential is **predictable and public** — the CNPJ is public record and the password is the company name. This must be paired with a "force password change on first login" flow so the predictable credential works only once. Tracked as a separate non-blocking follow-up (AUTHZ-4) so it does not block this task.
 
 ### P2 — Important improvements
 
