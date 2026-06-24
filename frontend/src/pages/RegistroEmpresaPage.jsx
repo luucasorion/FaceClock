@@ -5,12 +5,26 @@
 // that includes the cnpj (the value the user types as `empresa_id` when
 // registering employees) plus links back to the menu and to employee
 // registration.
+//
+// FE-UI-1: migrated to MUI (Card/TextField/Button/Alert/Stack). The fields
+// (limite_hora still numeric/coerced via Number), the empresa.cadastrar
+// endpoint, and the confirmation panel (showing the cnpj + the two links) are
+// all unchanged — presentation only.
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 import * as empresaApi from '../api/empresa.js';
 import { ApiError } from '../api/client.js';
-import '../styles/forms.css';
 
 export default function RegistroEmpresaPage() {
   const [form, setForm] = useState({
@@ -58,122 +72,128 @@ export default function RegistroEmpresaPage() {
   if (created) {
     const cnpj = created.cnpj ?? form.cnpj;
     return (
-      <main className="auth-page">
-        <header className="auth-header">
-          <h1 className="auth-title">Empresa cadastrada</h1>
-        </header>
+      <Box component="main" sx={{ width: '100%', mt: 2 }}>
+        <Box component="header" sx={{ textAlign: 'center', mb: 3 }}>
+          <Typography variant="h4" component="h1" fontWeight={700}>
+            Empresa cadastrada
+          </Typography>
+        </Box>
 
-        <div className="form-success" role="status">
-          <p style={{ marginTop: 0 }}>
-            Empresa cadastrada com sucesso.
-          </p>
-          <p style={{ marginBottom: 0 }}>
-            Use o CNPJ <strong>{cnpj}</strong> como identificador da empresa
-            ao cadastrar colaboradores.
-          </p>
-        </div>
+        <Card>
+          <CardContent>
+            <Stack spacing={2}>
+              <Alert severity="success" role="status">
+                <Typography sx={{ mt: 0 }}>
+                  Empresa cadastrada com sucesso.
+                </Typography>
+                <Typography sx={{ mb: 0 }}>
+                  Use o CNPJ <strong>{cnpj}</strong> como identificador da
+                  empresa ao cadastrar colaboradores.
+                </Typography>
+              </Alert>
 
-        <div className="auth-actions">
-          <Link className="btn-primary" to="/registro/colaborador">
-            Cadastrar colaborador
-          </Link>
-          <Link className="btn-secondary" to="/">
-            Voltar ao menu
-          </Link>
-        </div>
-      </main>
+              <Button
+                component={Link}
+                to="/registro/colaborador"
+                variant="contained"
+                size="large"
+                fullWidth
+              >
+                Cadastrar colaborador
+              </Button>
+              <Button component={Link} to="/" variant="text" fullWidth>
+                Voltar ao menu
+              </Button>
+            </Stack>
+          </CardContent>
+        </Card>
+      </Box>
     );
   }
 
   return (
-    <main className="auth-page">
-      <header className="auth-header">
-        <h1 className="auth-title">Cadastrar empresa</h1>
-        <p className="auth-subtitle">Cadastre a empresa antes dos colaboradores</p>
-      </header>
+    <Box component="main" sx={{ width: '100%', mt: 2 }}>
+      <Box component="header" sx={{ textAlign: 'center', mb: 3 }}>
+        <Typography variant="h4" component="h1" fontWeight={700}>
+          Cadastrar empresa
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Cadastre a empresa antes dos colaboradores
+        </Typography>
+      </Box>
 
-      <form className="auth-form" onSubmit={onSubmit} noValidate>
-        {error && (
-          <p className="form-error" role="alert">
-            {error}
-          </p>
-        )}
+      <Card>
+        <CardContent>
+          <Box component="form" onSubmit={onSubmit} noValidate>
+            <Stack spacing={2}>
+              {error && <Alert severity="error">{error}</Alert>}
 
-        <div className="form-field">
-          <label className="form-label" htmlFor="cnpj">
-            CNPJ
-          </label>
-          <input
-            className="form-input"
-            id="cnpj"
-            name="cnpj"
-            type="text"
-            inputMode="numeric"
-            autoComplete="off"
-            value={form.cnpj}
-            onChange={onChange}
-            required
-          />
-        </div>
+              <TextField
+                id="cnpj"
+                name="cnpj"
+                label="CNPJ"
+                type="text"
+                inputProps={{ inputMode: 'numeric' }}
+                autoComplete="off"
+                value={form.cnpj}
+                onChange={onChange}
+                required
+                fullWidth
+              />
 
-        <div className="form-field">
-          <label className="form-label" htmlFor="razao_social">
-            Razão social
-          </label>
-          <input
-            className="form-input"
-            id="razao_social"
-            name="razao_social"
-            type="text"
-            autoComplete="organization"
-            value={form.razao_social}
-            onChange={onChange}
-            required
-          />
-        </div>
+              <TextField
+                id="razao_social"
+                name="razao_social"
+                label="Razão social"
+                type="text"
+                autoComplete="organization"
+                value={form.razao_social}
+                onChange={onChange}
+                required
+                fullWidth
+              />
 
-        <div className="form-field">
-          <label className="form-label" htmlFor="endereco">
-            Endereço
-          </label>
-          <input
-            className="form-input"
-            id="endereco"
-            name="endereco"
-            type="text"
-            autoComplete="street-address"
-            value={form.endereco}
-            onChange={onChange}
-            required
-          />
-        </div>
+              <TextField
+                id="endereco"
+                name="endereco"
+                label="Endereço"
+                type="text"
+                autoComplete="street-address"
+                value={form.endereco}
+                onChange={onChange}
+                required
+                fullWidth
+              />
 
-        <div className="form-field">
-          <label className="form-label" htmlFor="limite_hora">
-            Limite de horas
-          </label>
-          <input
-            className="form-input"
-            id="limite_hora"
-            name="limite_hora"
-            type="number"
-            inputMode="numeric"
-            min="0"
-            value={form.limite_hora}
-            onChange={onChange}
-            required
-          />
-        </div>
+              <TextField
+                id="limite_hora"
+                name="limite_hora"
+                label="Limite de horas"
+                type="number"
+                inputProps={{ inputMode: 'numeric', min: 0 }}
+                value={form.limite_hora}
+                onChange={onChange}
+                required
+                fullWidth
+              />
 
-        <div className="auth-actions">
-          <button className="btn-primary" type="submit" disabled={submitting}>
-            {submitting ? 'Cadastrando…' : 'Cadastrar empresa'}
-          </button>
-          <Link className="btn-secondary" to="/">
-            Voltar ao menu
-          </Link>
-        </div>
-      </form>
-    </main>
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                fullWidth
+                disabled={submitting}
+              >
+                {submitting ? 'Cadastrando…' : 'Cadastrar empresa'}
+              </Button>
+
+              <Button component={Link} to="/" variant="text" fullWidth>
+                Voltar ao menu
+              </Button>
+            </Stack>
+          </Box>
+        </CardContent>
+      </Card>
+    </Box>
   );
 }

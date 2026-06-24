@@ -5,13 +5,26 @@
 // (returns { access_token, token_type, colaborador }). On success we store the
 // session and route to /enroll, because punching requires a stored embedding
 // and the enroll page then routes onward to /home.
+//
+// FE-UI-1: migrated to MUI (Card/TextField/Button/Alert/Stack). The fields,
+// `facial: []` payload, no-`gerente` rule, endpoint, and the
+// registrar→setSession→/enroll flow are all unchanged — presentation only.
 
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { useAuth } from '../auth/AuthContext.jsx';
 import * as colaboradorApi from '../api/colaborador.js';
 import { ApiError } from '../api/client.js';
-import '../styles/forms.css';
 
 export default function RegistroColaboradorPage() {
   const { setSession } = useAuth();
@@ -71,112 +84,101 @@ export default function RegistroColaboradorPage() {
   };
 
   return (
-    <main className="auth-page">
-      <header className="auth-header">
-        <h1 className="auth-title">Cadastrar colaborador</h1>
-        <p className="auth-subtitle">Crie sua conta para bater ponto</p>
-      </header>
+    <Box component="main" sx={{ width: '100%', mt: 2 }}>
+      <Box component="header" sx={{ textAlign: 'center', mb: 3 }}>
+        <Typography variant="h4" component="h1" fontWeight={700}>
+          Cadastrar colaborador
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Crie sua conta para bater ponto
+        </Typography>
+      </Box>
 
-      <form className="auth-form" onSubmit={onSubmit} noValidate>
-        {error && (
-          <p className="form-error" role="alert">
-            {error}
-          </p>
-        )}
+      <Card>
+        <CardContent>
+          <Box component="form" onSubmit={onSubmit} noValidate>
+            <Stack spacing={2}>
+              {error && <Alert severity="error">{error}</Alert>}
 
-        <div className="form-field">
-          <label className="form-label" htmlFor="cpf">
-            CPF
-          </label>
-          <input
-            className="form-input"
-            id="cpf"
-            name="cpf"
-            type="text"
-            inputMode="numeric"
-            autoComplete="off"
-            value={form.cpf}
-            onChange={onChange}
-            required
-          />
-        </div>
+              <TextField
+                id="cpf"
+                name="cpf"
+                label="CPF"
+                type="text"
+                inputProps={{ inputMode: 'numeric' }}
+                autoComplete="off"
+                value={form.cpf}
+                onChange={onChange}
+                required
+                fullWidth
+              />
 
-        <div className="form-field">
-          <label className="form-label" htmlFor="nome">
-            Nome
-          </label>
-          <input
-            className="form-input"
-            id="nome"
-            name="nome"
-            type="text"
-            autoComplete="name"
-            value={form.nome}
-            onChange={onChange}
-            required
-          />
-        </div>
+              <TextField
+                id="nome"
+                name="nome"
+                label="Nome"
+                type="text"
+                autoComplete="name"
+                value={form.nome}
+                onChange={onChange}
+                required
+                fullWidth
+              />
 
-        <div className="form-field">
-          <label className="form-label" htmlFor="login">
-            Login
-          </label>
-          <input
-            className="form-input"
-            id="login"
-            name="login"
-            type="text"
-            autoComplete="username"
-            value={form.login}
-            onChange={onChange}
-            required
-          />
-        </div>
+              <TextField
+                id="login"
+                name="login"
+                label="Login"
+                type="text"
+                autoComplete="username"
+                value={form.login}
+                onChange={onChange}
+                required
+                fullWidth
+              />
 
-        <div className="form-field">
-          <label className="form-label" htmlFor="senha">
-            Senha
-          </label>
-          <input
-            className="form-input"
-            id="senha"
-            name="senha"
-            type="password"
-            autoComplete="new-password"
-            value={form.senha}
-            onChange={onChange}
-            required
-          />
-        </div>
+              <TextField
+                id="senha"
+                name="senha"
+                label="Senha"
+                type="password"
+                autoComplete="new-password"
+                value={form.senha}
+                onChange={onChange}
+                required
+                fullWidth
+              />
 
-        <div className="form-field">
-          <label className="form-label" htmlFor="empresa_id">
-            Identificador da empresa (CNPJ)
-          </label>
-          <input
-            className="form-input"
-            id="empresa_id"
-            name="empresa_id"
-            type="text"
-            autoComplete="off"
-            value={form.empresa_id}
-            onChange={onChange}
-            required
-          />
-          <p className="form-hint">
-            Informe o CNPJ da empresa cadastrada.
-          </p>
-        </div>
+              <TextField
+                id="empresa_id"
+                name="empresa_id"
+                label="Identificador da empresa (CNPJ)"
+                type="text"
+                autoComplete="off"
+                value={form.empresa_id}
+                onChange={onChange}
+                required
+                fullWidth
+                helperText="Informe o CNPJ da empresa cadastrada."
+              />
 
-        <div className="auth-actions">
-          <button className="btn-primary" type="submit" disabled={submitting}>
-            {submitting ? 'Cadastrando…' : 'Cadastrar'}
-          </button>
-          <Link className="btn-secondary" to="/login">
-            Já tenho conta
-          </Link>
-        </div>
-      </form>
-    </main>
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                fullWidth
+                disabled={submitting}
+              >
+                {submitting ? 'Cadastrando…' : 'Cadastrar'}
+              </Button>
+
+              <Button component={Link} to="/login" variant="text" fullWidth>
+                Já tenho conta
+              </Button>
+            </Stack>
+          </Box>
+        </CardContent>
+      </Card>
+    </Box>
   );
 }

@@ -4,9 +4,9 @@
 // consult their punch history. Two sections:
 //
 //   1. Profile — loads GET /colaborador/me into the shared ProfileForm with
-//      editableFields={['nome','login','senha']} (employee self-edit; NOT
-//      gerente/empresa_id/status). COLAB-3 is done, so Save wires for real to
-//      PUT /colaborador/me via colaborador.editarPerfil(token, patch). The
+//      editableFields={['login','senha']} (employee self-edit; NOT
+//      nome/gerente/empresa_id/status). COLAB-3 is done, so Save wires for real
+//      to PUT /colaborador/me via colaborador.editarPerfil(token, patch). The
 //      manager PUT /{cpf} endpoint is NEVER called from here. On save success we
 //      refresh the displayed profile and update the auth context's colaborador
 //      via setSession (keeping the same token) so the rest of the app reflects
@@ -21,10 +21,31 @@
 //      would add that later). Export (enabled once results load) builds a CSV via
 //      punchesToCsv + downloadCsv (FE-SHARED-6).
 //
+// FE-UI-1: migrated to MUI (Card/TextField type="date"/Button/Table/Stack +
+// MUI-backed Spinner/EmptyState/ErrorBanner/ProfileForm). The FE-PROFILE-2
+// behavior is UNCHANGED — editableFields=['login','senha'], a login-change Save
+// logs out + redirects to /login with the re-login notice, senha-only stays
+// in-place, history search/export/pagination wiring is identical.
+//
 // Mobile-first: primary actions in thumb reach, no horizontal scroll.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from '@mui/material';
 import ProfileForm from '../components/ProfileForm.jsx';
 import Spinner from '../components/Spinner.jsx';
 import EmptyState from '../components/EmptyState.jsx';
@@ -33,8 +54,6 @@ import { useAuth } from '../auth/AuthContext.jsx';
 import { me, editarPerfil } from '../api/colaborador.js';
 import { historico } from '../api/relatorio.js';
 import { punchesToCsv, downloadCsv } from '../lib/csv.js';
-import '../styles/forms.css';
-import './ProfilePage.css';
 
 const PAGE_SIZE = 20;
 
@@ -169,85 +188,103 @@ export default function ProfilePage() {
   const searched = Array.isArray(items);
 
   return (
-    <main className="auth-page profile-page">
-      <header className="auth-header profile-page__header">
-        <div>
-          <h1 className="auth-title">Meu perfil</h1>
-          <p className="auth-subtitle">Seus dados e histórico de pontos.</p>
-        </div>
-        <Link to="/home" className="btn-secondary profile-page__back">
+    <Box component="main" sx={{ width: '100%', mt: 2 }}>
+      <Stack
+        component="header"
+        direction="row"
+        alignItems="flex-start"
+        justifyContent="space-between"
+        spacing={2}
+        sx={{ mb: 3 }}
+      >
+        <Box>
+          <Typography variant="h4" component="h1" fontWeight={700}>
+            Meu perfil
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Seus dados e histórico de pontos.
+          </Typography>
+        </Box>
+        <Button component={Link} to="/home" variant="outlined">
           Voltar
-        </Link>
-      </header>
+        </Button>
+      </Stack>
 
       {/* Profile section */}
-      <section className="profile-page__section" aria-label="Dados do perfil">
-        {loadingProfile && <Spinner label="Carregando perfil…" />}
+      <Box component="section" aria-label="Dados do perfil" sx={{ mb: 4 }}>
+        <Card>
+          <CardContent>
+            {loadingProfile && <Spinner label="Carregando perfil…" />}
 
-        {!loadingProfile && profileError && (
-          <ErrorBanner message={profileError} onRetry={loadProfile} />
-        )}
+            {!loadingProfile && profileError && (
+              <ErrorBanner message={profileError} onRetry={loadProfile} />
+            )}
 
-        {!loadingProfile && !profileError && profile && (
-          <ProfileForm
-            colaborador={profile}
-            editableFields={EDITABLE_FIELDS}
-            onSave={handleSave}
-            saving={saving}
-            error={saveError}
-          />
-        )}
-      </section>
+            {!loadingProfile && !profileError && profile && (
+              <ProfileForm
+                colaborador={profile}
+                editableFields={EDITABLE_FIELDS}
+                onSave={handleSave}
+                saving={saving}
+                error={saveError}
+              />
+            )}
+          </CardContent>
+        </Card>
+      </Box>
 
       {/* History section */}
-      <section className="profile-page__section" aria-label="Histórico de pontos">
-        <h2 className="profile-page__section-title">Histórico de pontos</h2>
+      <Box component="section" aria-label="Histórico de pontos">
+        <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
+          Histórico de pontos
+        </Typography>
 
-        <form className="profile-history__filters" onSubmit={handleSearch}>
-          <div className="form-field">
-            <label className="form-label" htmlFor="data_inicio">
-              Data início
-            </label>
-            <input
-              id="data_inicio"
-              type="date"
-              className="form-input"
-              value={dataInicio}
-              onChange={(e) => setDataInicio(e.target.value)}
-            />
-          </div>
+        <Card sx={{ mb: 2 }}>
+          <CardContent>
+            <Box component="form" onSubmit={handleSearch}>
+              <Stack spacing={2}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                  <TextField
+                    id="data_inicio"
+                    label="Data início"
+                    type="date"
+                    value={dataInicio}
+                    onChange={(e) => setDataInicio(e.target.value)}
+                    InputLabelProps={{ shrink: true }}
+                    fullWidth
+                  />
+                  <TextField
+                    id="data_fim"
+                    label="Data fim"
+                    type="date"
+                    value={dataFim}
+                    onChange={(e) => setDataFim(e.target.value)}
+                    InputLabelProps={{ shrink: true }}
+                    fullWidth
+                  />
+                </Stack>
 
-          <div className="form-field">
-            <label className="form-label" htmlFor="data_fim">
-              Data fim
-            </label>
-            <input
-              id="data_fim"
-              type="date"
-              className="form-input"
-              value={dataFim}
-              onChange={(e) => setDataFim(e.target.value)}
-            />
-          </div>
-
-          <div className="profile-history__actions">
-            <button
-              type="submit"
-              className="btn-primary"
-              disabled={searching || !dataInicio || !dataFim}
-            >
-              {searching ? 'Buscando…' : 'Buscar'}
-            </button>
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={handleExport}
-              disabled={!hasResults}
-            >
-              Exportar CSV
-            </button>
-          </div>
-        </form>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={searching || !dataInicio || !dataFim}
+                  >
+                    {searching ? 'Buscando…' : 'Buscar'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outlined"
+                    onClick={handleExport}
+                    disabled={!hasResults}
+                  >
+                    Exportar CSV
+                  </Button>
+                </Stack>
+              </Stack>
+            </Box>
+          </CardContent>
+        </Card>
 
         {searching && <Spinner label="Buscando histórico…" />}
 
@@ -264,54 +301,67 @@ export default function ProfilePage() {
 
         {hasResults && (
           <>
-            <ul className="profile-history__list">
-              {pageItems.map((b, i) => {
-                const { data, hora } = splitDateTime(b.batida);
-                return (
-                  <li
-                    key={b.id ?? `${b.batida}-${i}`}
-                    className={`profile-history__item profile-history__item--${b.tipo}`}
-                  >
-                    <span className="profile-history__tipo">
-                      {b.tipo === 'entrada'
-                        ? 'Entrada'
-                        : b.tipo === 'saida'
-                          ? 'Saída'
-                          : b.tipo || '—'}
-                    </span>
-                    <span className="profile-history__when">
-                      {data} {hora}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
+            <TableContainer component={Card} variant="outlined">
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Tipo</TableCell>
+                    <TableCell align="right">Data / hora</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {pageItems.map((b, i) => {
+                    const { data, hora } = splitDateTime(b.batida);
+                    return (
+                      <TableRow key={b.id ?? `${b.batida}-${i}`}>
+                        <TableCell sx={{ fontWeight: 600 }}>
+                          {b.tipo === 'entrada'
+                            ? 'Entrada'
+                            : b.tipo === 'saida'
+                              ? 'Saída'
+                              : b.tipo || '—'}
+                        </TableCell>
+                        <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                          {data} {hora}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
 
-            <div className="profile-history__pager">
-              <button
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              spacing={2}
+              sx={{ mt: 2 }}
+            >
+              <Button
                 type="button"
-                className="btn-secondary"
+                variant="outlined"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
               >
                 Anterior
-              </button>
-              <span className="profile-history__page-info">
+              </Button>
+              <Typography variant="body2" color="text.secondary">
                 Página {page} de {totalPages} · {items.length} registros
-              </span>
-              <button
+              </Typography>
+              <Button
                 type="button"
-                className="btn-secondary"
+                variant="outlined"
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages}
               >
                 Próxima
-              </button>
-            </div>
+              </Button>
+            </Stack>
           </>
         )}
-      </section>
-    </main>
+      </Box>
+    </Box>
   );
 }
 

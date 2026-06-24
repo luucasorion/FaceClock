@@ -7,6 +7,14 @@
 // `editableFields`, so the employee form can allow fewer fields than the manager
 // form (e.g. only the manager set includes `gerente`).
 //
+// FE-UI-1: migrated to MUI — editable text fields render as `TextField`,
+// `gerente`/`status` booleans as a `Switch` (editable) or `Typography` value
+// (read-only), read-only values as `Typography`, and errors as an `Alert`. The
+// PROP API AND BEHAVIOR ARE UNCHANGED so the manager `EmployeeFilePage` consumer
+// is not regressed: same props, `editableFields` still drives editability, the
+// patch only carries changed editable fields, cpf is always read-only, and senha
+// is only shown/sent when editable + typed. FE-UI-2 will polish the manager page.
+//
 // Behavior:
 //   - Renders ColaboradorResponse fields read-only by default.
 //   - `cpf` is ALWAYS read-only, regardless of `editableFields`.
@@ -28,10 +36,19 @@
 //   disabled        bool — disables Edit/Save entirely (e.g. endpoint unavailable).
 
 import { useMemo, useState } from 'react';
-import './ProfileForm.css';
+import {
+  Alert,
+  Box,
+  Button,
+  FormControlLabel,
+  Stack,
+  Switch,
+  TextField,
+  Typography,
+} from '@mui/material';
 
 // Field metadata. `senha` is rendered only when editable and never reflects an
-// existing value. `gerente` is a boolean (checkbox); the rest are text.
+// existing value. `gerente` is a boolean (switch); the rest are text.
 const FIELD_DEFS = [
   { name: 'cpf', label: 'CPF', type: 'text' },
   { name: 'nome', label: 'Nome', type: 'text' },
@@ -141,96 +158,124 @@ export default function ProfileForm({
     return v === undefined || v === null || v === '' ? '—' : String(v);
   };
 
+  // Read-only value styled to read like a field value (label above, value below).
+  const ReadOnlyField = ({ label, children }) => (
+    <Box>
+      <Typography variant="caption" color="text.secondary" component="div">
+        {label}
+      </Typography>
+      <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
+        {children}
+      </Typography>
+    </Box>
+  );
+
   return (
-    <form className="profile-form" onSubmit={handleSubmit}>
+    <Box component="form" onSubmit={handleSubmit}>
       {error ? (
-        <p className="form-error" role="alert">
+        <Alert severity="error" sx={{ mb: 2 }}>
           {error}
-        </p>
+        </Alert>
       ) : null}
 
-      <div className="profile-fields">
+      <Stack spacing={2}>
         {visibleFields.map((def) => {
           const editableNow = editing && isEditable(def.name);
           const fieldId = `profile-${def.name}`;
 
-          return (
-            <div className="form-field" key={def.name}>
-              <label className="form-label" htmlFor={fieldId}>
-                {def.label}
-              </label>
-
-              {def.type === 'boolean' ? (
-                editableNow ? (
-                  <input
+          if (def.type === 'boolean') {
+            return editableNow ? (
+              <FormControlLabel
+                key={def.name}
+                control={
+                  <Switch
                     id={fieldId}
-                    type="checkbox"
-                    className="profile-checkbox"
                     checked={Boolean(draft.gerente)}
                     disabled={saving}
                     onChange={(e) => setField('gerente', e.target.checked)}
                   />
-                ) : (
-                  <p className="profile-readonly">{renderValue(def)}</p>
-                )
-              ) : editableNow ? (
-                <input
-                  id={fieldId}
-                  type={def.type === 'password' ? 'password' : 'text'}
-                  className="form-input"
-                  value={draft[def.name] ?? ''}
-                  disabled={saving}
-                  autoComplete={
-                    def.type === 'password' ? 'new-password' : 'off'
-                  }
-                  placeholder={
-                    def.type === 'password'
-                      ? 'Deixe em branco para manter a atual'
-                      : undefined
-                  }
-                  onChange={(e) => setField(def.name, e.target.value)}
-                />
-              ) : def.name === 'senha' ? (
-                // Editable-but-not-in-edit-mode password: never show a value.
-                <p className="profile-readonly">••••••••</p>
-              ) : (
-                <p className="profile-readonly">{renderValue(def)}</p>
-              )}
-            </div>
+                }
+                label={def.label}
+              />
+            ) : (
+              <ReadOnlyField key={def.name} label={def.label}>
+                {renderValue(def)}
+              </ReadOnlyField>
+            );
+          }
+
+          if (editableNow) {
+            return (
+              <TextField
+                key={def.name}
+                id={fieldId}
+                label={def.label}
+                type={def.type === 'password' ? 'password' : 'text'}
+                value={draft[def.name] ?? ''}
+                disabled={saving}
+                fullWidth
+                autoComplete={def.type === 'password' ? 'new-password' : 'off'}
+                placeholder={
+                  def.type === 'password'
+                    ? 'Deixe em branco para manter a atual'
+                    : undefined
+                }
+                onChange={(e) => setField(def.name, e.target.value)}
+              />
+            );
+          }
+
+          if (def.name === 'senha') {
+            // Editable-but-not-in-edit-mode password: never show a value.
+            return (
+              <ReadOnlyField key={def.name} label={def.label}>
+                ••••••••
+              </ReadOnlyField>
+            );
+          }
+
+          return (
+            <ReadOnlyField key={def.name} label={def.label}>
+              {renderValue(def)}
+            </ReadOnlyField>
           );
         })}
-      </div>
+      </Stack>
 
-      <div className="profile-actions">
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        spacing={2}
+        sx={{ mt: 3 }}
+      >
         {editing ? (
           <>
-            <button
+            <Button
               type="submit"
-              className="btn-primary"
+              variant="contained"
               disabled={disabled || saving}
             >
               {saving ? 'Salvando…' : 'Salvar'}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className="btn-secondary"
+              variant="outlined"
               onClick={cancelEdit}
               disabled={saving}
             >
               Cancelar
-            </button>
+            </Button>
           </>
         ) : (
-          <button
+          <Button
             type="button"
-            className="btn-primary"
+            variant="contained"
             onClick={startEdit}
             disabled={disabled}
           >
             Editar
-          </button>
+          </Button>
         )}
-      </div>
-    </form>
+      </Stack>
+    </Box>
   );
 }

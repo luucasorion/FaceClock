@@ -1,25 +1,31 @@
 // FE-SHARED-7 — ErrorBanner: an error message with an optional Retry action.
 //
-// Replaces ad-hoc inline error <p> elements. role="alert" so the message is
-// announced. When onRetry is supplied a Retry button is shown in-line.
+// FE-UI-1: migrated to MUI Alert (severity="error"). The prop API is unchanged
+// so every caller (punch home, profile, manager pages) keeps working as-is. When
+// onRetry is supplied, the Alert renders an inline Retry action button.
 //
 // Props:
 //   message    — the error text (required for meaningful output).
 //   onRetry    — optional handler; renders a Retry button when present.
 //   retryLabel — Retry button text (default "Tentar novamente").
 
-import './ui.css';
+import { Alert, Button } from '@mui/material';
 
 export default function ErrorBanner({ message, onRetry, retryLabel = 'Tentar novamente' }) {
   if (!message) return null;
   return (
-    <div className="ui-error" role="alert">
-      <p className="ui-error__message">{message}</p>
-      {typeof onRetry === 'function' && (
-        <button type="button" className="ui-error__retry" onClick={onRetry}>
-          {retryLabel}
-        </button>
-      )}
-    </div>
+    <Alert
+      severity="error"
+      sx={{ mb: 2 }}
+      action={
+        typeof onRetry === 'function' ? (
+          <Button color="inherit" size="small" onClick={onRetry}>
+            {retryLabel}
+          </Button>
+        ) : undefined
+      }
+    >
+      {message}
+    </Alert>
   );
 }

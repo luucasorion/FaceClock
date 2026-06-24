@@ -17,13 +17,18 @@
 //
 // Reachable from post-registration onboarding (FE-AUTH-2 routes here) and from
 // the punch-home not-enrolled prompt (FE-PUNCH-2 links here).
+//
+// FE-UI-1: migrated the surrounding layout to MUI (Card/Typography/Button/Alert
+// + Spinner). CameraCapture itself is NOT changed. The phase machine, endpoint,
+// error mapping, and success→/home navigation are all unchanged — presentation only.
 
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Alert, Box, Button, Card, CardContent, Typography } from '@mui/material';
 import CameraCapture from '../components/CameraCapture.jsx';
+import Spinner from '../components/Spinner.jsx';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { cadastrarBiometria } from '../api/colaborador.js';
-import '../styles/forms.css';
 
 // phase: intro → capturing → submitting (errors return to intro with a message)
 export default function EnrollPage() {
@@ -64,48 +69,50 @@ export default function EnrollPage() {
   }, []);
 
   return (
-    <main className="auth-page">
-      <header className="auth-header">
-        <h1 className="auth-title">Cadastrar biometria facial</h1>
-        <p className="auth-subtitle">
+    <Box component="main" sx={{ width: '100%', mt: 2 }}>
+      <Box component="header" sx={{ textAlign: 'center', mb: 3 }}>
+        <Typography variant="h4" component="h1" fontWeight={700}>
+          Cadastrar biometria facial
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
           Para bater o ponto identificando seu rosto, cadastre sua face uma única
           vez. Centralize o rosto na marca oval, com boa iluminação, e capture.
-        </p>
-      </header>
+        </Typography>
+      </Box>
 
-      {error ? (
-        <p className="form-error" role="alert">
-          {error}
-        </p>
-      ) : null}
+      <Card>
+        <CardContent>
+          {error ? (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          ) : null}
 
-      {phase === 'capturing' && (
-        <CameraCapture
-          onCapture={handleCapture}
-          onError={handleCameraError}
-          captureLabel="Capturar e cadastrar"
-        />
-      )}
+          {phase === 'capturing' && (
+            <CameraCapture
+              onCapture={handleCapture}
+              onError={handleCameraError}
+              captureLabel="Capturar e cadastrar"
+            />
+          )}
 
-      {phase === 'submitting' && (
-        <p className="auth-subtitle" role="status">
-          Enviando sua biometria…
-        </p>
-      )}
+          {phase === 'submitting' && <Spinner label="Enviando sua biometria…" />}
 
-      {(phase === 'intro' || phase === 'submitting') && (
-        <div className="auth-actions">
-          <button
-            type="button"
-            className="btn-primary"
-            onClick={startCapture}
-            disabled={phase === 'submitting'}
-          >
-            {error ? 'Tentar novamente' : 'Cadastrar minha face'}
-          </button>
-        </div>
-      )}
-    </main>
+          {(phase === 'intro' || phase === 'submitting') && (
+            <Button
+              type="button"
+              variant="contained"
+              size="large"
+              fullWidth
+              onClick={startCapture}
+              disabled={phase === 'submitting'}
+            >
+              {error ? 'Tentar novamente' : 'Cadastrar minha face'}
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+    </Box>
   );
 }
 

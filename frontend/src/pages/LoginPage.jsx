@@ -3,13 +3,26 @@
 // Form: `login` + `senha` → api/auth.login → setSession → navigate('/home').
 // Invalid credentials (401/403) surface as a clear inline message; no token
 // is stored on failure (setSession only runs on success).
+//
+// FE-UI-1: migrated to MUI (Card/TextField/Button/Alert/Stack). The flow,
+// endpoint, navigation target, and the location.state.message notice are all
+// unchanged — presentation only.
 
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { useAuth } from '../auth/AuthContext.jsx';
 import * as authApi from '../api/auth.js';
 import { ApiError } from '../api/client.js';
-import '../styles/forms.css';
 
 export default function LoginPage() {
   const { setSession } = useAuth();
@@ -61,66 +74,74 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="auth-page">
-      <header className="auth-header">
-        <h1 className="auth-title">Entrar</h1>
-        <p className="auth-subtitle">Acesse sua conta FaceClock</p>
-      </header>
+    <Box component="main" sx={{ width: '100%', mt: 2 }}>
+      <Box component="header" sx={{ textAlign: 'center', mb: 3 }}>
+        <Typography variant="h4" component="h1" fontWeight={700}>
+          Entrar
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Acesse sua conta FaceClock
+        </Typography>
+      </Box>
 
-      <form className="auth-form" onSubmit={onSubmit} noValidate>
-        {notice && (
-          <p className="form-success" role="status">
-            {notice}
-          </p>
-        )}
+      <Card>
+        <CardContent>
+          <Box component="form" onSubmit={onSubmit} noValidate>
+            <Stack spacing={2}>
+              {notice && (
+                <Alert severity="info" role="status">
+                  {notice}
+                </Alert>
+              )}
 
-        {error && (
-          <p className="form-error" role="alert">
-            {error}
-          </p>
-        )}
+              {error && <Alert severity="error">{error}</Alert>}
 
-        <div className="form-field">
-          <label className="form-label" htmlFor="login">
-            Login
-          </label>
-          <input
-            className="form-input"
-            id="login"
-            name="login"
-            type="text"
-            autoComplete="username"
-            value={form.login}
-            onChange={onChange}
-            required
-          />
-        </div>
+              <TextField
+                id="login"
+                name="login"
+                label="Login"
+                type="text"
+                autoComplete="username"
+                value={form.login}
+                onChange={onChange}
+                required
+                fullWidth
+              />
 
-        <div className="form-field">
-          <label className="form-label" htmlFor="senha">
-            Senha
-          </label>
-          <input
-            className="form-input"
-            id="senha"
-            name="senha"
-            type="password"
-            autoComplete="current-password"
-            value={form.senha}
-            onChange={onChange}
-            required
-          />
-        </div>
+              <TextField
+                id="senha"
+                name="senha"
+                label="Senha"
+                type="password"
+                autoComplete="current-password"
+                value={form.senha}
+                onChange={onChange}
+                required
+                fullWidth
+              />
 
-        <div className="auth-actions">
-          <button className="btn-primary" type="submit" disabled={submitting}>
-            {submitting ? 'Entrando…' : 'Entrar'}
-          </button>
-          <Link className="btn-secondary" to="/registro/colaborador">
-            Criar conta de colaborador
-          </Link>
-        </div>
-      </form>
-    </main>
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                fullWidth
+                disabled={submitting}
+              >
+                {submitting ? 'Entrando…' : 'Entrar'}
+              </Button>
+
+              <Button
+                component={Link}
+                to="/registro/colaborador"
+                variant="text"
+                fullWidth
+              >
+                Criar conta de colaborador
+              </Button>
+            </Stack>
+          </Box>
+        </CardContent>
+      </Card>
+    </Box>
   );
 }

@@ -1,25 +1,41 @@
 // FE-SHARED-7 — EmptyState: icon + message for an empty list/result.
 //
-// Used where a page previously inlined a "Nenhum … encontrado" line, so empty
-// states look consistent across screens.
+// FE-UI-1: restyled on MUI (Box + Typography) for visual consistency with the
+// themed screens. The prop API is unchanged so callers keep passing the same
+// icon/message/children.
 //
 // Props:
 //   icon     — small visual marker (emoji/text node); default a neutral glyph.
 //   message  — the empty message (required for meaningful output).
 //   children — optional extra content (e.g. a call-to-action) below the message.
 
-import './ui.css';
+import { Box, Typography } from '@mui/material';
 
 export default function EmptyState({ icon = '📭', message, children }) {
   return (
-    <div className="ui-empty">
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        textAlign: 'center',
+        gap: 1,
+        py: 3,
+        px: 2,
+        color: 'text.secondary',
+      }}
+    >
       {icon && (
-        <span className="ui-empty__icon" aria-hidden="true">
+        <Box component="span" aria-hidden="true" sx={{ fontSize: '2rem', lineHeight: 1 }}>
           {icon}
-        </span>
+        </Box>
       )}
-      {message && <p className="ui-empty__message">{message}</p>}
+      {message && (
+        <Typography variant="body1" sx={{ m: 0 }}>
+          {message}
+        </Typography>
+      )}
       {children}
-    </div>
+    </Box>
   );
 }

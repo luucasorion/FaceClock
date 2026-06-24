@@ -5,9 +5,10 @@
 //     CameraCapture flow as the kiosk, but the /ponto/ endpoint, NOT the kiosk
 //     /ponto/embarcado endpoint.
 //   - See today's punches loaded from GET /relatorio/dia (each batida rendered
-//     as a card with time + derived tipo entrada/saida; plus the total count).
+//     as a list item with time + derived tipo entrada/saida; plus the total count).
 //     The list refreshes after a successful punch.
-//   - Reach their profile via a circular button in the top corner (→ /perfil).
+//   - Reach their profile via a button in the top corner (→ /perfil). The AppBar
+//     (FE-SHARED-9) also exposes Perfil, but the page keeps its own quick action.
 //
 // Result-state taxonomy is shared with the kiosk via the PunchResult component +
 // mapPunchError helper (FE-PUNCH-3): success / not-recognized (401) /
@@ -16,9 +17,26 @@
 //
 // The camera flow is toggleable: CameraCapture mounts only while clocking in
 // and is unmounted (releasing the camera) once a result is shown.
+//
+// FE-UI-1: migrated the page chrome to MUI (Card/List/Button/Typography/Box +
+// the MUI-backed Spinner/EmptyState/ErrorBanner/PunchResult). The punch flow,
+// the /ponto/ + /relatorio/dia endpoints, and the 400 not-enrolled-vs-invalid
+// disambiguation (via mapPunchError) are all unchanged — presentation only.
 
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  Box,
+  Button,
+  Card,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  Stack,
+  Typography,
+} from '@mui/material';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import CameraCapture from '../components/CameraCapture.jsx';
 import PunchResult, { mapPunchError } from '../components/PunchResult.jsx';
 import Spinner from '../components/Spinner.jsx';
@@ -28,7 +46,6 @@ import { useAuth } from '../auth/AuthContext.jsx';
 import { baterPonto } from '../api/ponto.js';
 import { dia } from '../api/relatorio.js';
 import { acquireGeo } from '../lib/geo.js';
-import './PunchHomePage.css';
 
 // phase: idle → capturing → submitting → result
 export default function PunchHomePage() {
@@ -93,57 +110,82 @@ export default function PunchHomePage() {
   }, []);
 
   return (
-    <main className="punch-home">
-      <header className="punch-home__header">
-        <div>
-          <h1 className="punch-home__title">Olá!</h1>
-          <p className="punch-home__subtitle">Bater ponto</p>
-        </div>
-        <Link
+    <Box component="main" sx={{ display: 'flex', flexDirection: 'column', flex: 1, width: '100%' }}>
+      <Stack
+        component="header"
+        direction="row"
+        alignItems="flex-start"
+        justifyContent="space-between"
+        spacing={2}
+        sx={{ mt: 1 }}
+      >
+        <Box>
+          <Typography variant="h5" component="h1" fontWeight={700}>
+            Olá!
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Bater ponto
+          </Typography>
+        </Box>
+        <IconButton
+          component={Link}
           to="/perfil"
-          className="punch-home__profile-btn"
           aria-label="Abrir perfil"
+          sx={{ border: 1, borderColor: 'divider' }}
         >
-          <span aria-hidden="true">👤</span>
-        </Link>
-      </header>
+          <PersonOutlineIcon />
+        </IconButton>
+      </Stack>
 
       {/* Clock In — above the cards, in thumb reach. Hidden while the camera or
           a result is showing so the screen has a single clear action. */}
       {phase === 'idle' && (
-        <button type="button" className="btn-primary punch-home__clock-in" onClick={startCapture}>
+        <Button
+          type="button"
+          variant="contained"
+          size="large"
+          fullWidth
+          onClick={startCapture}
+          sx={{ mt: 3 }}
+        >
           Bater ponto
-        </button>
+        </Button>
       )}
 
       {phase === 'capturing' && (
-        <CameraCapture
-          onCapture={handleCapture}
-          onError={handleCameraError}
-          captureLabel="Capturar e bater ponto"
-        />
+        <Box sx={{ mt: 3 }}>
+          <CameraCapture
+            onCapture={handleCapture}
+            onError={handleCameraError}
+            captureLabel="Capturar e bater ponto"
+          />
+        </Box>
       )}
 
       {phase === 'submitting' && (
-        <div className="punch-home__status">
+        <Box sx={{ my: 3, textAlign: 'center' }}>
           <Spinner label="Registrando…" />
-        </div>
+        </Box>
       )}
 
       {phase === 'result' && result && (
-        <PunchResult result={result} onRetry={dismissResult} retryLabel="Fechar" />
+        <Box sx={{ mt: 3 }}>
+          <PunchResult result={result} onRetry={dismissResult} retryLabel="Fechar" />
+        </Box>
       )}
 
       {/* Today's punches. */}
-      <section className="punch-home__today" aria-label="Registros de hoje">
-        <div className="punch-home__today-head">
-          <h2 className="punch-home__today-title">Hoje</h2>
+      <Box component="section" aria-label="Registros de hoje" sx={{ mt: 4 }}>
+        <Stack direction="row" alignItems="baseline" justifyContent="space-between">
+          <Typography variant="h6" component="h2">
+            Hoje
+          </Typography>
           {resumo && (
-            <span className="punch-home__count">
+            <Typography variant="body2" color="text.secondary">
               {resumo.total} {resumo.total === 1 ? 'registro' : 'registros'}
-            </span>
+            </Typography>
           )}
-        </div>
+        </Stack>
 
         {loadingResumo && <Spinner label="Carregando…" />}
 
@@ -156,19 +198,35 @@ export default function PunchHomePage() {
         )}
 
         {!loadingResumo && !resumoError && resumo && resumo.batidas?.length > 0 && (
-          <ul className="punch-card-list">
+          <List disablePadding sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
             {resumo.batidas.map((b) => (
-              <li key={b.id} className={`punch-card punch-card--${b.tipo}`}>
-                <span className="punch-card__tipo">
-                  {b.tipo === 'entrada' ? 'Entrada' : 'Saída'}
-                </span>
-                <span className="punch-card__time">{formatTime(b.batida)}</span>
-              </li>
+              <Card
+                key={b.id}
+                variant="outlined"
+                sx={{
+                  borderLeft: 4,
+                  borderLeftColor: b.tipo === 'entrada' ? '#16a34a' : '#dc2626',
+                }}
+              >
+                <ListItem>
+                  <ListItemText
+                    primary={b.tipo === 'entrada' ? 'Entrada' : 'Saída'}
+                    primaryTypographyProps={{ fontWeight: 600 }}
+                  />
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ fontVariantNumeric: 'tabular-nums' }}
+                  >
+                    {formatTime(b.batida)}
+                  </Typography>
+                </ListItem>
+              </Card>
             ))}
-          </ul>
+          </List>
         )}
-      </section>
-    </main>
+      </Box>
+    </Box>
   );
 }
 
