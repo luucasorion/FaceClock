@@ -22,3 +22,14 @@ for AUTHZ-2, AUTH-4 claims shape, and the frontend manager flow.
 - **qa note (for human):** raising embarcado 0.4→0.65 tightens blind recognition; may reject more legitimate punches — recognition-quality concern, not a defect.
 - **Next:** AUTHZ-1 (P1) — surface `gerente` in JWT claims + `ColaboradorResponse` + controlled promotion (key unblocker).
 
+### Cycle 2 — AUTHZ-1 (P1, `TASKS.md`) — ✅ DONE
+- **Selected:** AUTHZ-1 (was "in progress"); key unblocker for AUTHZ-2, AUTH-4 claims shape, and the frontend manager flow.
+- **Architecture:** plan accepted — 4 edits (login dict, DTO field, login claims, registration claims); promotion stays manager-only (no new mechanism); flagged Gap1↔Gap2 coupling on `ColaboradorResponse(**result)`.
+- **Implementation:** the 4 edits + qa-identified cleanup (removed the ignored `gerente` from the public `RegistroColaboradorRequest`). 5 files.
+- **Verify:** smoke green (21 routes); response DTO has no senha/facial; qa PASS (claims identical across both token sites, no self-promotion hole, all DTO construction sites valid).
+- **Commit:** `d42217d`.
+- **Task files:** AUTHZ-1 moved to §4 done; §3 snapshot + PROJECT_CONTEXT §24 updated.
+- **Follow-ons recorded (not blocking):** (1) AUTHZ-2 — `require_manager` should read the new claim vs DB re-query; (2) first-manager bootstrap (no API path mints the first manager) → seed/CLI, never reopen public registration. **(2) is a product decision flagged for the human; default kept safe.**
+- **Next:** AUTHZ-2 (P1) — now unblocked; switch `require_manager` to read the `gerente` claim (with DB fallback for legacy tokens).
+
+

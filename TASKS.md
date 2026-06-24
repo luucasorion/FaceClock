@@ -54,8 +54,8 @@ Based on the real code review of 2026-06-23 (re-audited against code on 2026-06-
 
 | Group | Tasks |
 |---|---|
-| ✅ Done | AUTH-1, AUTH-2, AUTH-3, BIO-3, PUNCH-1, EMPRESA-1, EMPRESA-2, REPORT-1, REPORT-2, REPORT-3, REPORT-4, COLAB-1, COLAB-2, PUNCH-2, BIO-2, RECOG-1 |
-| 🚧 In progress | AUTHZ-1, AUTHZ-2, API-1 |
+| ✅ Done | AUTH-1, AUTH-2, AUTH-3, BIO-3, PUNCH-1, EMPRESA-1, EMPRESA-2, REPORT-1, REPORT-2, REPORT-3, REPORT-4, COLAB-1, COLAB-2, PUNCH-2, BIO-2, RECOG-1, AUTHZ-1 |
+| 🚧 In progress | AUTHZ-2, API-1 |
 | ⬜ To do | AUTH-4, COLAB-3, REPORT-6, REPORT-5, PUNCH-3, BIO-1, RECOG-2, ARCH-1, ARCH-2, ARCH-3, ARCH-4 |
 
 > Note (2026-06-23 re-audit): `application/use_cases/ponto/get_ponto_usecase.py` no longer exists — its history-grouping logic was relocated to `application/use_cases/relatorio/` (`_agrupamento.py` + the report use cases). Task file-references were corrected accordingly.
@@ -84,14 +84,13 @@ Based on the real code review of 2026-06-23 (re-audited against code on 2026-06-
 - SQLite + auto schema creation + lightweight `gerente` migration at startup — `infra/db/database.py`, `main.py`.
 
 ### Partially implemented
-- **Authorization (AUTHZ)**: `gerente` is persisted; `require_manager` is built and applied broadly (empresa edit/deactivate, collaborator edit/deactivate, company reports); BR06 company scoping is enforced on collaborator edit/deactivate, collaborator listing, and reports. **But**: registration hard-codes `gerente=False` (no controlled promotion path), and `gerente` is absent from JWT claims and from `ColaboradorResponse` (so `require_manager` still re-queries the DB). AUTHZ-1 remainder.
+- **Authorization (AUTHZ)**: `gerente` is persisted and now surfaced in the JWT claims (login + registration tokens, identical shape) and in `ColaboradorResponse` (AUTHZ-1 done); `require_manager` is built and applied broadly (empresa edit/deactivate, collaborator edit/deactivate, company reports); BR06 company scoping is enforced on collaborator edit/deactivate, collaborator listing, and reports. Controlled promotion is intentionally manager-only via `PUT /colaborador/{cpf}`; public registration stays `gerente=False`. **Remaining (AUTHZ-2)**: `require_manager` still re-queries the DB instead of reading the new `gerente` claim. **Known follow-on**: no API path creates the first manager (bootstrap chicken-and-egg) — resolve via seed/CLI, not by reopening public registration.
 - **Punch thresholds**: aligned to BR01 (0.65) via a single `LIMIAR_RECONHECIMENTO` constant in `facial_service.py`, reused by the login punch (`validar_rosto` default) and the embarcado punch cutoff (RECOG-1 done).
 - **Response shaping (API-1)**: collaborator and empresa endpoints use response DTOs, but punch endpoints still return ad-hoc dicts and login returns a hand-built dict.
 - **Domain model**: no dedicated PunchProfile entity — `Empresa.limite_hora` is the only hour limit.
 
 ### Still missing
 - Bearer token issued on registration (AUTH-4).
-- `gerente` in JWT claims and `ColaboradorResponse`; a controlled manager-promotion path (AUTHZ-1 remainder).
 - Daily self punch-summary endpoint — "today's punches" (REPORT-6).
 - Composite DB indexes + pagination on punch history queries (REPORT-5).
 - Punch robustness: a live `TypeError` when an unenrolled collaborator punches via the login flow (`None`-guard on `colaborador.facial`), plus FacialService error translation and upload validation (PUNCH-3).
@@ -401,6 +400,27 @@ Completed tasks, grouped by priority. Retained for traceability and acceptance e
   - ✅ No remaining literal `0.6`/`0.4` recognition thresholds exist in punch logic.
 - **Follow-up (non-blocking):** raising the embarcado cutoff 0.4→0.65 is a meaningful behavior tightening; legitimate blind-recognition punches may now be rejected more often — a recognition-quality concern for QA, not an architecture one.
 
+### [AUTHZ-1] Add `gerente` boolean to Colaborador (RF02)
+- **Priority:** P1
+- **Status:** done
+- **Why it existed:** RF02/BR03 distinguish Manager from Collaborator via a **boolean field (`gerente`) on `Colaborador`**, not a separate entity. The column existed and was persisted, but was absent from JWT claims and `ColaboradorResponse`, and registration advertised an ignored `gerente` field.
+- **What was done (verified 2026-06-23):**
+  - `gerente` Boolean column (default `False`, not null) on `Colaborador` + startup `ALTER TABLE` migration (pre-existing).
+  - `gerente` added to the JWT claims in **both** token-mint sites — login (`login_controller.py` via `LoginColaboradorUseCase`'s returned dict) and registration (`colaborador_controller.py`) — so both tokens carry an identical claim set `sub`/`cpf`/`empresa_id`/`gerente`.
+  - `gerente: bool` added to `ColaboradorResponse` (still no `senha`/`facial`); all construction sites (login `(**result)`, registration `model_validate`, `/me`, `/` list, `PUT`, `DELETE`) verified.
+  - Removed the ignored `gerente` field from the public `RegistroColaboradorRequest` so the API no longer advertises self-promotion; registration stays hard-coded `gerente=False`.
+  - Controlled promotion path: manager-only `PUT /colaborador/{cpf}` (COLAB-2) is the sole way to set `gerente=True`.
+- **Relevant files / areas:**
+  - `domains/models/colaborador.py`, `main.py` (migration)
+  - `presentation/schema/requests/registro_colaborador_request.py` (ignored field removed)
+  - `presentation/schema/responses/colaborador_response.py`
+  - `application/use_cases/colaborador/login_colaborador_usecase.py`
+  - `presentation/controller/colaborador_controller.py`, `login_controller.py`
+- **Done when:**
+  - ✅ `Colaborador` has a persisted `gerente` boolean; existing data continues to work.
+  - ✅ The flag is surfaced in tokens and responses, and settable only in a controlled (manager-gated) way.
+- **Follow-on (separate, not blocking):** (1) AUTHZ-2's remaining item — `require_manager` should read the new claim instead of re-querying the DB; (2) first-manager bootstrap (no API path mints the first manager) — resolve via seed/CLI, never by reopening public registration.
+
 ---
 
 ## 5. 🚧 To do / In progress
@@ -426,28 +446,6 @@ The live work queue. Work top-down by priority: **P0 → P1 → P2 → P3**.
   - Registration returns a valid signed bearer token plus the safe collaborator DTO.
   - The token authenticates against protected endpoints without a separate login call.
   - The response contains no `senha` or `facial` data.
-
-#### [AUTHZ-1] Add `gerente` boolean to Colaborador (RF02)
-- **Priority:** P1
-- **Status:** in progress
-- **Why it exists:** RF02/BR03 distinguish Manager from Collaborator. The role is a **boolean field (`gerente`) on `Colaborador`**, not a separate entity.
-- **What was done:**
-  - `gerente` Boolean column (default `False`, not null) added to `Colaborador` — `domains/models/colaborador.py`.
-  - Startup `ALTER TABLE colaboradores ADD COLUMN gerente ...` migration guards existing DBs — `main.py`.
-  - `RegistroColaboradorRequest` accepts `gerente` and `RegistrarColaboradorUseCase` persists it.
-- **What still needs to be done:**
-  - The controller hard-codes `gerente=False` ("elevation locked until manager guard"). Implement a controlled promotion path (e.g. only an authenticated manager may set it). Until then no manager can be created via the API. (COLAB-2's edit path can set `gerente`, but registration cannot.)
-  - Include `gerente` in the JWT claims (login token currently carries only `sub`, `cpf`, `empresa_id`) so `require_manager` need not re-query the DB.
-  - Surface `gerente` in `ColaboradorResponse`.
-- **Relevant files / areas:**
-  - `domains/models/colaborador.py`, `main.py` (migration)
-  - `presentation/schema/requests/registro_colaborador_request.py`
-  - `presentation/schema/responses/colaborador_response.py`
-  - `application/use_cases/colaborador/registrar_colaborador_usecase.py`
-  - `presentation/controller/colaborador_controller.py`, `login_controller.py` (JWT claims)
-- **Done when:**
-  - ✅ `Colaborador` has a persisted `gerente` boolean; existing data continues to work.
-  - The flag is settable in a controlled way and surfaced in tokens and responses.
 
 #### [AUTHZ-2] Enforce manager-only access (BR03) and company-scoped access (BR06)
 - **Priority:** P1
