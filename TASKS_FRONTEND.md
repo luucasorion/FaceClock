@@ -72,8 +72,7 @@ The frontend scaffold now exists (`frontend/`, React+Vite); the screens are bein
 |---|---|
 | ✅ Done | FE-SHARED-1, FE-SHARED-2, FE-SHARED-3, FE-SHARED-4, FE-MENU-1, FE-AUTH-1, FE-AUTH-2, FE-AUTH-3, FE-PUNCH-1, FE-PUNCH-2 |
 | ⬜ P0 | — (all done) |
-| ✅ Done (P1) | FE-SHARED-5, FE-SHARED-6, FE-ENROLL-1, FE-PROFILE-1 |
-| ⬜ P1 | FE-MANAGER-1, FE-MANAGER-2 |
+| ✅ Done (P1) | FE-SHARED-5, FE-SHARED-6, FE-ENROLL-1, FE-PROFILE-1, FE-MANAGER-1, FE-MANAGER-2 |
 | ⬜ P2 | FE-PUNCH-3, FE-SHARED-7 |
 
 **Backend dependencies (in `TASKS.md`) that block frontend tasks**
@@ -374,8 +373,8 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
 
 #### [FE-MANAGER-1] Manager — My Employees + employee file
 - **Priority:** P1
-- **Status:** todo — **blocked on AUTHZ-1**
-- **Why it exists:** RF10 — managers list and manage their company's collaborators. Listing uses `GET /colaborador/`; the employee file reuses `ProfileForm` for manager edit (`PUT /colaborador/{cpf}`) and deactivate (`DELETE /colaborador/{cpf}`).
+- **Status:** done — 2026-06-23 (AUTHZ-1 unblocked it). `ConfirmModal.jsx` (reusable accessible dialog) + `ManagerEmployeesPage.jsx` (`/gerente/colaboradores`: `colaborador.listar` → rows → file) + `EmployeeFilePage.jsx` (`/gerente/colaboradores/:cpf`: load via list+find since there's no get-by-cpf endpoint; `ProfileForm` manager-editable `nome/login/gerente/senha` → `PUT /{cpf}`; Deactivate → ConfirmModal → `DELETE /{cpf}`; surfaces self/last-manager/cross-company guard errors). Behind `RequireManager`. Verified `npm run build` green. **Not e2e-exercisable until a manager is seeded** (backend bootstrap gap).
+- **Why it existed:** RF10 — managers list and manage their company's collaborators. Listing uses `GET /colaborador/`; the employee file reuses `ProfileForm` for manager edit (`PUT /colaborador/{cpf}`) and deactivate (`DELETE /colaborador/{cpf}`).
 - **What must be done:**
   - `frontend/src/pages/ManagerEmployeesPage.jsx` (behind `RequireManager`): list collaborators via `api/colaborador.listar()`. Clicking a row opens the employee file.
   - `frontend/src/pages/EmployeeFilePage.jsx`: render that employee's profile via `ProfileForm` with manager-editable fields; **Edit→Save** → `PUT /colaborador/{cpf}`; **Deactivate** → `DELETE /colaborador/{cpf}` behind a **confirmation modal**. Surface backend guard errors (self-deactivate / last-active-manager / cross-company BR06) as clear messages.
@@ -394,8 +393,8 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
 
 #### [FE-MANAGER-2] Manager — company report
 - **Priority:** P1
-- **Status:** todo — **blocked on AUTHZ-1**
-- **Why it exists:** RF12 — managers request the whole company's punches for a period via `GET /relatorio/empresa/{empresa_id}` (JSON view + CSV export, both supported server-side).
+- **Status:** done — 2026-06-23 (AUTHZ-1 unblocked it). `ManagerReportPage.jsx` (`/gerente/relatorio`): date range → `relatorio.empresa(token, empresaId, {dataInicio,dataFim,formato:'json'})` (empresaId from `useAuth()`) → per-collaborator worked/overtime table with the BR05 overtime flag (JSON shape read from `relatorio_empresa_response.py`); Export CSV → `formato:'csv'` raw server CSV → `downloadCsv`. Degrades to stacked cards on mobile. Behind `RequireManager`. Verified `npm run build` green.
+- **Why it existed:** RF12 — managers request the whole company's punches for a period via `GET /relatorio/empresa/{empresa_id}` (JSON view + CSV export, both supported server-side).
 - **What must be done:**
   - `frontend/src/pages/ManagerReportPage.jsx` (behind `RequireManager`): date range inputs → `api/relatorio.empresa(empresa_id, {dataInicio, dataFim, formato})` with `empresa_id` from the auth context (`empresa_id` claim).
   - Render the JSON report (per-collaborator hours, overtime flags BR05) as a table; an **Export CSV** action requests `formato=csv` and downloads the server-generated file (no client CSV helper needed here).

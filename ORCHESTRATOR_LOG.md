@@ -148,6 +148,12 @@ for AUTHZ-2, AUTH-4 claims shape, and the frontend manager flow.
 - EnrollPage (CameraCapture→cadastrarBiometria→/home) + ProfilePage (ProfileForm self-edit wired to PUT /me — COLAB-3 real; history search→flatten→client-paginate; CSV export). Wired into App. Build green (JS 196/CSS 11 kB — ProfileForm + csv now bundled). Commit `48bae39`.
 - **Next:** FE-MANAGER-1 (My Employees + employee file + ConfirmModal) and FE-MANAGER-2 (company report). Unblocked by AUTHZ-1; not e2e-exercisable until a manager is seeded (bootstrap caveat).
 
+### Cycle 18 — FE-MANAGER-1 + FE-MANAGER-2 (P1) — ✅ DONE (batched: manager surface)
+- ConfirmModal + ManagerEmployeesPage (list) + EmployeeFilePage (list+find by cpf, ProfileForm manager-edit→PUT /{cpf}, deactivate→ConfirmModal→DELETE) + ManagerReportPage (JSON table w/ BR05 flag, CSV export). Shapes read from backend schema (read-only). Wired into App under RequireManager. Build green (JS 207/CSS 16 kB). Commit `d11ca22`.
+- **All P1 frontend done.** Bootstrap caveat stands: manager screens need a seeded manager to exercise e2e.
+- **Next:** P2 polish — FE-PUNCH-3 (unified punch result UX) + FE-SHARED-7 (shared loading/empty/error primitives + responsive QA pass).
+
+
 
 
 
