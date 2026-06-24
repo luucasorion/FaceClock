@@ -54,9 +54,9 @@ Based on the real code review of 2026-06-23 (re-audited against code on 2026-06-
 
 | Group | Tasks |
 |---|---|
-| ✅ Done | AUTH-1, AUTH-2, AUTH-3, BIO-3, PUNCH-1, EMPRESA-1, EMPRESA-2, REPORT-1, REPORT-2, REPORT-3, REPORT-4, COLAB-1, COLAB-2, PUNCH-2, BIO-2 |
+| ✅ Done | AUTH-1, AUTH-2, AUTH-3, BIO-3, PUNCH-1, EMPRESA-1, EMPRESA-2, REPORT-1, REPORT-2, REPORT-3, REPORT-4, COLAB-1, COLAB-2, PUNCH-2, BIO-2, RECOG-1 |
 | 🚧 In progress | AUTHZ-1, AUTHZ-2, API-1 |
-| ⬜ To do | RECOG-1, AUTH-4, COLAB-3, REPORT-6, REPORT-5, PUNCH-3, BIO-1, RECOG-2, ARCH-1, ARCH-2, ARCH-3, ARCH-4 |
+| ⬜ To do | AUTH-4, COLAB-3, REPORT-6, REPORT-5, PUNCH-3, BIO-1, RECOG-2, ARCH-1, ARCH-2, ARCH-3, ARCH-4 |
 
 > Note (2026-06-23 re-audit): `application/use_cases/ponto/get_ponto_usecase.py` no longer exists — its history-grouping logic was relocated to `application/use_cases/relatorio/` (`_agrupamento.py` + the report use cases). Task file-references were corrected accordingly.
 
@@ -85,12 +85,11 @@ Based on the real code review of 2026-06-23 (re-audited against code on 2026-06-
 
 ### Partially implemented
 - **Authorization (AUTHZ)**: `gerente` is persisted; `require_manager` is built and applied broadly (empresa edit/deactivate, collaborator edit/deactivate, company reports); BR06 company scoping is enforced on collaborator edit/deactivate, collaborator listing, and reports. **But**: registration hard-codes `gerente=False` (no controlled promotion path), and `gerente` is absent from JWT claims and from `ColaboradorResponse` (so `require_manager` still re-queries the DB). AUTHZ-1 remainder.
-- **Punch thresholds**: core punch flow works (including BR02), but thresholds deviate from BR01 — login uses the `0.6` default and embarcado uses a literal `0.4` (vs required `0.65`). RECOG-1.
+- **Punch thresholds**: aligned to BR01 (0.65) via a single `LIMIAR_RECONHECIMENTO` constant in `facial_service.py`, reused by the login punch (`validar_rosto` default) and the embarcado punch cutoff (RECOG-1 done).
 - **Response shaping (API-1)**: collaborator and empresa endpoints use response DTOs, but punch endpoints still return ad-hoc dicts and login returns a hand-built dict.
 - **Domain model**: no dedicated PunchProfile entity — `Empresa.limite_hora` is the only hour limit.
 
 ### Still missing
-- Recognition thresholds aligned to BR01 (0.65) — still 0.6 / 0.4 (RECOG-1).
 - Bearer token issued on registration (AUTH-4).
 - `gerente` in JWT claims and `ColaboradorResponse`; a controlled manager-promotion path (AUTHZ-1 remainder).
 - Daily self punch-summary endpoint — "today's punches" (REPORT-6).
@@ -383,30 +382,30 @@ Completed tasks, grouped by priority. Retained for traceability and acceptance e
 - **Done when:**
   - N/A — out of scope. Future work tracked separately if RF13 is re-prioritized.
 
+### [RECOG-1] Align recognition thresholds with BR01 (0.65)
+- **Priority:** P0
+- **Status:** done
+- **Why it existed:** BR01 requires a minimum recognition similarity of **0.65** for a valid punch. Previously `FacialService.validar_rosto` defaulted `limiar=0.6`; `BaterPontoUseCase` called it without a threshold (silently 0.6); `BatidaPontoEmbarcadoUseCase` used a literal `0.4`. Both accepted faces that should be rejected.
+- **What was done (verified 2026-06-23):**
+  - Added a single module-level constant `LIMIAR_RECONHECIMENTO = 0.65  # BR01` in `application/services/facial_service.py`.
+  - `validar_rosto`'s default is now `limiar: float = LIMIAR_RECONHECIMENTO`, so the login punch (`BaterPontoUseCase`, which calls it with no threshold) inherits 0.65.
+  - `BatidaPontoEmbarcadoUseCase` imports the constant and rejects `melhor_similaridade < LIMIAR_RECONHECIMENTO` (was `< 0.4`); best-match selection then cutoff order preserved.
+  - Verified no recognition literal `0.6`/`0.4` remains in punch logic; smoke gate green.
+- **Relevant files / areas:**
+  - `application/services/facial_service.py`
+  - `application/use_cases/ponto/batida_ponto_embarcado_usecase.py`
+  - `application/use_cases/ponto/batida_ponto_usecase.py` (unchanged; inherits the default)
+- **Done when:**
+  - ✅ Both punch flows reject matches with similarity < 0.65 (inclusive boundary: 0.65 accepted).
+  - ✅ The threshold is defined in exactly one place and reused by all flows.
+  - ✅ No remaining literal `0.6`/`0.4` recognition thresholds exist in punch logic.
+- **Follow-up (non-blocking):** raising the embarcado cutoff 0.4→0.65 is a meaningful behavior tightening; legitimate blind-recognition punches may now be rejected more often — a recognition-quality concern for QA, not an architecture one.
+
 ---
 
 ## 5. 🚧 To do / In progress
 
 The live work queue. Work top-down by priority: **P0 → P1 → P2 → P3**.
-
-### P0 — Critical tasks
-
-#### [RECOG-1] Align recognition thresholds with BR01 (0.65)
-- **Priority:** P0
-- **Status:** todo
-- **Why it exists:** BR01 requires a minimum recognition similarity of **0.65** for a valid punch. Confirmed in code: `FacialService.validar_rosto` still defaults `limiar=0.6`; `BaterPontoUseCase` calls it **without** passing a threshold (so it silently uses 0.6); `BatidaPontoEmbarcadoUseCase` still uses a literal `0.4`. Both accept faces that should be rejected, undermining anti-fraud guarantees. **This is the highest-priority open gap.**
-- **What must be done:**
-  - Define a single canonical threshold constant (0.65) in one place (config or facial service) so it cannot drift between flows.
-  - Update `BaterPontoUseCase` and `BatidaPontoEmbarcadoUseCase` to use the canonical 0.65 threshold.
-  - Change `FacialService.validar_rosto` default to the canonical value (or require it to be passed explicitly) so no caller silently uses a weaker value.
-- **Relevant files / areas:**
-  - `application/services/facial_service.py` (`validar_rosto` default 0.6)
-  - `application/use_cases/ponto/batida_ponto_usecase.py` (calls `validar_rosto` with no threshold)
-  - `application/use_cases/ponto/batida_ponto_embarcado_usecase.py` (literal `0.4`)
-- **Done when:**
-  - Both punch flows reject matches with similarity < 0.65.
-  - The threshold is defined in exactly one place and reused by all flows.
-  - No remaining literal `0.6` or `0.4` recognition thresholds exist in punch logic.
 
 ### P1 — Core product completion tasks
 

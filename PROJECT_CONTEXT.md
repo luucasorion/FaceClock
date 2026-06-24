@@ -768,16 +768,17 @@ FaceClock/
 - `FacialService.validar_rosto(e1, e2, limiar=0.6)` returns `True` if similarity >= limiar
 
 ### Thresholds in use
-- `BaterPontoUseCase` calls `validar_rosto()` with default threshold `0.6`
-- `BatidaPontoEmbarcadoUseCase` uses `0.4` as minimum similarity for blind recognition
-- BR01 requires `0.65` — neither threshold meets this requirement
+- A single canonical constant `LIMIAR_RECONHECIMENTO = 0.65` (BR01) is defined in `application/services/facial_service.py` (RECOG-1)
+- `BaterPontoUseCase` calls `validar_rosto()` with no threshold, inheriting the `0.65` default
+- `BatidaPontoEmbarcadoUseCase` imports the constant and rejects similarity `< 0.65`
+- BR01 (`0.65`) is now met by both flows
 
 ### Service location
 - `application/services/facial_service.py` — `FacialService` class
 - DeepFace is an external dependency; the service should live in `infra/` per clean architecture intent
 
 ## Status
-- partially implemented (core service works; thresholds deviate from BR01; service is in the wrong layer)
+- partially implemented (core service works; thresholds aligned to BR01 = 0.65 via `LIMIAR_RECONHECIMENTO` — RECOG-1; service is still in the wrong layer — ARCH-1)
 
 ## Evidence
 - `application/services/facial_service.py`
@@ -837,15 +838,18 @@ FaceClock/
 - Evidence: `application/use_cases/ponto/batida_ponto_usecase.py`
 
 ### Face validation before punch (login-based)
-- `BaterPontoUseCase` raises HTTP 401 if `validar_rosto()` returns False (threshold 0.6)
+- `BaterPontoUseCase` raises HTTP 401 if `validar_rosto()` returns False (threshold 0.65, BR01 — RECOG-1)
 - Evidence: `application/use_cases/ponto/batida_ponto_usecase.py`
 
 ### Blind recognition threshold (embarcado)
-- `BatidaPontoEmbarcadoUseCase` raises HTTP 401 if best similarity < 0.4
+- `BatidaPontoEmbarcadoUseCase` raises HTTP 401 if best similarity < 0.65 (BR01 — RECOG-1)
 - Evidence: `application/use_cases/ponto/batida_ponto_embarcado_usecase.py`
 
+### Minimum recognition threshold (BR01)
+- Both punch flows enforce a 0.65 minimum via the single `LIMIAR_RECONHECIMENTO` constant
+- Evidence: `application/services/facial_service.py`
+
 ## Rules NOT yet implemented
-- **BR01**: minimum threshold of 0.65 — current thresholds are 0.6 and 0.4
 - **BR02**: 5-minute interval between punches — not implemented anywhere
 - **BR03**: manager-only access for reports and editing — no role field, no middleware
 - **BR04 / BR05**: overtime calculation and flagging — not implemented
