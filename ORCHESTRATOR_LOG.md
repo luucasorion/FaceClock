@@ -132,6 +132,15 @@ for AUTHZ-2, AUTH-4 claims shape, and the frontend manager flow.
 - **Deferrals carried in code comments:** manager routing →/home for now; facial:[] clears w/ BIO-1; clean company-not-found w/ RECOG-2.
 - **Next:** FE-PUNCH-1 (kiosk embarcado punch) then FE-PUNCH-2 (authenticated punch home).
 
+### Cycle 15 — FE-PUNCH-1/2 (P0) — ✅ DONE (batched: 2 punch screens)
+- **Implementation:** KioskPage (public embarcado punch) + PunchHomePage (auth punch + today's punches + profile button) + shared `lib/geo.js`; wired into App.
+- **Caught + fixed a real cross-task bug:** the agent mapped any 400 → "enroll your face", but PUNCH-3 (earlier this run) made `/ponto/` return 400 for invalid-image too. Refined PunchHomePage to disambiguate on the "biometria" detail string → not-enrolled prompt vs. invalid-image retry.
+- **Gitignore fix:** repo-root `.gitignore` has `lib/` (Python); added a negation in `frontend/.gitignore` so `frontend/src/lib/` is tracked (also needed by FE-SHARED-6's csv.js).
+- **Verify:** `npm run build` green (JS ~186 kB, CSS 8.4 kB — both pages compiled).
+- **Commit:** `5b0e01d`.
+- **All P0 frontend tasks complete.** Next: P1 — FE-SHARED-5 (ProfileForm), FE-SHARED-6 (CSV helper), FE-ENROLL-1, FE-PROFILE-1, FE-MANAGER-1/2 (FE-MANAGER unblocked by AUTHZ-1, but not exercisable e2e until a manager is seeded).
+
+
 
 
 
