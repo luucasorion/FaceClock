@@ -217,6 +217,11 @@ User confirmed: keep **MUI** and implement all queued tasks. Incoming user task 
 - KioskPage rewritten as full-bleed MUI totem (idle+live clock, single CTA, 3-2-1 auto-capture via default-off CameraCapture prop, big countdown result reusing mapPunchError). Other CameraCapture consumers unaffected. Build green (JS 391 kB). Commit `49aed0d`.
 - **All P1 enhancement tasks done.** Next (P2): FE-UI-1 (migrate collaborator/auth screens to MUI), FE-UI-2 (manager screens to MUI tables/dialogs); then backend P2 (BIO-1, RECOG-2, API-1, AUTHZ-4) and P3 (ARCH-1..4).
 
+### Cycle 25 — FE-UI-1 (P2 enhancement) — ✅ DONE
+- 6 collaborator/auth pages + 3 shared primitives + ProfileForm migrated to MUI (prop APIs preserved → no manager regression). Presentation-only; flows/FE-PROFILE-2/punch-400 intact. Build green (JS 460 kB, CSS 10.6 kB). Commit `c109e2e`.
+- **Next:** FE-UI-2 (manager screens → MUI Table/DataGrid + Dialog).
+
+
 
 
 

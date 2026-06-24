@@ -76,8 +76,8 @@ The frontend scaffold now exists (`frontend/`, React+Vite); the screens are bein
 | ✅ Done (P1) | FE-SHARED-5, FE-SHARED-6, FE-ENROLL-1, FE-PROFILE-1, FE-MANAGER-1, FE-MANAGER-2 |
 | ✅ Done (P2) | FE-PUNCH-3, FE-SHARED-7 |
 | ✅ Done (Fixes) | FE-PROFILE-2 |
-| ✅ Done (Enh) | FE-SHARED-8, FE-SHARED-9, FE-PUNCH-4 |
-| ⬜ Enhancements | FE-UI-1, FE-UI-2 |
+| ✅ Done (Enh) | FE-SHARED-8, FE-SHARED-9, FE-PUNCH-4, FE-UI-1 |
+| ⬜ Enhancements | FE-UI-2 |
 
 **MVP frontend complete (2026-06-23).** Verified via `npm run build` (Vite) on each cycle. Remaining caveats: (a) ~~manager screens need a seeded manager~~ — **resolved by AUTHZ-3** (2026-06-24): `POST /empresa` now bootstraps a manager (`login`=CNPJ, `senha`=company name), so the manager flow is exercisable end-to-end (predictable credential to be hardened by AUTHZ-4); (b) `facial: []` at registration clears when BIO-1 lands; (c) clean "company not found" message arrives with RECOG-2; (d) the build gate proves compilation, not runtime/visual behavior (no headless browser run this pass).
 
@@ -536,7 +536,7 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
 
 #### [FE-UI-1] Migrate collaborator/auth screens to MUI components
 - **Priority:** P2
-- **Status:** todo — depends on FE-SHARED-8/9
+- **Status:** done — 2026-06-24. Login, employee/company registration, enroll, punch home, profile rebuilt with MUI (`TextField`/`Button`/`Card`/`Stack`/`Typography`/`Alert`/`List`/`Table`). Shared `Spinner`→`CircularProgress`, `ErrorBanner`→`Alert`, `EmptyState`→styled Box, and `ProfileForm`→MUI fields (`Switch` for booleans) — all kept their prop APIs so the manager `EmployeeFilePage` is not regressed. Presentation-only: flows/endpoints/nav, FE-PROFILE-2 login-change re-login, and the punch 400 disambiguation unchanged; CameraCapture untouched. **Verified:** `npm run build` green (CSS 16.5→10.6 kB as hand-rolled styles dropped). Orphaned `ProfileForm.css`/`PunchHomePage.css`/`ProfilePage.css` left in place (unused, harmless); `forms.css`/`ui.css` still used by the manager pages (FE-UI-2).
 - **Why it exists:** After the MUI foundation and layout land, the collaborator-facing screens should use MUI components for a consistent, polished look instead of the hand-rolled `forms.css`/page CSS.
 - **What must be done:**
   - Migrate MenuPage, LoginPage, RegistroColaboradorPage, RegistroEmpresaPage, EnrollPage, PunchHomePage, ProfilePage to MUI: `TextField`, `Button`, `Card`, `Stack`, `Typography`, `Alert` (for errors), `Dialog`, etc. Replace the shared loading/empty/error primitives with MUI equivalents (`CircularProgress`, `Alert`) or restyle them on MUI.
