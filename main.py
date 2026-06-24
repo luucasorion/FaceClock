@@ -3,10 +3,14 @@ from dotenv import load_dotenv
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from presentation.controller.colaborador_controller import router as colaboradorRouter
+from presentation.controller.colaborador_controller import read_router as colaboradorReadRouter
 from presentation.controller.login_controller import router as loginRouter
 from presentation.controller.batida_ponto_controller import router as pontoRouter
+from presentation.controller.empresa_controller import router as empresaRouter
+from presentation.controller.relatorio_controller import router as relatorioRouter
 
 from infra.db.base import Base
 from infra.db.database import engine
@@ -28,15 +32,26 @@ app.add_middleware(
 )
 
 app.include_router(colaboradorRouter)
+app.include_router(colaboradorReadRouter)
 app.include_router(loginRouter)
-app.include_router(colaboradorRouter )
-app.include_router(loginRouter )
 app.include_router(pontoRouter)
+app.include_router(empresaRouter)
+app.include_router(relatorioRouter)
 
 
 @app.on_event("startup")
 def startup():
     Base.metadata.create_all(bind=engine)
+
+    # lightweight migration — create_all does not alter existing tables
+    with engine.connect() as conn:
+        columns = conn.execute(text("PRAGMA table_info(colaboradores)")).fetchall()
+        column_names = [row[1] for row in columns]
+        if "gerente" not in column_names:
+            conn.execute(
+                text("ALTER TABLE colaboradores ADD COLUMN gerente BOOLEAN NOT NULL DEFAULT 0")
+            )
+            conn.commit()
 
 
 if __name__ == "__main__":

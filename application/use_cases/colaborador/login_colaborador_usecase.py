@@ -46,4 +46,10 @@ class LoginColaboradorUseCase:
                 status_code=status.HTTP_403_FORBIDDEN
             )
 
-        return colaborador
+        return {
+            "cpf": colaborador.cpf,
+            "nome": colaborador.nome,
+            "login": colaborador.login,
+            "empresa_id": colaborador.empresa_id,
+            "status": colaborador.status,
+        }

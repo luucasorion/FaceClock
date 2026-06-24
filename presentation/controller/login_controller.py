@@ -1,23 +1,22 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from infra.db.database import SessionLocal
+from infra.db.database import get_db
+from infra.repositories.colaborador_repository import ColaboradorRepository
+from infra.security.token_service import TokenService
 
-from infra.repositories.colaborador_repository import (
-    ColaboradorRepository
-)
-
-from application.useCases.colaborador.login_colaborador_usecase import (
+from application.use_cases.colaborador.login_colaborador_usecase import (
     LoginColaboradorUseCase
 )
 
-from application.services.hash_service import (
-    HashService
-)
+from application.services.hash_service import HashService
 
 from presentation.schema.requests.login_colaborador_request import (
     LoginColaboradorRequest
 )
+
+from presentation.schema.responses.colaborador_response import ColaboradorResponse
+from presentation.schema.responses.auth_response import AuthTokenResponse
 
 
 router = APIRouter(
@@ -26,25 +25,14 @@ router = APIRouter(
 )
 
 
-def get_db():
-
-    db = SessionLocal()
-
-    try:
-        yield db
-
-    finally:
-        db.close()
-
-
-@router.post("/login")
+# PUBLIC — token issuance entry point
+@router.post("/login", response_model=AuthTokenResponse)
 def login_colaborador(
     body: LoginColaboradorRequest,
     db: Session = Depends(get_db)
 ):
 
     repository = ColaboradorRepository(db)
-
     hash_service = HashService()
 
     usecase = LoginColaboradorUseCase(
@@ -52,9 +40,19 @@ def login_colaborador(
         hash_service
     )
 
-    colaborador = usecase.execute(
+    result = usecase.execute(
         login=body.login,
         senha=body.senha
     )
 
-    return colaborador
+    token_service = TokenService()
+    token = token_service.gerar_token({
+        "sub": result["login"],
+        "cpf": result["cpf"],
+        "empresa_id": result["empresa_id"],
+    })
+
+    return AuthTokenResponse(
+        access_token=token,
+        colaborador=ColaboradorResponse(**result),
+    )

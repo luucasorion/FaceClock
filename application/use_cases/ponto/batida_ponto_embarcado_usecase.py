@@ -1,6 +1,9 @@
+from datetime import datetime
+
 from fastapi import HTTPException, status
 
 from domains.models.batida_ponto import BatidaPonto
+from application.use_cases.ponto.batida_ponto_usecase import INTERVALO_MINIMO
 
 
 class BatidaPontoEmbarcadoUseCase:
@@ -60,16 +63,24 @@ class BatidaPontoEmbarcadoUseCase:
                 detail="Nenhum colaborador compatível encontrado"
             )
 
-        print(
-            f"Melhor match: "
-            f"{melhor_colaborador.nome} "
-            f"({melhor_similaridade:.4f})"
-        )
-
         if melhor_similaridade < 0.4:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Pessoa não reconhecida"
+            )
+
+        ultima = (
+            self.batida_repository
+            .buscar_ultima_por_colaborador(melhor_colaborador.cpf)
+        )
+
+        if (
+            ultima is not None
+            and datetime.utcnow() - ultima.batida < INTERVALO_MINIMO
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Intervalo mínimo entre batidas é de 5 minutos"
             )
 
         batida = BatidaPonto(

@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Session
 
-from domains.models import colaborador
 from domains.models.colaborador import Colaborador
 
 
@@ -36,6 +35,15 @@ class ColaboradorRepository:
     def listar(self):
 
         return self.db.query(Colaborador).all()
+
+    def listar_por_empresa(self, empresa_id: str):
+
+        return (
+            self.db.query(Colaborador)
+            .filter(Colaborador.empresa_id == empresa_id)
+            .filter(Colaborador.status == True)
+            .all()
+        )
     
     def atualizar(self, colaborador: Colaborador):
 
@@ -52,3 +60,11 @@ class ColaboradorRepository:
         self.db.refresh(colaborador)
 
         return colaborador
+
+    def contar_gerentes_ativos(self, empresa_id: str) -> int:
+
+        return self.db.query(Colaborador).filter(
+            Colaborador.empresa_id == empresa_id,
+            Colaborador.gerente == True,
+            Colaborador.status == True,
+        ).count()

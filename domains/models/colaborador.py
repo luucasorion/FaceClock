@@ -40,6 +40,12 @@ class Colaborador(Base):
         default=True
     )
 
+    gerente = Column(
+        Boolean,
+        default=False,
+        nullable=False
+    )
+
     facial = Column(
         JSON,
         nullable=True

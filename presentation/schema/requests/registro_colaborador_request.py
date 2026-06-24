@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class RegistroColaboradorRequest(BaseModel):
@@ -8,3 +8,4 @@ class RegistroColaboradorRequest(BaseModel):
     senha: str
     empresa_id: str
     facial: list[float]
+    gerente: bool = False

@@ -5,14 +5,15 @@ from fastapi import (
     Form,
     UploadFile
 )
-
+from sqlalchemy.orm import Session
 from infra.db.database import get_db
 from infra.repositories.colaborador_repository import ColaboradorRepository
 from infra.repositories.batida_ponto_repository import BatidaPontoRepository
 
 from application.services.facial_service import FacialService
-from application.useCases.ponto.batida_ponto_usecase import BaterPontoUseCase
-from application.useCases.ponto.batida_ponto_embarcado_usecase import BatidaPontoEmbarcadoUseCase
+from application.use_cases.ponto.batida_ponto_usecase import BaterPontoUseCase
+from application.use_cases.ponto.batida_ponto_embarcado_usecase import BatidaPontoEmbarcadoUseCase
+from presentation.dependencies.auth import get_current_colaborador
 
 
 router = APIRouter(
@@ -23,10 +24,10 @@ router = APIRouter(
 
 @router.post("/")
 async def bater_ponto(
-    login: str = Form(...),
     geo: str = Form(...),
     imagem: UploadFile = File(...),
-    db=Depends(get_db)
+    db: Session = Depends(get_db),
+    current_colaborador: dict = Depends(get_current_colaborador)
 ):
 
     colaborador_repository = ColaboradorRepository(db)
@@ -44,28 +45,23 @@ async def bater_ponto(
     imagem_bytes = await imagem.read()
 
     return usecase.execute(
-        login=login,
+        login=current_colaborador["sub"],
         imagem=imagem_bytes,
         geo=geo
     )
 
+# PUBLIC — kiosk endpoint; identity established via facial recognition, not a bearer token
 @router.post("/embarcado")
 async def bater_ponto_embarcado(
     imagem: UploadFile = File(...),
     geo: str = Form(...),
-    db=Depends(get_db)
+    db: Session = Depends(get_db)
 ):
 
     imagem_bytes = await imagem.read()
 
-    colaborador_repository = (
-        ColaboradorRepository(db)
-    )
-
-    batida_repository = (
-        BatidaPontoRepository(db)
-    )
-
+    colaborador_repository = ColaboradorRepository(db)
+    batida_repository = BatidaPontoRepository(db)
     facial_service = FacialService()
 
     usecase = BatidaPontoEmbarcadoUseCase(

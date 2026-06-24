@@ -21,7 +21,8 @@ class RegistrarColaboradorUseCase:
         login: str,
         senha: str,
         empresa_id: str,
-        facial: list[float]
+        facial: list[float],
+        gerente: bool = False
     ):
 
         colaborador_existente = (
@@ -55,7 +56,8 @@ class RegistrarColaboradorUseCase:
             senha=senha_hash,
             empresa_id=empresa_id,
             status=True,
-            facial=facial
+            facial=facial,
+            gerente=gerente
         )
 
         return self.colaborador_repository.criar(colaborador)

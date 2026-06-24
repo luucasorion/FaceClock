@@ -33,7 +33,7 @@ class FacialService:
         result = DeepFace.represent(
             img_path=imagem,
             model_name=self.model_name,
-            enforce_detection=True
+            enforce_detection=False
         )
 
         if not result:
@@ -46,7 +46,7 @@ class FacialService:
     def calcular_similaridade(
         self,
         embedding_1: list[float],
-        embedding_2: list[float]
+        embedding_2: list[float],
     ) -> float:
 
         distancia = cosine(
@@ -62,7 +62,7 @@ class FacialService:
         self,
         embedding_1: list[float],
         embedding_2: list[float],
-        limiar: float = 0.4
+        limiar: float = 0.6
     ) -> bool:
 
         similaridade = self.calcular_similaridade(
