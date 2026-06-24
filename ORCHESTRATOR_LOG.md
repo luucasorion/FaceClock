@@ -71,6 +71,16 @@ for AUTHZ-2, AUTH-4 claims shape, and the frontend manager flow.
 - **Follow-ups (non-blocking):** login change doesn't reissue JWT; optional schema validation hardening (out of MVP scope).
 - **Next:** REPORT-5 (P2) — composite DB indexes + pagination on punch history.
 
+### Cycle 7 — REPORT-5 (P2, `TASKS.md`) — ✅ DONE
+- **Selected:** REPORT-5 (indexes + pagination).
+- **Architecture:** flagged the dominant risk — capped pagination defaults would silently truncate the company-report overtime math. Decided OPT-IN pagination (`None` defaults, conditional offset/limit); default 50 lives at the endpoint, not the repo. New endpoint to consume the envelope + `contar_por_colaborador` for `total`.
+- **Implementation:** 5 files changed + 2 new schemas; composite + empresa_id indexes; idempotent `CREATE INDEX IF NOT EXISTS` in main.py (mirrors gerente migration); new `GET /relatorio/historico/paginado`. +1 hardening: bounded `page>=1`, `page_size in [1,200]` (serves the payload-bounding goal + fixes negative-offset).
+- **Verify:** smoke green 22→23; no caller passes page args (full-range/hours math preserved — confirmed by grep + qa); qa PASS (table names match `__tablename__`, total from count query not len, self-scoped, no embedding leak).
+- **Commit:** `921d953`.
+- **Task files:** REPORT-5 → §4 done; §3 snapshot updated.
+- **Next:** PUNCH-3 (P2) — punch robustness (live `None`-guard TypeError on login punch when unenrolled; FacialService error translation; upload validation).
+
+
 
 
 

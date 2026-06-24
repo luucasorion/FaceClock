@@ -54,9 +54,9 @@ Based on the real code review of 2026-06-23 (re-audited against code on 2026-06-
 
 | Group | Tasks |
 |---|---|
-| ✅ Done | AUTH-1, AUTH-2, AUTH-3, BIO-3, PUNCH-1, EMPRESA-1, EMPRESA-2, REPORT-1, REPORT-2, REPORT-3, REPORT-4, COLAB-1, COLAB-2, PUNCH-2, BIO-2, RECOG-1, AUTHZ-1, AUTHZ-2, AUTH-4, REPORT-6, COLAB-3 |
+| ✅ Done | AUTH-1, AUTH-2, AUTH-3, BIO-3, PUNCH-1, EMPRESA-1, EMPRESA-2, REPORT-1, REPORT-2, REPORT-3, REPORT-4, COLAB-1, COLAB-2, PUNCH-2, BIO-2, RECOG-1, AUTHZ-1, AUTHZ-2, AUTH-4, REPORT-6, COLAB-3, REPORT-5 |
 | 🚧 In progress | API-1 |
-| ⬜ To do | REPORT-5, PUNCH-3, BIO-1, RECOG-2, ARCH-1, ARCH-2, ARCH-3, ARCH-4 |
+| ⬜ To do | PUNCH-3, BIO-1, RECOG-2, ARCH-1, ARCH-2, ARCH-3, ARCH-4 |
 
 > Note (2026-06-23 re-audit): `application/use_cases/ponto/get_ponto_usecase.py` no longer exists — its history-grouping logic was relocated to `application/use_cases/relatorio/` (`_agrupamento.py` + the report use cases). Task file-references were corrected accordingly.
 
@@ -90,7 +90,6 @@ Based on the real code review of 2026-06-23 (re-audited against code on 2026-06-
 - **Domain model**: no dedicated PunchProfile entity — `Empresa.limite_hora` is the only hour limit.
 
 ### Still missing
-- Composite DB indexes + pagination on punch history queries (REPORT-5).
 - Punch robustness: a live `TypeError` when an unenrolled collaborator punches via the login flow (`None`-guard on `colaborador.facial`), plus FacialService error translation and upload validation (PUNCH-3).
 - Single hardened enrollment path — registration still accepts a client-supplied `facial` list alongside the dedicated server-side endpoint (BIO-1).
 - Company existence/active validation at registration (RECOG-2).
@@ -500,26 +499,24 @@ The live work queue. Work top-down by priority: **P0 → P1 → P2 → P3**.
 
 #### [REPORT-5] Add composite DB indexes and pagination to punch history queries
 - **Priority:** P2
-- **Status:** todo
-- **Why it exists:** `BatidaPontoRepository` time-range queries will be slow without indexes as data grows, and unbounded history queries will produce oversized payloads. Pagination and indexing must be designed together.
-- **What must be done:**
-  - Add a composite index on `BatidaPonto(colaborador_id, batida)` to `domains/models/batida_ponto.py` via `__table_args__`.
-  - Add an index on `Colaborador.empresa_id` to support the manager join (`listar_por_empresa`).
-  - Extend `listar_por_colaborador` and `listar_por_empresa` to accept `page: int` and `page_size: int` (default 50); apply `.offset().limit()` internally.
-  - Both `data_inicio` and `data_fim` must be required (no open-ended queries).
-  - Create `presentation/schema/responses/historico_response.py` with a paginated envelope: `{ total, page, page_size, items: list[BatidaPontoResponse] }`.
-  - Create `presentation/schema/responses/batida_ponto_response.py` with safe punch fields (no raw embedding vectors).
+- **Status:** done
+- **Why it existed:** Time-range queries get slow without indexes as data grows, and unbounded history queries produce oversized payloads.
+- **What was done (verified 2026-06-23):**
+  - Composite index `ix_batida_colaborador_batida` on `BatidaPonto(colaborador_id, batida)` via `__table_args__`; `index=True` on `Colaborador.empresa_id`. Because `create_all` only indexes new tables, idempotent `CREATE INDEX IF NOT EXISTS` statements were added at startup in `main.py` (mirroring the `gerente` migration) using the real table names `batidas_ponto`/`colaboradores`.
+  - `listar_por_colaborador` and `listar_por_empresa` take **optional** `page`/`page_size` (`None` default) and apply `.offset().limit()` ONLY when both are set — pagination is **opt-in**, so the grouped `/historico`, `/dia`, and the company-report overtime math (index-based pairing over the full day) are unchanged. Added `contar_por_colaborador` for full-range count. `data_inicio`/`data_fim` stay required.
+  - New `BatidaPontoResponse` (safe fields `id`/`colaborador_id`/`geo`/`batida`; no embedding) and `HistoricoResponse` envelope `{ total, page, page_size, items }`.
+  - New self-scoped `GET /relatorio/historico/paginado` consuming the envelope (`total` from the count query; `page >= 1`, `page_size` in `[1,200]`).
 - **Relevant files / areas:**
-  - `domains/models/batida_ponto.py` (add `__table_args__` composite index)
-  - `domains/models/colaborador.py` (add `empresa_id` index)
-  - `infra/repositories/batida_ponto_repository.py` (add pagination)
-  - new: `presentation/schema/responses/historico_response.py`
-  - new: `presentation/schema/responses/batida_ponto_response.py`
+  - `domains/models/batida_ponto.py`, `domains/models/colaborador.py`, `main.py`
+  - `infra/repositories/batida_ponto_repository.py`
+  - `presentation/controller/relatorio_controller.py`
+  - new: `presentation/schema/responses/historico_response.py`, `batida_ponto_response.py`
 - **Done when:**
-  - Composite index exists on `(colaborador_id, batida)` and index on `empresa_id`.
-  - Both repository query methods accept page/page_size and apply correct offset/limit.
-  - `data_inicio` and `data_fim` are required.
-  - History response DTOs use the paginated envelope and never include `facial` embedding vectors.
+  - ✅ Composite index on `(colaborador_id, batida)` and index on `empresa_id` (live on new + existing DBs).
+  - ✅ Both query methods accept page/page_size and apply correct offset/limit (opt-in).
+  - ✅ `data_inicio`/`data_fim` required.
+  - ✅ History response DTOs use the paginated envelope; never include embedding vectors.
+- **Note:** the paginated endpoint returns raw batidas without `tipo` (by design — task excludes it; `tipo` lives on the grouped `/historico`).
 
 #### [PUNCH-3] Robust error handling and edge cases in punch flows
 - **Priority:** P2
