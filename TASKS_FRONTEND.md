@@ -72,8 +72,8 @@ The frontend scaffold now exists (`frontend/`, React+Vite); the screens are bein
 |---|---|
 | ✅ Done | FE-SHARED-1, FE-SHARED-2, FE-SHARED-3, FE-SHARED-4, FE-MENU-1, FE-AUTH-1, FE-AUTH-2, FE-AUTH-3, FE-PUNCH-1, FE-PUNCH-2 |
 | ⬜ P0 | — (all done) |
-| ✅ Done (P1) | FE-SHARED-5, FE-SHARED-6 |
-| ⬜ P1 | FE-ENROLL-1, FE-PROFILE-1, FE-MANAGER-1, FE-MANAGER-2 |
+| ✅ Done (P1) | FE-SHARED-5, FE-SHARED-6, FE-ENROLL-1, FE-PROFILE-1 |
+| ⬜ P1 | FE-MANAGER-1, FE-MANAGER-2 |
 | ⬜ P2 | FE-PUNCH-3, FE-SHARED-7 |
 
 **Backend dependencies (in `TASKS.md`) that block frontend tasks**
@@ -338,7 +338,7 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
 
 #### [FE-ENROLL-1] Biometric enrollment flow
 - **Priority:** P1
-- **Status:** todo
+- **Status:** done — 2026-06-23. `src/pages/EnrollPage.jsx` (RequireAuth): explain step → `CameraCapture` → `colaborador.cadastrarBiometria(token, blob)` → `/home`; clear no-face/upload errors with retry; image discarded after upload (CameraCapture). Reachable from post-registration and the punch-home not-enrolled prompt. Verified `npm run build` green.
 - **Why it exists:** Punching as a token holder (`/ponto/`) requires a stored embedding; RF13 (enroll on first punch) is out of MVP scope, so enrollment is an explicit self-service step via `POST /colaborador/registro/cadastrar-biometria`. The client captures and uploads; the server extracts the embedding.
 - **What must be done:**
   - `frontend/src/pages/EnrollPage.jsx` behind `RequireAuth`: explain the step, open `CameraCapture` (oval guide), capture, submit the `Blob` to `api/colaborador.cadastrarBiometria(blob)`.
@@ -354,7 +354,7 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
 
 #### [FE-PROFILE-1] Employee profile + own punch history/export
 - **Priority:** P1
-- **Status:** todo
+- **Status:** done — 2026-06-23. `src/pages/ProfilePage.jsx` (+css, RequireAuth): profile via `ProfileForm` (`editableFields nome/login/senha`) → Save wired to `colaborador.editarPerfil` = `PUT /colaborador/me` (COLAB-3 done, real — never the manager endpoint) + `setSession` refresh; no self-deactivate. Punch-history search (`data_inicio`/`data_fim`) → `relatorio.historico`, flattened defensively (dias/batidas + alias keys) and **client-side paginated** (20/page); Export CSV via FE-SHARED-6 over the full flattened list. Verified `npm run build` green. (Server pagination remains REPORT-5's `/historico/paginado`; this page paginates client-side per the task.)
 - **Why it exists:** RF09 — collaborators view (and edit) their own profile and consult their punch history. Combines the shared `ProfileForm` with a self-history search/export section.
 - **What must be done:**
   - `frontend/src/pages/ProfilePage.jsx` behind `RequireAuth`.

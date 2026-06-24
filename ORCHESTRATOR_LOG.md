@@ -144,6 +144,11 @@ for AUTHZ-2, AUTH-4 claims shape, and the frontend manager flow.
 - ProfileForm.jsx (editableFields-gated edit, changed-fields-only onSave patch) + lib/csv.js (punchesToCsv RFC-4180 + downloadCsv). Neither imported by entry yet → esbuild JSX check + node --check + build green. Commit `f3f6350`.
 - **Next:** FE-ENROLL-1 (biometric enrollment via CameraCapture → cadastrarBiometria).
 
+### Cycle 17 — FE-ENROLL-1 + FE-PROFILE-1 (P1) — ✅ DONE (batched: employee self-service)
+- EnrollPage (CameraCapture→cadastrarBiometria→/home) + ProfilePage (ProfileForm self-edit wired to PUT /me — COLAB-3 real; history search→flatten→client-paginate; CSV export). Wired into App. Build green (JS 196/CSS 11 kB — ProfileForm + csv now bundled). Commit `48bae39`.
+- **Next:** FE-MANAGER-1 (My Employees + employee file + ConfirmModal) and FE-MANAGER-2 (company report). Unblocked by AUTHZ-1; not e2e-exercisable until a manager is seeded (bootstrap caveat).
+
+
 
 
 
