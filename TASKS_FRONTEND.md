@@ -78,7 +78,7 @@ The frontend scaffold now exists (`frontend/`, React+Vite); the screens are bein
 | ✅ Done (Fixes) | FE-PROFILE-2 |
 | ⬜ Enhancements | FE-SHARED-8, FE-SHARED-9, FE-PUNCH-4, FE-UI-1, FE-UI-2 |
 
-**MVP frontend complete (2026-06-23).** Verified via `npm run build` (Vite) on each cycle. Remaining caveats: (a) manager screens need a seeded manager to exercise end-to-end (backend bootstrap gap); (b) `facial: []` at registration clears when BIO-1 lands; (c) clean "company not found" message arrives with RECOG-2; (d) the build gate proves compilation, not runtime/visual behavior (no headless browser run this pass).
+**MVP frontend complete (2026-06-23).** Verified via `npm run build` (Vite) on each cycle. Remaining caveats: (a) ~~manager screens need a seeded manager~~ — **resolved by AUTHZ-3** (2026-06-24): `POST /empresa` now bootstraps a manager (`login`=CNPJ, `senha`=company name), so the manager flow is exercisable end-to-end (predictable credential to be hardened by AUTHZ-4); (b) `facial: []` at registration clears when BIO-1 lands; (c) clean "company not found" message arrives with RECOG-2; (d) the build gate proves compilation, not runtime/visual behavior (no headless browser run this pass).
 
 **Enhancement backlog (added 2026-06-24).** The MVP UI is functional but hand-rolled and constrained to a single 480px mobile column on every screen (cramped on desktop, especially the manager tables), and the kiosk flow is awkward. The `FE-SHARED-8/9`, `FE-PUNCH-4`, and `FE-UI-1/2` tasks below adopt **MUI (Material UI)** to make the app prettier and properly desktop-friendly. Do them in order: FE-SHARED-8 (MUI base) first — it blocks the rest.
 

@@ -54,9 +54,9 @@ Based on the real code review of 2026-06-23 (re-audited against code on 2026-06-
 
 | Group | Tasks |
 |---|---|
-| ✅ Done | AUTH-1, AUTH-2, AUTH-3, BIO-3, PUNCH-1, EMPRESA-1, EMPRESA-2, REPORT-1, REPORT-2, REPORT-3, REPORT-4, COLAB-1, COLAB-2, PUNCH-2, BIO-2, RECOG-1, AUTHZ-1, AUTHZ-2, AUTH-4, REPORT-6, COLAB-3, REPORT-5, PUNCH-3 |
+| ✅ Done | AUTH-1, AUTH-2, AUTH-3, BIO-3, PUNCH-1, EMPRESA-1, EMPRESA-2, REPORT-1, REPORT-2, REPORT-3, REPORT-4, COLAB-1, COLAB-2, PUNCH-2, BIO-2, RECOG-1, AUTHZ-1, AUTHZ-2, AUTH-4, REPORT-6, COLAB-3, REPORT-5, PUNCH-3, AUTHZ-3 |
 | 🚧 In progress | API-1 |
-| ⬜ To do | AUTHZ-3, BIO-1, RECOG-2, ARCH-1, ARCH-2, ARCH-3, ARCH-4 |
+| ⬜ To do | BIO-1, RECOG-2, AUTHZ-4, ARCH-1, ARCH-2, ARCH-3, ARCH-4 |
 
 > Note (2026-06-23 re-audit): `application/use_cases/ponto/get_ponto_usecase.py` no longer exists — its history-grouping logic was relocated to `application/use_cases/relatorio/` (`_agrupamento.py` + the report use cases). Task file-references were corrected accordingly.
 
@@ -84,7 +84,7 @@ Based on the real code review of 2026-06-23 (re-audited against code on 2026-06-
 - SQLite + auto schema creation + lightweight `gerente` migration at startup — `infra/db/database.py`, `main.py`.
 
 ### Partially implemented
-- **Authorization (AUTHZ)**: `gerente` is persisted and now surfaced in the JWT claims (login + registration tokens, identical shape) and in `ColaboradorResponse` (AUTHZ-1 done); `require_manager` is built and applied broadly (empresa edit/deactivate, collaborator edit/deactivate, company reports); BR06 company scoping is enforced on collaborator edit/deactivate, collaborator listing, and reports. Controlled promotion is intentionally manager-only via `PUT /colaborador/{cpf}`; public registration stays `gerente=False`. **Remaining (AUTHZ-2)**: `require_manager` still re-queries the DB instead of reading the new `gerente` claim. **Known follow-on**: no API path creates the first manager (bootstrap chicken-and-egg) — resolve via seed/CLI, not by reopening public registration.
+- **Authorization (AUTHZ)**: `gerente` is persisted and now surfaced in the JWT claims (login + registration tokens, identical shape) and in `ColaboradorResponse` (AUTHZ-1 done); `require_manager` is built and applied broadly (empresa edit/deactivate, collaborator edit/deactivate, company reports); BR06 company scoping is enforced on collaborator edit/deactivate, collaborator listing, and reports. Controlled promotion is intentionally manager-only via `PUT /colaborador/{cpf}`; public registration stays `gerente=False`. The first-manager **bootstrap is now solved (AUTHZ-3)**: `POST /empresa` atomically creates a CNPJ-derived placeholder manager — the only remaining hardening is AUTHZ-4 (force password change, since that bootstrap credential is predictable).
 - **Punch thresholds**: aligned to BR01 (0.65) via a single `LIMIAR_RECONHECIMENTO` constant in `facial_service.py`, reused by the login punch (`validar_rosto` default) and the embarcado punch cutoff (RECOG-1 done).
 - **Response shaping (API-1)**: collaborator and empresa endpoints use response DTOs, but punch endpoints still return ad-hoc dicts and login returns a hand-built dict.
 - **Domain model**: no dedicated PunchProfile entity — `Empresa.limite_hora` is the only hour limit.
@@ -525,6 +525,26 @@ Completed tasks, grouped by priority. Retained for traceability and acceptance e
   - ✅ Basic upload validation happens at the controller.
 - **Follow-ups (non-blocking):** size cap runs after the body is read into memory (proxy/Content-Length pre-check is the real defense); content-type is client-asserted but degrades gracefully via the `ValueError` translation; enrollment endpoint has the same gaps (BIO-1); use-case `HTTPException`s remain pending ARCH-2.
 
+### [AUTHZ-3] Bootstrap the first manager atomically when a company is created
+- **Priority:** P1
+- **Status:** done
+- **Why it existed:** Manager bootstrap chicken-and-egg (flagged in AUTHZ-1/AUTHZ-2 and EMPRESA-2): public registration forces `gerente=False` and the only promotion path needs an *existing* manager, so a new company had no API way to get its first manager.
+- **What was done (verified 2026-06-24):**
+  - `POST /empresa` now creates, in **one transaction**, a CNPJ-derived placeholder manager `Colaborador`: `cpf="gestor_"+cnpj`, `login=cnpj`, `nome=razao_social`, `senha=HashService.hash(razao_social)` (bcrypt — never plaintext), `gerente=True`, `facial=None`, `empresa_id=cnpj`, `status=True`.
+  - New `EmpresaRepository.criar_com_gestor(empresa, gestor)` adds both + commits **once** (both persist or neither) with an explicit `rollback()` on failure; the existing `criar` is untouched. `CadastroEmpresaUseCase` takes `hash_service`; controller POST wires it.
+  - Sole creation-time `gerente=True` path; public `/colaborador/registro` still forces `False`. CNPJ uniqueness (409) still pre-checked — derived cpf/login can only collide if the CNPJ already exists.
+  - `EmpresaResponse` unchanged (no secret leak; manager `login` == cnpj, already in the response).
+- **Relevant files / areas:**
+  - `application/use_cases/empresa/cadastro_empresa_usecase.py`
+  - `infra/repositories/empresa_repository.py`
+  - `presentation/controller/empresa_controller.py`
+- **Done when:**
+  - ✅ Creating a company creates exactly one active manager atomically.
+  - ✅ The manager logs in immediately (`login`=CNPJ, `senha`=company name) and gets a `gerente:true` JWT. **Runtime-verified:** POST /empresa 201 → login 200 (gerente claim true) → manager-gated `GET /colaborador/` 200; wrong pw 401 (hashed); duplicate cnpj 409.
+  - ✅ No response/log leaks the hash/plaintext; manager `facial` is `None`.
+  - ✅ Public registration still `gerente=False`; AUTHZ-3 is the sole creation-time `gerente=True` path.
+- **Follow-up:** AUTHZ-4 (P2) — the bootstrap credential is predictable/public; force a password change on first manager login (marked with `# TODO(AUTHZ-4)`).
+
 ---
 
 ## 5. 🚧 To do / In progress
@@ -533,35 +553,25 @@ The live work queue. Work top-down by priority: **P0 → P1 → P2 → P3**.
 
 ### P1 — Core product completion tasks
 
-#### [AUTHZ-3] Bootstrap the first manager atomically when a company is created
-- **Priority:** P1
-- **Status:** todo
-- **Why it exists:** There is a manager bootstrap chicken-and-egg gap (flagged as the follow-on in AUTHZ-1/AUTHZ-2 and the open point in EMPRESA-2). Public registration hard-codes `gerente=False`, and the only promotion path (`PUT /colaborador/{cpf}`) requires an *existing* manager. So a brand-new company has no API way to obtain its first manager. Decision (2026-06-24): create the first manager **atomically inside `POST /empresa`**, as a **company-named placeholder account** derived from the CNPJ.
-- **What must be done:**
-  - Extend `CadastroEmpresaUseCase` to create, in the **same transaction** as the `Empresa`, a placeholder manager `Colaborador`. Roll back the company if the collaborator insert fails (and vice versa) — no partial state.
-  - Derive the placeholder account from stable, unique inputs (NOT `razao_social`, which can repeat):
-    - `cpf` (PK): the company's `cnpj` (recommended: prefixed, e.g. `"gestor_" + cnpj`) — CNPJ is already globally unique, so the PK cannot collide.
-    - `login` (unique): the `cnpj` — derived from CNPJ guarantees global uniqueness.
-    - `nome`: the `razao_social` (display only — this is the "company-named" part).
-    - `senha`: the `razao_social` (company name), hashed via the existing `HashService` (bcrypt). **Never store plaintext.**
-    - `gerente=True`, `facial=None` (manager logs in with login/senha; biometrics stay a separate, deliberate step per the RF13 decision), `empresa_id = cnpj`, `status=True`.
-  - This must be the **only** code path that sets `gerente=True` at creation. Do **not** reopen public `/colaborador/registro` — its `gerente=False` lock stays intact.
-  - Reuse the existing `ColaboradorRepository` for the insert; keep the use case free of HTTP concerns (existing `HTTPException` debt tracked under ARCH-2 — match current convention, don't expand it).
-  - Leave a `# TODO(AUTHZ-4)` marker referencing the force-password-change follow-up (below).
-- **Relevant files / areas:**
-  - `application/use_cases/empresa/cadastro_empresa_usecase.py`
-  - `infra/repositories/empresa_repository.py`, `infra/repositories/colaborador_repository.py`
-  - `application/services/hash_service.py`
-  - `presentation/controller/empresa_controller.py` (`POST /empresa` — response may surface the created manager's `login`)
-  - `domains/models/colaborador.py`, `domains/models/empresa.py`
-- **Done when:**
-  - Creating a company also creates exactly one active manager (`gerente=True`) for that company, in one atomic operation (both persist or neither does).
-  - The first manager can log in immediately: `login` = the CNPJ, `senha` = the company name.
-  - No response or log leaks the password hash or plaintext (NFR04/NFR05); the manager's `facial` is `None`.
-  - Public `/colaborador/registro` still hard-codes `gerente=False`; AUTHZ-3 is the sole creation-time `gerente=True` path.
-- **Known security trade-off (accepted for MVP, tracked as AUTHZ-4):** the initial credential is **predictable and public** — the CNPJ is public record and the password is the company name. This must be paired with a "force password change on first login" flow so the predictable credential works only once. Tracked as a separate non-blocking follow-up (AUTHZ-4) so it does not block this task.
+_(No open P1 backend tasks — AUTHZ-3 completed 2026-06-24; see §4.)_
 
 ### P2 — Important improvements
+
+#### [AUTHZ-4] Force password change on first manager login (predictable bootstrap credential)
+- **Priority:** P2
+- **Status:** todo
+- **Why it exists:** AUTHZ-3 bootstraps the first manager with a **predictable, public** credential — `login` = CNPJ (public record), `senha` = `razao_social` (company name). Anyone who knows the company can guess it. This is acceptable only as a one-time bootstrap; the predictable credential must stop working after the manager sets a real password. **This is blocking-for-production even though it was non-blocking for AUTHZ-3.** (See the `# TODO(AUTHZ-4)` marker in `cadastro_empresa_usecase.py`.)
+- **What must be done:**
+  - Add a "must change password" signal for the bootstrapped manager (e.g. a `senha_provisoria`/`must_change_password` boolean on `Colaborador`, defaulted appropriately + a startup migration like the `gerente` one), set `True` only on the AUTHZ-3 bootstrap account.
+  - On login, if the flag is set, require a password change before issuing a usable session (or issue a restricted token that only permits the change-password call), then clear the flag.
+  - Provide a change-password path (reuse `PUT /colaborador/me`'s `senha` field or a dedicated endpoint) that clears the flag.
+- **Relevant files / areas:**
+  - `domains/models/colaborador.py` (+ `main.py` migration), `application/use_cases/colaborador/login_colaborador_usecase.py`
+  - `application/use_cases/empresa/cadastro_empresa_usecase.py` (set the flag on bootstrap)
+  - `presentation/controller/login_controller.py`, `colaborador_controller.py`
+- **Done when:**
+  - A freshly bootstrapped manager must set a new password before the predictable credential stops working; after the change, the old (CNPJ/company-name) credential no longer authenticates.
+  - No regression to normal login for non-bootstrap accounts.
 
 #### [BIO-1] Consolidate and harden biometric enrollment
 - **Priority:** P2

@@ -196,6 +196,16 @@ User confirmed: keep **MUI** and implement all queued tasks. Incoming user task 
 - **Commit:** `1d98d4f`.
 - **Next:** AUTHZ-3 (atomic first-manager bootstrap in POST /empresa).
 
+### Cycle 21 — AUTHZ-3 (P1, `TASKS.md`) — ✅ DONE
+- **Architecture:** new `EmpresaRepository.criar_com_gestor` (single commit, explicit rollback) — atomicity can't go through the per-repo `criar` (each commits). Inject only `hash_service`; no EmpresaResponse change.
+- **Implementation:** repo method + use-case placeholder manager (cpf=gestor_+cnpj, login=cnpj, senha=hash(razao_social), gerente=True, facial=None) + controller wiring. `# TODO(AUTHZ-4)` marker.
+- **Verify:** smoke green; qa PASS (atomicity, hashed senha, sole gerente=True path, 409 uniqueness, no leak). **Runtime-verified:** POST /empresa 201 → manager login 200 w/ gerente:true JWT → manager-gated GET /colaborador/ 200; wrong pw 401; duplicate cnpj 409. Backend started for the test, then stopped.
+- **Commit:** `2e9e8f9`.
+- **Task files:** AUTHZ-3 → §4 done; §3 bootstrap note updated; **AUTHZ-4 added (P2 todo)** for the predictable-credential hardening; frontend manager-bootstrap caveat marked resolved.
+- **Impact:** the manager flow (FE-MANAGER-1/2) is now exercisable e2e — a fresh company has a working manager login.
+- **Next:** FE-SHARED-8 (adopt MUI — base/theme; blocks the other enhancement tasks).
+
+
 
 
 
