@@ -221,6 +221,20 @@ User confirmed: keep **MUI** and implement all queued tasks. Incoming user task 
 - 6 collaborator/auth pages + 3 shared primitives + ProfileForm migrated to MUI (prop APIs preserved → no manager regression). Presentation-only; flows/FE-PROFILE-2/punch-400 intact. Build green (JS 460 kB, CSS 10.6 kB). Commit `c109e2e`.
 - **Next:** FE-UI-2 (manager screens → MUI Table/DataGrid + Dialog).
 
+### Cycle 26 — FE-UI-2 (P2 enhancement) — ✅ DONE
+- Manager screens → MUI: DataGrid (employees), MUI chrome + Dialog confirm (employee file), Table w/ BR05 Chip (report). ConfirmModal restyled on MUI Dialog (prop API kept). 4 orphaned CSS removed. Build green (DataGrid pushes bundle >500kB — Vite advisory only). Commit `7ab2658`.
+
+---
+
+## FRONTEND ENHANCEMENT BACKLOG COMPLETE (2026-06-24)
+
+All user-requested frontend work done: **FE-PROFILE-2** (self-edit fix, runtime-reproduced) + the MUI suite **FE-SHARED-8** (base/theme), **FE-SHARED-9** (responsive desktop layout, 480px column retired), **FE-PUNCH-4** (kiosk/totem redesign), **FE-UI-1** (collaborator/auth → MUI), **FE-UI-2** (manager → MUI DataGrid/Table/Dialog). Each `npm run build` green. The whole frontend (MVP + fix + enhancements) is now on MUI, desktop-friendly, with a redesigned kiosk.
+
+**Caveats:** verified by build (compile) + targeted API runtime checks (FE-PROFILE-2, AUTHZ-3); no full headless-browser visual/interaction QA. Bundle >500 kB (DataGrid) — future code-split. AUTHZ-4 (force password change on the predictable bootstrap credential) still pending.
+
+**Remaining backend (deferred):** BIO-1, RECOG-2, API-1, AUTHZ-4 (P2); ARCH-1..4 (P3) — all have the smoke gate.
+
+
 
 
 
