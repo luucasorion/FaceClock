@@ -866,7 +866,7 @@ FaceClock/
 - JWT token generation and validation — no code exists
 - Protected endpoints — no authentication middleware anywhere
 - ~~Manager boolean flag (e.g. `gerente`) on `Colaborador`~~ — implemented: persisted column, surfaced in JWT claims (login + registration) and `ColaboradorResponse`; controlled promotion via the manager-gated `PUT /colaborador/{cpf}` (AUTHZ-1 done). Open follow-on: no API path mints the first manager (bootstrap) — resolve via seed/CLI.
-- Role-based access control (BR03) — `require_manager` enforces it (re-querying the DB); switching it to read the new `gerente` claim is the remaining AUTHZ-2 item
+- Role-based access control (BR03) — `require_manager` enforces it by reading the `gerente` JWT claim (fail-closed; no DB re-query) (AUTHZ-2 done). Accepted trade-off: role staleness bounded by token expiry (≤ `JWT_EXPIRY_MINUTES`).
 - Empresa CRUD endpoints — `empresa_controller.py` is empty, all empresa use cases are empty
 - Reporting endpoints — `relatorio_controller.py` is empty, `GetPontoUseCase` is empty
 - Collaborator query and editing endpoints — `GetColaboradorUseCase` and `EdicaoColaboradorUseCase` are empty

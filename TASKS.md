@@ -54,8 +54,8 @@ Based on the real code review of 2026-06-23 (re-audited against code on 2026-06-
 
 | Group | Tasks |
 |---|---|
-| ✅ Done | AUTH-1, AUTH-2, AUTH-3, BIO-3, PUNCH-1, EMPRESA-1, EMPRESA-2, REPORT-1, REPORT-2, REPORT-3, REPORT-4, COLAB-1, COLAB-2, PUNCH-2, BIO-2, RECOG-1, AUTHZ-1 |
-| 🚧 In progress | AUTHZ-2, API-1 |
+| ✅ Done | AUTH-1, AUTH-2, AUTH-3, BIO-3, PUNCH-1, EMPRESA-1, EMPRESA-2, REPORT-1, REPORT-2, REPORT-3, REPORT-4, COLAB-1, COLAB-2, PUNCH-2, BIO-2, RECOG-1, AUTHZ-1, AUTHZ-2 |
+| 🚧 In progress | API-1 |
 | ⬜ To do | AUTH-4, COLAB-3, REPORT-6, REPORT-5, PUNCH-3, BIO-1, RECOG-2, ARCH-1, ARCH-2, ARCH-3, ARCH-4 |
 
 > Note (2026-06-23 re-audit): `application/use_cases/ponto/get_ponto_usecase.py` no longer exists — its history-grouping logic was relocated to `application/use_cases/relatorio/` (`_agrupamento.py` + the report use cases). Task file-references were corrected accordingly.
@@ -419,7 +419,25 @@ Completed tasks, grouped by priority. Retained for traceability and acceptance e
 - **Done when:**
   - ✅ `Colaborador` has a persisted `gerente` boolean; existing data continues to work.
   - ✅ The flag is surfaced in tokens and responses, and settable only in a controlled (manager-gated) way.
-- **Follow-on (separate, not blocking):** (1) AUTHZ-2's remaining item — `require_manager` should read the new claim instead of re-querying the DB; (2) first-manager bootstrap (no API path mints the first manager) — resolve via seed/CLI, never by reopening public registration.
+- **Follow-on (separate, not blocking):** first-manager bootstrap (no API path mints the first manager) — resolve via seed/CLI, never by reopening public registration. (AUTHZ-2's claim-read item is now done.)
+
+### [AUTHZ-2] Enforce manager-only access (BR03) and company-scoped access (BR06)
+- **Priority:** P1
+- **Status:** done
+- **Why it existed:** BR03 restricts report export and edit/delete of collaborator/company data to managers; BR06 restricts a collaborator to their own company's data. Coverage and scoping were complete; the last item was decoupling `require_manager` from the DB.
+- **What was done (verified 2026-06-23):**
+  - `require_manager()` now authorizes off the `gerente` JWT claim (`payload.get("gerente")`) — fail-closed — instead of re-querying `ColaboradorRepository`; the `db`/`get_db`/`Session`/repository imports were dropped from `auth.py` (AUTHZ-2 final item, depends on AUTHZ-1's claim).
+  - Applied to empresa edit/deactivate, collaborator edit/deactivate (COLAB-2), and company reports (REPORT-3).
+  - Company scoping (BR06) enforced at the domain level for empresa edit/deactivate, collaborator edit/deactivate, collaborator listing, and reports (`empresa_id` claim check).
+- **Relevant files / areas:**
+  - `presentation/dependencies/auth.py` (`require_manager`)
+  - collaborator, empresa, and report controllers
+- **Done when:**
+  - ✅ Non-managers receive 403 on manager-only endpoints; a manager cannot edit/view another company's data.
+  - ✅ Collaborator edit/deactivate and reports are manager-gated and company-scoped.
+  - ✅ Collaborators can only access their own company's history/profile.
+  - ✅ `require_manager` reads the role from the JWT claim (no DB re-query).
+- **Accepted trade-off:** a demoted/deactivated manager keeps manager access until their token expires (≤ `JWT_EXPIRY_MINUTES`, default 60). Live revocation/short-expiry deferred as a separate decision. Legacy pre-AUTHZ-1 tokens get a clean 403 and self-heal on re-login.
 
 ---
 
@@ -446,25 +464,6 @@ The live work queue. Work top-down by priority: **P0 → P1 → P2 → P3**.
   - Registration returns a valid signed bearer token plus the safe collaborator DTO.
   - The token authenticates against protected endpoints without a separate login call.
   - The response contains no `senha` or `facial` data.
-
-#### [AUTHZ-2] Enforce manager-only access (BR03) and company-scoped access (BR06)
-- **Priority:** P1
-- **Status:** in progress
-- **Why it exists:** BR03 restricts report export and edit/delete of collaborator/company data to managers. BR06 restricts a collaborator to their own company's data.
-- **What was done:**
-  - `require_manager()` dependency — checks `gerente` (re-queried via `ColaboradorRepository`) and returns 403 for non-managers — `presentation/dependencies/auth.py`.
-  - Applied to empresa edit/deactivate; collaborator edit/deactivate (COLAB-2); company reports (REPORT-3).
-  - Company scoping (BR06) enforced at the domain level for empresa edit/deactivate, collaborator edit/deactivate, collaborator listing, and reports (`empresa_id` claim check).
-- **What still needs to be done:**
-  - Once `gerente` is in the JWT claims (AUTHZ-1), `require_manager` should read the claim instead of re-querying the DB. This is the only remaining item — the access-control coverage itself is effectively complete.
-- **Relevant files / areas:**
-  - `presentation/dependencies/auth.py` (`require_manager`)
-  - collaborator and report controllers (done)
-- **Done when:**
-  - ✅ Non-managers receive 403 on manager-only endpoints; a manager cannot edit/view another company's data.
-  - ✅ Collaborator edit/deactivate and reports are manager-gated and company-scoped.
-  - ✅ Collaborators can only access their own company's history/profile.
-  - `require_manager` reads the role from the JWT claim (blocked on AUTHZ-1).
 
 #### [REPORT-6] Implement a daily punch-summary endpoint for the authenticated collaborator (RF09)
 - **Priority:** P1
