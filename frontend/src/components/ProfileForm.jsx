@@ -37,7 +37,7 @@ const FIELD_DEFS = [
   { name: 'nome', label: 'Nome', type: 'text' },
   { name: 'login', label: 'Login', type: 'text' },
   { name: 'empresa_id', label: 'Empresa', type: 'text' },
-  { name: 'status', label: 'Status', type: 'text' },
+  { name: 'status', label: 'Status', type: 'boolean' },
   { name: 'gerente', label: 'Gerente', type: 'boolean' },
   { name: 'senha', label: 'Nova senha', type: 'password' },
 ];

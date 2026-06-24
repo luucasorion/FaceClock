@@ -24,7 +24,7 @@
 // Mobile-first: primary actions in thumb reach, no horizontal scroll.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ProfileForm from '../components/ProfileForm.jsx';
 import Spinner from '../components/Spinner.jsx';
 import EmptyState from '../components/EmptyState.jsx';
@@ -38,11 +38,13 @@ import './ProfilePage.css';
 
 const PAGE_SIZE = 20;
 
-// The employee may self-edit only these fields (no gerente/empresa_id/status).
-const EDITABLE_FIELDS = ['nome', 'login', 'senha'];
+// The employee may self-edit only these fields (no nome/gerente/empresa_id/status).
+// `nome` is read-only on self-edit; the editable set is login + senha.
+const EDITABLE_FIELDS = ['login', 'senha'];
 
 export default function ProfilePage() {
-  const { token, colaborador, setSession } = useAuth();
+  const { token, colaborador, setSession, logout } = useAuth();
+  const navigate = useNavigate();
 
   // ----- Profile section -----------------------------------------------------
   const [profile, setProfile] = useState(colaborador ?? null);
@@ -81,20 +83,39 @@ export default function ProfilePage() {
       setSaveError('');
       try {
         const updated = await editarPerfil(token, patch); // PUT /colaborador/me
+
+        // The PUT targets the collaborator by cpf and succeeds even when `login`
+        // changed, but the stored JWT keeps its OLD `sub` (= the old login).
+        // GET /colaborador/me resolves identity via por_login(sub), so any
+        // refresh/remount after a login change would call por_login(old_login)
+        // → 404 and strand the session. When the login changed we therefore
+        // discard the stale token and force a clean re-login instead of trying
+        // to keep using it.
+        if ('login' in patch) {
+          logout();
+          navigate('/login', {
+            state: { message: 'Login alterado. Faça login novamente.' },
+          });
+          return;
+        }
+
+        // Senha-only (or otherwise login-unchanged) save: keep the in-place
+        // behavior. Reflect the change across the app (same token, updated
+        // colaborador).
         setProfile(updated);
-        // Reflect the change across the app (same token, updated colaborador).
         setSession(token, updated);
       } catch (err) {
         setSaveError(
           (err && err.message) || 'Não foi possível salvar as alterações.',
         );
-        // Re-throw so ProfileForm callers could react; ProfileForm itself awaits
-        // and then leaves edit mode regardless, but the error stays visible.
+        // On failure do NOT logout/redirect — the existing session is intact
+        // and the error stays visible. ProfileForm awaits and leaves edit mode
+        // regardless, but the error banner remains.
       } finally {
         setSaving(false);
       }
     },
-    [token, setSession],
+    [token, setSession, logout, navigate],
   );
 
   // ----- History section -----------------------------------------------------

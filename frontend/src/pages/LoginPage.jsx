@@ -5,7 +5,7 @@
 // is stored on failure (setSession only runs on success).
 
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext.jsx';
 import * as authApi from '../api/auth.js';
 import { ApiError } from '../api/client.js';
@@ -14,6 +14,10 @@ import '../styles/forms.css';
 export default function LoginPage() {
   const { setSession } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  // A redirect (e.g. after a self-service login change) may pass an info message
+  // to surface above the form, prompting the user to sign in again.
+  const notice = location.state?.message;
 
   const [form, setForm] = useState({ login: '', senha: '' });
   const [error, setError] = useState(null);
@@ -64,6 +68,12 @@ export default function LoginPage() {
       </header>
 
       <form className="auth-form" onSubmit={onSubmit} noValidate>
+        {notice && (
+          <p className="form-success" role="status">
+            {notice}
+          </p>
+        )}
+
         {error && (
           <p className="form-error" role="alert">
             {error}
