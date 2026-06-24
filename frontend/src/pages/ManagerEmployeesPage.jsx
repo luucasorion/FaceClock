@@ -5,23 +5,62 @@
 // — the backend scopes the list to the token holder's company, so no empresa_id
 // filter is needed here.
 //
-// Each row shows nome / login / cpf / status. Clicking a row navigates to the
-// employee file at /gerente/colaboradores/{cpf}.
+// Each row shows nome / login / cpf / status / gerente. Clicking a row navigates
+// to the employee file at /gerente/colaboradores/{cpf}.
 //
 // States: loading, error (ApiError.message), empty, and the populated list.
 //
-// Responsive: desktop-oriented table-like rows that collapse to stacked cards on
-// narrow screens (no horizontal scroll at mobile widths).
+// FE-UI-2: migrated to MUI. The list renders as an `@mui/x-data-grid` DataGrid
+// (sortable/filterable columns; row click → employee file). Loading/empty/error
+// stay on the shared MUI primitives. Wide layout comes from AppLayout
+// (FE-SHARED-9 gives `/gerente/*` a wide Container). Endpoint + navigation
+// wiring are UNCHANGED — presentation only.
 
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { Box, Button, Chip, Stack, Typography } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { listar } from '../api/colaborador.js';
 import Spinner from '../components/Spinner.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import ErrorBanner from '../components/ErrorBanner.jsx';
-import '../styles/forms.css';
-import './ManagerEmployeesPage.css';
+
+// Column model for the DataGrid. Sortable by default; the grid handles sort/
+// filter client-side. `gerente` (boolean) and `status` render as readable text.
+const COLUMNS = [
+  { field: 'nome', headerName: 'Nome', flex: 1.4, minWidth: 160 },
+  { field: 'login', headerName: 'Login', flex: 1, minWidth: 120 },
+  { field: 'cpf', headerName: 'CPF', flex: 1, minWidth: 130 },
+  {
+    field: 'status',
+    headerName: 'Status',
+    flex: 0.8,
+    minWidth: 110,
+    renderCell: (params) => {
+      const status = params.value || '';
+      const active = String(status).toLowerCase() === 'ativo';
+      return status ? (
+        <Chip
+          size="small"
+          label={status}
+          color={active ? 'success' : 'default'}
+          variant={active ? 'filled' : 'outlined'}
+        />
+      ) : (
+        '—'
+      );
+    },
+  },
+  {
+    field: 'gerente',
+    headerName: 'Gerente',
+    flex: 0.7,
+    minWidth: 100,
+    type: 'boolean',
+    valueGetter: (value) => Boolean(value),
+  },
+];
 
 export default function ManagerEmployeesPage() {
   const { token } = useAuth();
@@ -58,18 +97,30 @@ export default function ManagerEmployeesPage() {
   const hasRows = Array.isArray(rows) && rows.length > 0;
 
   return (
-    <main className="auth-page manager-employees">
-      <header className="auth-header manager-employees__header">
-        <div>
-          <h1 className="auth-title">Meus colaboradores</h1>
-          <p className="auth-subtitle">
+    <Box component="main" sx={{ width: '100%', mt: 2 }}>
+      <Stack
+        component="header"
+        direction={{ xs: 'column', sm: 'row' }}
+        alignItems={{ xs: 'flex-start', sm: 'flex-start' }}
+        justifyContent="space-between"
+        spacing={2}
+        sx={{ mb: 3 }}
+      >
+        <Box>
+          <Typography variant="h4" component="h1" fontWeight={700}>
+            Meus colaboradores
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
             Colaboradores da sua empresa. Toque em um para abrir a ficha.
-          </p>
-        </div>
-        <Link to="/gerente/relatorio" className="btn-secondary manager-employees__nav">
+          </Typography>
+        </Box>
+        <Button
+          variant="outlined"
+          onClick={() => navigate('/gerente/relatorio')}
+        >
           Relatório
-        </Link>
-      </header>
+        </Button>
+      </Stack>
 
       {loading && <Spinner label="Carregando colaboradores…" />}
 
@@ -80,42 +131,27 @@ export default function ManagerEmployeesPage() {
       )}
 
       {!loading && !error && hasRows && (
-        <ul className="manager-employees__list">
-          {/* Column headers (visible on wider screens via CSS). */}
-          <li className="manager-employees__row manager-employees__row--head" aria-hidden="true">
-            <span className="manager-employees__cell">Nome</span>
-            <span className="manager-employees__cell">Login</span>
-            <span className="manager-employees__cell">CPF</span>
-            <span className="manager-employees__cell">Status</span>
-          </li>
-
-          {rows.map((c) => (
-            <li key={c.cpf} className="manager-employees__row">
-              <button
-                type="button"
-                className="manager-employees__rowbtn"
-                onClick={() => openFile(c.cpf)}
-              >
-                <span className="manager-employees__cell" data-label="Nome">
-                  {c.nome || '—'}
-                </span>
-                <span className="manager-employees__cell" data-label="Login">
-                  {c.login || '—'}
-                </span>
-                <span className="manager-employees__cell" data-label="CPF">
-                  {c.cpf || '—'}
-                </span>
-                <span
-                  className={`manager-employees__cell manager-employees__status manager-employees__status--${c.status || 'unknown'}`}
-                  data-label="Status"
-                >
-                  {c.status || '—'}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
+        <DataGrid
+          rows={rows}
+          columns={COLUMNS}
+          getRowId={(row) => row.cpf}
+          onRowClick={(params) => openFile(params.row.cpf)}
+          disableRowSelectionOnClick
+          autoHeight
+          pageSizeOptions={[10, 25, 50]}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 25, page: 0 } },
+          }}
+          sx={{
+            // Keep the grid from forcing horizontal scroll on the page shell;
+            // the grid scrolls internally if columns overflow.
+            width: '100%',
+            bgcolor: 'background.paper',
+            '& .MuiDataGrid-row': { cursor: 'pointer' },
+          }}
+          aria-label="Colaboradores da empresa"
+        />
       )}
-    </main>
+    </Box>
   );
 }

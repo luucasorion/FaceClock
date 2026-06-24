@@ -36,16 +36,34 @@
 // server generates the CSV and the api client surfaces it as raw text. We hand
 // that text straight to downloadCsv (FE-SHARED-6); no client-side CSV building.
 //
-// Responsive: desktop-oriented table that degrades to stacked cards on narrow
-// screens (no horizontal scroll at mobile widths).
+// FE-UI-2: migrated to MUI. Date inputs are `TextField type="date"`, the period
+// filters/actions live in a Card, and results render as an MUI Table with the
+// BR05 overtime flag emphasized via a `Chip` (color="warning"). The
+// relatorio.empresa fetch (json) and the Export CSV action (formato:'csv' →
+// downloadCsv) are UNCHANGED — presentation only.
 
 import { useCallback, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { empresa as relatorioEmpresa } from '../api/relatorio.js';
 import { downloadCsv } from '../lib/csv.js';
-import '../styles/forms.css';
-import './ManagerReportPage.css';
 
 // Sum a numeric field across a list of day objects, tolerating missing values.
 function sumDays(dias, field) {
@@ -74,6 +92,7 @@ function summarize(colaborador) {
 
 export default function ManagerReportPage() {
   const { token, empresaId } = useAuth();
+  const navigate = useNavigate();
 
   const [dataInicio, setDataInicio] = useState('');
   const [dataFim, setDataFim] = useState('');
@@ -141,123 +160,143 @@ export default function ManagerReportPage() {
   const hasRows = colaboradores.length > 0;
 
   return (
-    <main className="auth-page manager-report">
-      <header className="auth-header manager-report__header">
-        <div>
-          <h1 className="auth-title">Relatório da empresa</h1>
-          <p className="auth-subtitle">
+    <Box component="main" sx={{ width: '100%', mt: 2 }}>
+      <Stack
+        component="header"
+        direction={{ xs: 'column', sm: 'row' }}
+        alignItems="flex-start"
+        justifyContent="space-between"
+        spacing={2}
+        sx={{ mb: 3 }}
+      >
+        <Box>
+          <Typography variant="h4" component="h1" fontWeight={700}>
+            Relatório da empresa
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
             Horas trabalhadas por colaborador no período.
-          </p>
-        </div>
-        <Link to="/gerente/colaboradores" className="btn-secondary manager-report__nav">
+          </Typography>
+        </Box>
+        <Button
+          variant="outlined"
+          onClick={() => navigate('/gerente/colaboradores')}
+        >
           Colaboradores
-        </Link>
-      </header>
+        </Button>
+      </Stack>
 
-      <form className="manager-report__filters" onSubmit={handleSearch}>
-        <div className="form-field">
-          <label className="form-label" htmlFor="data_inicio">
-            Data início
-          </label>
-          <input
-            id="data_inicio"
-            type="date"
-            className="form-input"
-            value={dataInicio}
-            onChange={(e) => setDataInicio(e.target.value)}
-          />
-        </div>
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Box component="form" onSubmit={handleSearch}>
+            <Stack spacing={2}>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                <TextField
+                  id="data_inicio"
+                  label="Data início"
+                  type="date"
+                  value={dataInicio}
+                  onChange={(e) => setDataInicio(e.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                />
+                <TextField
+                  id="data_fim"
+                  label="Data fim"
+                  type="date"
+                  value={dataFim}
+                  onChange={(e) => setDataFim(e.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                />
+              </Stack>
 
-        <div className="form-field">
-          <label className="form-label" htmlFor="data_fim">
-            Data fim
-          </label>
-          <input
-            id="data_fim"
-            type="date"
-            className="form-input"
-            value={dataFim}
-            onChange={(e) => setDataFim(e.target.value)}
-          />
-        </div>
-
-        <div className="manager-report__actions">
-          <button
-            type="submit"
-            className="btn-primary"
-            disabled={loading || !canSubmit}
-          >
-            {loading ? 'Gerando…' : 'Gerar relatório'}
-          </button>
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={handleExport}
-            disabled={exporting || !canSubmit}
-          >
-            {exporting ? 'Exportando…' : 'Exportar CSV'}
-          </button>
-        </div>
-      </form>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={loading || !canSubmit}
+                >
+                  {loading ? 'Gerando…' : 'Gerar relatório'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outlined"
+                  onClick={handleExport}
+                  disabled={exporting || !canSubmit}
+                >
+                  {exporting ? 'Exportando…' : 'Exportar CSV'}
+                </Button>
+              </Stack>
+            </Stack>
+          </Box>
+        </CardContent>
+      </Card>
 
       {!empresaId && (
-        <p className="form-hint">
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           Empresa não identificada na sessão; refaça o login.
-        </p>
+        </Typography>
       )}
 
       {error && (
-        <p className="form-error" role="alert">
+        <Alert severity="error" sx={{ mb: 2 }}>
           {error}
-        </p>
+        </Alert>
       )}
 
       {hasReport && !hasRows && !error && (
-        <p className="auth-subtitle">
+        <Typography variant="body1" color="text.secondary">
           Nenhum colaborador com registros no período selecionado.
-        </p>
+        </Typography>
       )}
 
       {hasRows && (
-        <div className="manager-report__table" role="table" aria-label="Horas por colaborador">
-          <div className="manager-report__row manager-report__row--head" role="row">
-            <span className="manager-report__cell" role="columnheader">Colaborador</span>
-            <span className="manager-report__cell" role="columnheader">Horas trabalhadas</span>
-            <span className="manager-report__cell" role="columnheader">Hora extra</span>
-            <span className="manager-report__cell" role="columnheader">Excedeu limite</span>
-          </div>
-
-          {colaboradores.map((c) => {
-            const { worked, overtime, exceeded } = summarize(c);
-            return (
-              <div
-                key={c.colaborador_id}
-                className={`manager-report__row${exceeded ? ' manager-report__row--flag' : ''}`}
-                role="row"
-              >
-                <span className="manager-report__cell" data-label="Colaborador" role="cell">
-                  {c.nome || c.colaborador_id || '—'}
-                </span>
-                <span className="manager-report__cell" data-label="Horas trabalhadas" role="cell">
-                  {formatMinutes(worked)}
-                </span>
-                <span className="manager-report__cell" data-label="Hora extra" role="cell">
-                  {formatMinutes(overtime)}
-                </span>
-                <span className="manager-report__cell" data-label="Excedeu limite" role="cell">
-                  {exceeded ? (
-                    <span className="manager-report__badge manager-report__badge--over">
-                      Sim
-                    </span>
-                  ) : (
-                    'Não'
-                  )}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+        <TableContainer component={Card} variant="outlined">
+          <Table aria-label="Horas por colaborador">
+            <TableHead>
+              <TableRow>
+                <TableCell>Colaborador</TableCell>
+                <TableCell align="right">Horas trabalhadas</TableCell>
+                <TableCell align="right">Hora extra</TableCell>
+                <TableCell align="center">Excedeu limite</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {colaboradores.map((c) => {
+                const { worked, overtime, exceeded } = summarize(c);
+                return (
+                  <TableRow key={c.colaborador_id} hover>
+                    <TableCell sx={{ fontWeight: 600 }}>
+                      {c.nome || c.colaborador_id || '—'}
+                    </TableCell>
+                    <TableCell
+                      align="right"
+                      sx={{ fontVariantNumeric: 'tabular-nums' }}
+                    >
+                      {formatMinutes(worked)}
+                    </TableCell>
+                    <TableCell
+                      align="right"
+                      sx={{ fontVariantNumeric: 'tabular-nums' }}
+                    >
+                      {formatMinutes(overtime)}
+                    </TableCell>
+                    <TableCell align="center">
+                      {exceeded ? (
+                        <Chip size="small" color="warning" label="Sim" />
+                      ) : (
+                        <Typography variant="body2" color="text.secondary">
+                          Não
+                        </Typography>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
-    </main>
+    </Box>
   );
 }

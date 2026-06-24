@@ -19,16 +19,27 @@
 // BR06) arrive as ApiError.message and are surfaced verbatim. On success we
 // navigate back to the list.
 //
-// Responsive: reuses ProfileForm (already mobile-friendly); no horizontal scroll.
+// FE-UI-2: migrated to MUI (header on Typography/Stack, body wrapped in a Card,
+// errors via Alert, deactivate confirm via the MUI-backed ConfirmModal Dialog).
+// The endpoint wiring, list+find load, ProfileForm consumption, and guard-error
+// handling are UNCHANGED — presentation only.
 
 import { useCallback, useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Stack,
+  Typography,
+} from '@mui/material';
 import ProfileForm from '../components/ProfileForm.jsx';
 import ConfirmModal from '../components/ConfirmModal.jsx';
+import Spinner from '../components/Spinner.jsx';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { listar, atualizar, desativar } from '../api/colaborador.js';
-import '../styles/forms.css';
-import './EmployeeFilePage.css';
 
 // Manager may edit these fields (includes `gerente`, unlike employee self-edit).
 const EDITABLE_FIELDS = ['nome', 'login', 'gerente', 'senha'];
@@ -121,59 +132,81 @@ export default function EmployeeFilePage() {
     employee && String(employee.status || '').toLowerCase() === 'ativo';
 
   return (
-    <main className="auth-page employee-file">
-      <header className="auth-header employee-file__header">
-        <div>
-          <h1 className="auth-title">Ficha do colaborador</h1>
-          <p className="auth-subtitle">CPF {cpf}</p>
-        </div>
-        <Link to="/gerente/colaboradores" className="btn-secondary employee-file__back">
+    <Box component="main" sx={{ width: '100%', mt: 2 }}>
+      <Stack
+        component="header"
+        direction={{ xs: 'column', sm: 'row' }}
+        alignItems="flex-start"
+        justifyContent="space-between"
+        spacing={2}
+        sx={{ mb: 3 }}
+      >
+        <Box>
+          <Typography variant="h4" component="h1" fontWeight={700}>
+            Ficha do colaborador
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            CPF {cpf}
+          </Typography>
+        </Box>
+        <Button
+          variant="outlined"
+          onClick={() => navigate('/gerente/colaboradores')}
+        >
           Voltar
-        </Link>
-      </header>
+        </Button>
+      </Stack>
 
-      {loading && <p className="auth-subtitle">Carregando colaborador…</p>}
+      {loading && <Spinner label="Carregando colaborador…" />}
 
       {!loading && loadError && (
-        <p className="form-error" role="alert">
+        <Alert severity="error" sx={{ mb: 2 }}>
           {loadError}
-        </p>
+        </Alert>
       )}
 
       {!loading && !loadError && employee && (
         <>
-          <ProfileForm
-            colaborador={employee}
-            editableFields={EDITABLE_FIELDS}
-            onSave={handleSave}
-            saving={saving}
-            error={saveError}
-          />
+          <Card sx={{ mb: 3 }}>
+            <CardContent>
+              <ProfileForm
+                colaborador={employee}
+                editableFields={EDITABLE_FIELDS}
+                onSave={handleSave}
+                saving={saving}
+                error={saveError}
+              />
+            </CardContent>
+          </Card>
 
           {actionError && (
-            <p className="form-error" role="alert">
+            <Alert severity="error" sx={{ mb: 2 }}>
               {actionError}
-            </p>
+            </Alert>
           )}
 
-          <div className="employee-file__danger">
-            <button
-              type="button"
-              className="btn-secondary employee-file__deactivate"
-              onClick={() => {
-                setActionError('');
-                setConfirmOpen(true);
-              }}
-              disabled={!isActive}
-            >
-              Desativar colaborador
-            </button>
-            {!isActive && (
-              <p className="form-hint">
-                Este colaborador já está inativo.
-              </p>
-            )}
-          </div>
+          <Card variant="outlined" sx={{ borderColor: 'error.light' }}>
+            <CardContent>
+              <Stack spacing={1} alignItems="flex-start">
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={() => {
+                    setActionError('');
+                    setConfirmOpen(true);
+                  }}
+                  disabled={!isActive}
+                >
+                  Desativar colaborador
+                </Button>
+                {!isActive && (
+                  <Typography variant="body2" color="text.secondary">
+                    Este colaborador já está inativo.
+                  </Typography>
+                )}
+              </Stack>
+            </CardContent>
+          </Card>
         </>
       )}
 
@@ -187,6 +220,6 @@ export default function EmployeeFilePage() {
         onConfirm={confirmDeactivate}
         onCancel={() => setConfirmOpen(false)}
       />
-    </main>
+    </Box>
   );
 }
