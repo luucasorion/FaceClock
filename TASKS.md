@@ -54,9 +54,9 @@ Based on the real code review of 2026-06-23 (re-audited against code on 2026-06-
 
 | Group | Tasks |
 |---|---|
-| ✅ Done | AUTH-1, AUTH-2, AUTH-3, BIO-3, PUNCH-1, EMPRESA-1, EMPRESA-2, REPORT-1, REPORT-2, REPORT-3, REPORT-4, COLAB-1, COLAB-2, PUNCH-2, BIO-2, RECOG-1, AUTHZ-1, AUTHZ-2, AUTH-4, REPORT-6 |
+| ✅ Done | AUTH-1, AUTH-2, AUTH-3, BIO-3, PUNCH-1, EMPRESA-1, EMPRESA-2, REPORT-1, REPORT-2, REPORT-3, REPORT-4, COLAB-1, COLAB-2, PUNCH-2, BIO-2, RECOG-1, AUTHZ-1, AUTHZ-2, AUTH-4, REPORT-6, COLAB-3 |
 | 🚧 In progress | API-1 |
-| ⬜ To do | COLAB-3, REPORT-5, PUNCH-3, BIO-1, RECOG-2, ARCH-1, ARCH-2, ARCH-3, ARCH-4 |
+| ⬜ To do | REPORT-5, PUNCH-3, BIO-1, RECOG-2, ARCH-1, ARCH-2, ARCH-3, ARCH-4 |
 
 > Note (2026-06-23 re-audit): `application/use_cases/ponto/get_ponto_usecase.py` no longer exists — its history-grouping logic was relocated to `application/use_cases/relatorio/` (`_agrupamento.py` + the report use cases). Task file-references were corrected accordingly.
 
@@ -468,6 +468,26 @@ Completed tasks, grouped by priority. Retained for traceability and acceptance e
   - ✅ Self-scoped and mounted in OpenAPI (route registered).
   - ✅ Defaults to today; a specific day via `?data=` is supported.
 
+### [COLAB-3] Add an authenticated self-edit endpoint for a collaborator's own profile
+- **Priority:** P1
+- **Status:** done
+- **Why it existed:** The only edit path was the manager-gated `PUT /colaborador/{cpf}`; there was no endpoint a non-manager could call to update their own record (needed by the frontend employee-profile edit flow, FE-PROFILE-1).
+- **What was done (verified 2026-06-23):**
+  - New `PUT /colaborador/me` on `read_router`, guarded by `Depends(get_current_colaborador)` (any authenticated collaborator), declared **before** `PUT /{cpf}` so `me` isn't captured as a cpf.
+  - New narrow `EdicaoPerfilRequest` (`nome`/`login`/`senha` only — no `gerente`/`empresa_id`/`status`), so privilege/scope fields are unrepresentable at the API boundary.
+  - Reuses `EdicaoColaboradorUseCase` unchanged: identity (`target_cpf`, `requester_empresa_id`, `requester_login`) comes ONLY from the JWT; `gerente=None` is pinned so the manager flag is left unchanged (use case applies fields only `if ... is not None`, never touches `empresa_id`/`status`). Login uniqueness + password re-hash stay centralized.
+  - Returns `ColaboradorResponse` (no `senha`/`facial`).
+- **Relevant files / areas:**
+  - `presentation/controller/colaborador_controller.py` (`editar_perfil`)
+  - `presentation/schema/requests/edicao_perfil_request.py` (new)
+  - `application/use_cases/colaborador/edicao_colaborador_usecase.py` (reused, unchanged)
+- **Done when:**
+  - ✅ A collaborator updates their own `nome`/`login`/`senha` without a manager token.
+  - ✅ Cannot elevate to manager, move companies, or edit another collaborator via this endpoint.
+  - ✅ Password updates stored hashed; response has no `senha`/`facial`.
+  - ✅ Mounted and in OpenAPI (route count 21→22).
+- **Follow-ups (non-blocking, MVP-scope-aware):** (1) changing `login` does NOT reissue the JWT — the token keeps the old `sub` until re-login (would need a wider response shape); (2) optional input-validation hardening on `EdicaoPerfilRequest` (`min_length`, `extra="forbid"`) — input validation is explicitly out of MVP priority and the endpoint is already safe.
+
 ---
 
 ## 5. 🚧 To do / In progress
@@ -475,26 +495,6 @@ Completed tasks, grouped by priority. Retained for traceability and acceptance e
 The live work queue. Work top-down by priority: **P0 → P1 → P2 → P3**.
 
 ### P1 — Core product completion tasks
-
-#### [COLAB-3] Add an authenticated self-edit endpoint for a collaborator's own profile
-- **Priority:** P1
-- **Status:** todo
-- **Why it exists:** A collaborator must be able to edit their own profile (RF09 / RF05 self-service), but the only edit path today is `PUT /colaborador/{cpf}`, which is gated by `require_manager`. There is no endpoint a non-manager can call to update their own record, so the frontend employee-profile edit flow has nothing to call. Reusing the manager endpoint from an employee context is wrong (it would 403 for non-managers and conflates self-edit with manager-edit authorization).
-- **What must be done:**
-  - Add a self-scoped endpoint (e.g. `PUT /colaborador/me`) protected by `Depends(get_current_colaborador)`; identity comes from the token (`sub`/`cpf`), never from a path param or body.
-  - Allow editing only safe self-service fields (e.g. `nome`, `login`, `senha`); **must not** allow a collaborator to set `gerente`, change `empresa_id`, or reactivate/deactivate themselves.
-  - Reuse `EdicaoColaboradorUseCase` (or a thin self-edit path on it) so login-uniqueness and password re-hashing stay centralized; pass the token identity as both requester and target so BR06 scoping holds.
-  - Return `ColaboradorResponse` (no `senha`/`facial`).
-- **Relevant files / areas:**
-  - `presentation/controller/colaborador_controller.py` (new `PUT /colaborador/me` handler)
-  - `application/use_cases/colaborador/edicao_colaborador_usecase.py`
-  - `presentation/schema/requests/edicao_colaborador_request.py` (reuse or a self-edit subset)
-  - `presentation/dependencies/auth.py` (`get_current_colaborador`)
-- **Done when:**
-  - An authenticated collaborator can update their own `nome`/`login`/`senha` without a manager token.
-  - A collaborator cannot elevate themselves to manager, move companies, or change another collaborator via this endpoint.
-  - Password updates are stored hashed; the response contains no `senha`/`facial`.
-  - The endpoint is mounted and appears in OpenAPI.
 
 ### P2 — Important improvements
 

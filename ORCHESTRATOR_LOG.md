@@ -61,6 +61,17 @@ for AUTHZ-2, AUTH-4 claims shape, and the frontend manager flow.
 - **Observation:** `TASKS.md §5` had drifted ahead of the code — AUTH-4 and REPORT-6 were both already implemented but listed `todo`. Per-task I now verify real code state before planning (architecture is doing this). PROJECT_CONTEXT §19/§20/§24 are broadly stale vs §3 (canonical per §26) — not reconciling wholesale; correcting only lines that would be outright false.
 - **Next:** COLAB-3 (P1) — authenticated self-edit endpoint `PUT /colaborador/me` (verify if already present, else implement).
 
+### Cycle 6 — COLAB-3 (P1, `TASKS.md`) — ✅ DONE
+- **Selected:** COLAB-3 (self-edit `PUT /colaborador/me`). Confirmed NOT present (only `GET /me`).
+- **Architecture:** plan accepted — narrow `EdicaoPerfilRequest` (no `gerente`), reuse `EdicaoColaboradorUseCase` unchanged, identity from token, `gerente=None` pinned, route declared before `/{cpf}`.
+- **Implementation:** new request schema + `editar_perfil` handler. 2 files (1 new). Use case/repo/DTO untouched.
+- **Verify:** smoke green, route count 21→22; diff matches plan; qa PASS on all 5 acceptance criteria (no privilege escalation, no scope escape, route ordering, non-manager auth, no secret leak).
+- **Commit:** `0215fb2`.
+- **Task files:** COLAB-3 → §4 done; §3 snapshot updated; **TASKS_FRONTEND.md** dependency table + contract §5 updated (AUTHZ-1 & COLAB-3 now unblock FE-AUTH-1, FE-MANAGER-1/2, FE-PROFILE-1; `PUT /colaborador/me` + `gerente` claim/field documented).
+- **Follow-ups (non-blocking):** login change doesn't reissue JWT; optional schema validation hardening (out of MVP scope).
+- **Next:** REPORT-5 (P2) — composite DB indexes + pagination on punch history.
+
+
 
 
 

@@ -77,11 +77,13 @@ The frontend is **greenfield — no `frontend/` directory exists yet** (confirme
 
 | Backend task | Status | Blocks |
 |---|---|---|
-| **AUTHZ-1** (surface `gerente` in JWT claims + `ColaboradorResponse`) | in progress | FE-AUTH-1 (role routing), FE-MANAGER-1, FE-MANAGER-2 |
-| **COLAB-3** (authenticated self-edit endpoint, `PUT /colaborador/me`) | todo | FE-PROFILE-1 (edit/save) |
+| **AUTHZ-1** (surface `gerente` in JWT claims + `ColaboradorResponse`) | **done** (2026-06-23) | ~~FE-AUTH-1 (role routing), FE-MANAGER-1, FE-MANAGER-2~~ — unblocked |
+| **COLAB-3** (authenticated self-edit endpoint, `PUT /colaborador/me`) | **done** (2026-06-23) | ~~FE-PROFILE-1 (edit/save)~~ — unblocked |
 | **RECOG-2** (validate company existence/active at registration) | todo | FE-AUTH-2 (clean "company not found" error) |
 | **BIO-1** (consolidate enrollment; remove in-body `facial`) | todo | FE-AUTH-2 (lets registration stop sending `facial: []`) |
 | **REPORT-5** (pagination on history) — optional P2 | todo | FE-PROFILE-1 (frontend paginates client-side until then) |
+
+> **Note (2026-06-23, orchestrator run):** `ColaboradorResponse` now includes `gerente`, and the JWT claims (login + registration) carry `gerente`, so role-based routing and `RequireManager` can now be implemented. A new `PUT /colaborador/me` (bearer, self-scoped; body `{nome, login, senha}`; returns `ColaboradorResponse`) exists — FE-PROFILE-1 Save wires to it. **Bootstrap caveat:** no API path currently mints the first manager (registration forces `gerente=False`; promotion only via the manager-gated `PUT /colaborador/{cpf}`), so the manager screens can't be exercised end-to-end until a manager is seeded — a backend/ops decision flagged in `ORCHESTRATOR_LOG.md`.
 
 ---
 
@@ -96,6 +98,7 @@ Read from the controllers in `presentation/controller/` on 2026-06-23. **Trust t
 | `POST /colaborador/registro/cadastrar-biometria` | bearer | multipart `imagem` | enrolls the **token holder's** face |
 | `GET /colaborador/me` | bearer | — | `ColaboradorResponse` (own profile) |
 | `GET /colaborador/` | manager | — | `list[ColaboradorResponse]` (own company) |
+| `PUT /colaborador/me` | bearer | JSON `{ nome, login, senha }` (self-scoped; no `gerente`) | `ColaboradorResponse` |
 | `PUT /colaborador/{cpf}` | manager | JSON `{ nome, login, gerente, senha }` | `ColaboradorResponse` |
 | `DELETE /colaborador/{cpf}` | manager | — | `ColaboradorResponse` (soft-deactivate) |
 | `POST /ponto/` | bearer | multipart `geo`, `imagem` | punch as token holder |
@@ -109,8 +112,8 @@ Read from the controllers in `presentation/controller/` on 2026-06-23. **Trust t
 
 **Shapes that matter for the UI**
 
-- `ColaboradorResponse` = `{ cpf, nome, login, empresa_id, status }`. **No `gerente`.**
-- JWT claims = `{ sub (=login), cpf, empresa_id }`. **No `gerente`.** → the client cannot tell managers from collaborators today (blocks the manager flow — AUTHZ-1).
+- `ColaboradorResponse` = `{ cpf, nome, login, empresa_id, status, gerente }`. (`gerente` added by AUTHZ-1, 2026-06-23.)
+- JWT claims = `{ sub (=login), cpf, empresa_id, gerente }` on **both** login and registration tokens (AUTHZ-1 done). → the client can now distinguish managers; `RequireManager` and role routing are unblocked. (Bootstrap caveat: no manager exists until one is seeded — see §4 note.)
 - `BatidaItemResponse` (inside `/dia` and `/historico`) = `{ id, colaborador_id, geo, batida (datetime), tipo: "entrada"|"saida" }`. `tipo` is derived server-side by sequence position.
 - `/relatorio/dia` returns `total` (count) + ordered `batidas` for the day — this is the employee home's "today's punches" source.
 - Registration's `facial` field is currently **required** by `RegistroColaboradorRequest`; until BIO-1 removes it, the client sends `facial: []` and enrolls separately via `cadastrar-biometria`.
