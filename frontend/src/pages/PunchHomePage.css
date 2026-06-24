@@ -47,63 +47,14 @@
   margin-top: var(--space-lg);
 }
 
+/* Wraps the shared Spinner during submit. */
 .punch-home__status {
   margin: var(--space-lg) 0;
   text-align: center;
-  font-size: 1.125rem;
-  color: var(--color-text-muted);
 }
 
-/* Punch result banner. */
-.punch-result {
-  margin-top: var(--space-lg);
-  padding: var(--space-md);
-  border-radius: var(--radius);
-  text-align: center;
-}
-
-.punch-result--success {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.punch-result--denied {
-  background: #fef9c3;
-  color: #854d0e;
-}
-
-.punch-result--not-enrolled {
-  background: #e0f2fe;
-  color: #075985;
-}
-
-.punch-result--error {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.punch-result__message {
-  margin: 0;
-  font-weight: 600;
-}
-
-.punch-result__action {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  margin-top: var(--space-md);
-}
-
-.punch-result__dismiss {
-  margin-top: var(--space-sm);
-  background: none;
-  border: none;
-  color: inherit;
-  text-decoration: underline;
-  cursor: pointer;
-  min-height: var(--tap-target);
-}
+/* Punch result feedback now lives in the shared PunchResult component
+   (components/PunchResult.css). */
 
 /* Today's punches. */
 .punch-home__today {
@@ -124,14 +75,6 @@
 .punch-home__count {
   color: var(--color-text-muted);
   font-size: 0.9rem;
-}
-
-.punch-home__muted {
-  color: var(--color-text-muted);
-}
-
-.punch-home__error {
-  color: #991b1b;
 }
 
 .punch-card-list {

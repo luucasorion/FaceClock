@@ -26,6 +26,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProfileForm from '../components/ProfileForm.jsx';
+import Spinner from '../components/Spinner.jsx';
+import EmptyState from '../components/EmptyState.jsx';
+import ErrorBanner from '../components/ErrorBanner.jsx';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { me, editarPerfil } from '../api/colaborador.js';
 import { historico } from '../api/relatorio.js';
@@ -158,12 +161,10 @@ export default function ProfilePage() {
 
       {/* Profile section */}
       <section className="profile-page__section" aria-label="Dados do perfil">
-        {loadingProfile && <p className="auth-subtitle">Carregando perfil…</p>}
+        {loadingProfile && <Spinner label="Carregando perfil…" />}
 
         {!loadingProfile && profileError && (
-          <p className="form-error" role="alert">
-            {profileError}
-          </p>
+          <ErrorBanner message={profileError} onRetry={loadProfile} />
         )}
 
         {!loadingProfile && !profileError && profile && (
@@ -227,16 +228,17 @@ export default function ProfilePage() {
           </div>
         </form>
 
-        {historyError && (
-          <p className="form-error" role="alert">
-            {historyError}
-          </p>
+        {searching && <Spinner label="Buscando histórico…" />}
+
+        {!searching && historyError && (
+          <ErrorBanner message={historyError} onRetry={handleSearch} />
         )}
 
-        {searched && !hasResults && !historyError && (
-          <p className="auth-subtitle">
-            Nenhum ponto encontrado para o período selecionado.
-          </p>
+        {!searching && searched && !hasResults && !historyError && (
+          <EmptyState
+            icon="🗓️"
+            message="Nenhum ponto encontrado para o período selecionado."
+          />
         )}
 
         {hasResults && (

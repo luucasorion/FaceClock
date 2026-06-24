@@ -9,14 +9,10 @@
 //     The list refreshes after a successful punch.
 //   - Reach their profile via a circular button in the top corner (→ /perfil).
 //
-// Result-state taxonomy (mapped from response / ApiError.status):
-//   success (2xx) → punched
-//   401           → "face não reconhecida"
-//   429           → "muito cedo" (BR02)
-//   400           → "not enrolled" (collaborator has no stored embedding —
-//                   backend returns 400 "não possui biometria"); show a prompt
-//                   to enroll first, linking to /enroll.
-//   other         → generic message from ApiError
+// Result-state taxonomy is shared with the kiosk via the PunchResult component +
+// mapPunchError helper (FE-PUNCH-3): success / not-recognized (401) /
+// too-soon (429, BR02) / not-enrolled (400 w/ "biometria" → enroll link) /
+// error (incl. the 400 invalid-image case).
 //
 // The camera flow is toggleable: CameraCapture mounts only while clocking in
 // and is unmounted (releasing the camera) once a result is shown.
@@ -24,6 +20,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import CameraCapture from '../components/CameraCapture.jsx';
+import PunchResult, { mapPunchError } from '../components/PunchResult.jsx';
+import Spinner from '../components/Spinner.jsx';
+import EmptyState from '../components/EmptyState.jsx';
+import ErrorBanner from '../components/ErrorBanner.jsx';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { baterPonto } from '../api/ponto.js';
 import { dia } from '../api/relatorio.js';
@@ -125,23 +125,13 @@ export default function PunchHomePage() {
       )}
 
       {phase === 'submitting' && (
-        <p className="punch-home__status" role="status">
-          Registrando…
-        </p>
+        <div className="punch-home__status">
+          <Spinner label="Registrando…" />
+        </div>
       )}
 
       {phase === 'result' && result && (
-        <div className={`punch-result punch-result--${result.kind}`} role="status">
-          <p className="punch-result__message">{result.message}</p>
-          {result.kind === 'not-enrolled' && (
-            <Link to="/enroll" className="btn-primary punch-result__action">
-              Cadastrar minha face
-            </Link>
-          )}
-          <button type="button" className="punch-result__dismiss" onClick={dismissResult}>
-            Fechar
-          </button>
-        </div>
+        <PunchResult result={result} onRetry={dismissResult} retryLabel="Fechar" />
       )}
 
       {/* Today's punches. */}
@@ -155,16 +145,14 @@ export default function PunchHomePage() {
           )}
         </div>
 
-        {loadingResumo && <p className="punch-home__muted">Carregando…</p>}
+        {loadingResumo && <Spinner label="Carregando…" />}
 
         {!loadingResumo && resumoError && (
-          <p className="punch-home__error" role="alert">
-            {resumoError}
-          </p>
+          <ErrorBanner message={resumoError} onRetry={loadResumo} />
         )}
 
         {!loadingResumo && !resumoError && resumo && resumo.batidas?.length === 0 && (
-          <p className="punch-home__muted">Nenhum ponto registrado hoje ainda.</p>
+          <EmptyState icon="🕒" message="Nenhum ponto registrado hoje ainda." />
         )}
 
         {!loadingResumo && !resumoError && resumo && resumo.batidas?.length > 0 && (
@@ -191,38 +179,4 @@ function formatTime(value) {
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return String(value);
   return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-}
-
-// Map an ApiError (or any thrown error) to a punch-home result state.
-function mapPunchError(err) {
-  const status = err && typeof err.status === 'number' ? err.status : null;
-  if (status === 401) {
-    return { kind: 'denied', message: 'Face não reconhecida. Tente novamente.' };
-  }
-  if (status === 429) {
-    return { kind: 'denied', message: 'Muito cedo — aguarde alguns minutos para bater novamente.' };
-  }
-  if (status === 400) {
-    // The backend returns 400 in two distinct cases. Disambiguate by the
-    // detail/message text rather than treating every 400 as "not enrolled":
-    //   - "...não possui biometria facial cadastrada" → collaborator has no
-    //     stored embedding → prompt enrollment.
-    //   - "Imagem inválida ou nenhum rosto detectado" → bad capture → let the
-    //     (possibly already-enrolled) user simply retry, no enroll prompt.
-    const detailText = `${(err && err.detail) || ''} ${(err && err.message) || ''}`.toLowerCase();
-    if (detailText.includes('biometria')) {
-      return {
-        kind: 'not-enrolled',
-        message: 'Você ainda não cadastrou sua face. Cadastre sua biometria para bater o ponto.',
-      };
-    }
-    return {
-      kind: 'error',
-      message: 'Imagem inválida, tente novamente.',
-    };
-  }
-  return {
-    kind: 'error',
-    message: (err && err.message) || 'Não foi possível registrar o ponto. Tente novamente.',
-  };
 }

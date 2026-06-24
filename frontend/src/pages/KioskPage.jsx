@@ -5,11 +5,10 @@
 // no token). A prominent "Bater ponto" button opens CameraCapture; on capture
 // the Blob is submitted to ponto.baterPontoEmbarcado({ blob, geo }).
 //
-// Result-state taxonomy (mapped from the response / ApiError.status):
-//   success (2xx) → recognized + punched
-//   401           → "face não reconhecida"
-//   429           → "muito cedo" (BR02 — under 5 min between punches)
-//   other         → generic message from ApiError
+// Result-state taxonomy is shared with the authenticated punch home via the
+// PunchResult component + mapPunchError helper (FE-PUNCH-3):
+//   success / not-recognized (401) / too-soon (429, BR02) / error.
+// (not-enrolled cannot occur here: the kiosk recognizes across all faces.)
 //
 // After a result the screen auto-resets to the ready state for the next person
 // (short timeout) so the whole interaction stays near the ~3s target. A manual
@@ -18,6 +17,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import CameraCapture from '../components/CameraCapture.jsx';
+import PunchResult, { mapPunchError } from '../components/PunchResult.jsx';
+import Spinner from '../components/Spinner.jsx';
 import { baterPontoEmbarcado } from '../api/ponto.js';
 import { acquireGeo } from '../lib/geo.js';
 import './KioskPage.css';
@@ -113,36 +114,16 @@ export default function KioskPage() {
       )}
 
       {phase === 'submitting' && (
-        <div className="kiosk-status" role="status">
-          <p className="kiosk-instruction">Reconhecendo…</p>
+        <div className="kiosk-status">
+          <Spinner label="Reconhecendo…" />
         </div>
       )}
 
       {phase === 'result' && result && (
-        <div className={`kiosk-result kiosk-result--${result.kind}`} role="status">
-          <p className="kiosk-result__message">{result.message}</p>
-          <div className="thumb-zone">
-            <button type="button" className="btn-primary" onClick={goReady}>
-              Próxima pessoa
-            </button>
-          </div>
+        <div className="kiosk-result">
+          <PunchResult result={result} onReset={goReady} resetLabel="Próxima pessoa" />
         </div>
       )}
     </main>
   );
-}
-
-// Map an ApiError (or any thrown error) to a kiosk result state.
-function mapPunchError(err) {
-  const status = err && typeof err.status === 'number' ? err.status : null;
-  if (status === 401) {
-    return { kind: 'denied', message: 'Face não reconhecida. Tente novamente.' };
-  }
-  if (status === 429) {
-    return { kind: 'denied', message: 'Muito cedo — aguarde alguns minutos para bater novamente.' };
-  }
-  return {
-    kind: 'error',
-    message: (err && err.message) || 'Não foi possível registrar o ponto. Tente novamente.',
-  };
 }

@@ -17,6 +17,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { listar } from '../api/colaborador.js';
+import Spinner from '../components/Spinner.jsx';
+import EmptyState from '../components/EmptyState.jsx';
+import ErrorBanner from '../components/ErrorBanner.jsx';
 import '../styles/forms.css';
 import './ManagerEmployeesPage.css';
 
@@ -68,16 +71,12 @@ export default function ManagerEmployeesPage() {
         </Link>
       </header>
 
-      {loading && <p className="auth-subtitle">Carregando colaboradores…</p>}
+      {loading && <Spinner label="Carregando colaboradores…" />}
 
-      {!loading && error && (
-        <p className="form-error" role="alert">
-          {error}
-        </p>
-      )}
+      {!loading && error && <ErrorBanner message={error} onRetry={load} />}
 
       {!loading && !error && !hasRows && (
-        <p className="auth-subtitle">Nenhum colaborador encontrado.</p>
+        <EmptyState icon="👥" message="Nenhum colaborador encontrado." />
       )}
 
       {!loading && !error && hasRows && (
