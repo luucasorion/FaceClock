@@ -221,12 +221,16 @@ export default function ProfilePage() {
             )}
 
             {!loadingProfile && !profileError && profile && (
+              // Self-edit deactivated (user request 2026-06-24): render the
+              // profile read-only. Re-enable by removing `readOnly` (and the
+              // self-edit wiring below stays intact for that).
               <ProfileForm
                 colaborador={profile}
                 editableFields={EDITABLE_FIELDS}
                 onSave={handleSave}
                 saving={saving}
                 error={saveError}
+                readOnly
               />
             )}
           </CardContent>

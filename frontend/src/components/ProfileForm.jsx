@@ -80,6 +80,7 @@ export default function ProfileForm({
   saving = false,
   error = '',
   disabled = false,
+  readOnly = false,
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(() => initialDraft(colaborador));
@@ -242,6 +243,7 @@ export default function ProfileForm({
         })}
       </Stack>
 
+      {readOnly ? null : (
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
         spacing={2}
@@ -276,6 +278,7 @@ export default function ProfileForm({
           </Button>
         )}
       </Stack>
+      )}
     </Box>
   );
 }
