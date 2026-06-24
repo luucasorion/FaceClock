@@ -70,8 +70,8 @@ The frontend scaffold now exists (`frontend/`, React+Vite); the screens are bein
 
 | Group | Tasks |
 |---|---|
-| ✅ Done | FE-SHARED-1, FE-SHARED-2, FE-SHARED-3 |
-| ⬜ P0 | FE-SHARED-4, FE-MENU-1, FE-AUTH-1, FE-AUTH-2, FE-AUTH-3, FE-PUNCH-1, FE-PUNCH-2 |
+| ✅ Done | FE-SHARED-1, FE-SHARED-2, FE-SHARED-3, FE-SHARED-4 |
+| ⬜ P0 | FE-MENU-1, FE-AUTH-1, FE-AUTH-2, FE-AUTH-3, FE-PUNCH-1, FE-PUNCH-2 |
 | ⬜ P1 | FE-SHARED-5, FE-SHARED-6, FE-ENROLL-1, FE-PROFILE-1, FE-MANAGER-1, FE-MANAGER-2 |
 | ⬜ P2 | FE-PUNCH-3, FE-SHARED-7 |
 
@@ -195,7 +195,7 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
 
 #### [FE-SHARED-4] `CameraCapture` component (oval face guide → Blob)
 - **Priority:** P0
-- **Status:** todo
+- **Status:** done — 2026-06-23. `src/components/CameraCapture.jsx` (+ co-located `.css`): front-camera `getUserMedia`, live `<video playsInline muted>` with oval guide overlay, `.thumb-zone` capture button. Captures the frame to an off-screen canvas → `image/jpeg` Blob → `onCapture(blob)`. Props: `onCapture` (req), `onError`, `captureLabel`, `quality`. Stops all tracks on unmount AND after handoff; no object URLs, nothing persisted (NFR05). Graceful permission/no-camera/insecure-context messages. **Verified:** esbuild JSX syntax check + `npm run build` green. Consumers (FE-PUNCH-1/2, FE-ENROLL-1) mount it inside `.app-shell`.
 - **Why it exists:** Three flows (kiosk punch, authenticated punch, biometric enrollment) all need the same capture experience. The client never runs recognition (NFR05) — it only captures bytes and hands them to a caller-supplied submit.
 - **What must be done:**
   - `frontend/src/components/CameraCapture.jsx`: open `getUserMedia` (prefer front camera, `facingMode: "user"`), render the live video with an **oval face-guide overlay**, and a large capture button. On capture, draw the current frame to a canvas and export a `Blob`.

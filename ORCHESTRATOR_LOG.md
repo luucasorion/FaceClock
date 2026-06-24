@@ -114,6 +114,13 @@ for AUTHZ-2, AUTH-4 claims shape, and the frontend manager flow.
 - **Commit:** `a77de5a`.
 - **Next:** FE-SHARED-4 (`CameraCapture` — getUserMedia + oval guide → Blob; reused by kiosk/punch/enroll).
 
+### Cycle 12 — FE-SHARED-4 (P0, `TASKS_FRONTEND.md`) — ✅ DONE
+- **Implementation:** `CameraCapture.jsx` + co-located CSS — front-camera stream, oval guide, capture→jpeg Blob→onCapture, track cleanup on unmount+handoff (NFR05), graceful permission/no-camera errors.
+- **Verify:** esbuild JSX syntax check (component not yet imported by entry, so `node --check` can't parse JSX and vite build wouldn't include it) + `npm run build` green. **Established the unreferenced-JSX gate: `node -e "esbuild.transformSync(..., {loader:'jsx'})"`.**
+- **Commit:** `2eec5cc`.
+- **All 4 shared P0 blocks (FE-SHARED-1..4) done.** Next: P0 screens — FE-MENU-1, then FE-AUTH-1/2/3, FE-PUNCH-1/2 (these replace App placeholders, so vite build compiles them as the real gate).
+
+
 
 
 
