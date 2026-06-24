@@ -1,10 +1,7 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.orm import Session
 
 from infra.security.token_service import TokenService
-from infra.db.database import get_db
-from infra.repositories.colaborador_repository import ColaboradorRepository
 
 security = HTTPBearer()
 token_service = TokenService()
@@ -25,10 +22,7 @@ def get_current_colaborador(
 
 def require_manager(
     payload: dict = Depends(get_current_colaborador),
-    db: Session = Depends(get_db),
 ) -> dict:
-    repo = ColaboradorRepository(db)
-    colaborador = repo.buscar_por_login(payload["sub"])
-    if not colaborador or not colaborador.gerente:
+    if not payload.get("gerente"):
         raise HTTPException(status_code=403, detail="Acesso restrito a gerentes")
     return payload

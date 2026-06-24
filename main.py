@@ -53,6 +53,22 @@ def startup():
             )
             conn.commit()
 
+        # create_all only builds indexes for NEW tables — add them idempotently
+        # for pre-existing databases.
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_batida_colaborador_batida "
+                "ON batidas_ponto (colaborador_id, batida)"
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_colaborador_empresa_id "
+                "ON colaboradores (empresa_id)"
+            )
+        )
+        conn.commit()
+
 
 if __name__ == "__main__":
     import uvicorn

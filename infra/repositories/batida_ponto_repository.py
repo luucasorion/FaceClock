@@ -35,7 +35,31 @@ class BatidaPontoRepository:
         colaborador_id: str,
         data_inicio: datetime,
         data_fim: datetime,
+        page: int | None = None,
+        page_size: int | None = None,
     ) -> list[BatidaPonto]:
+
+        query = (
+            self.db.query(BatidaPonto)
+            .filter(
+                BatidaPonto.colaborador_id == colaborador_id,
+                BatidaPonto.batida >= data_inicio,
+                BatidaPonto.batida <= data_fim,
+            )
+            .order_by(BatidaPonto.batida.asc())
+        )
+
+        if page is not None and page_size is not None:
+            query = query.offset((page - 1) * page_size).limit(page_size)
+
+        return query.all()
+
+    def contar_por_colaborador(
+        self,
+        colaborador_id: str,
+        data_inicio: datetime,
+        data_fim: datetime,
+    ) -> int:
 
         return (
             self.db.query(BatidaPonto)
@@ -44,8 +68,7 @@ class BatidaPontoRepository:
                 BatidaPonto.batida >= data_inicio,
                 BatidaPonto.batida <= data_fim,
             )
-            .order_by(BatidaPonto.batida.asc())
-            .all()
+            .count()
         )
 
     def listar_por_empresa(
@@ -53,9 +76,11 @@ class BatidaPontoRepository:
         empresa_id: str,
         data_inicio: datetime,
         data_fim: datetime,
+        page: int | None = None,
+        page_size: int | None = None,
     ) -> list[BatidaPonto]:
 
-        return (
+        query = (
             self.db.query(BatidaPonto)
             .join(Colaborador, BatidaPonto.colaborador_id == Colaborador.cpf)
             .filter(
@@ -64,5 +89,9 @@ class BatidaPontoRepository:
                 BatidaPonto.batida <= data_fim,
             )
             .order_by(BatidaPonto.batida.asc())
-            .all()
         )
+
+        if page is not None and page_size is not None:
+            query = query.offset((page - 1) * page_size).limit(page_size)
+
+        return query.all()

@@ -1,0 +1,131 @@
+/* FE-PROFILE-1 — Employee profile + history layout.
+   Mobile-first; reuses base.css tokens and forms.css primitives. No horizontal
+   scroll at mobile widths; primary actions stay reachable. */
+
+.profile-page {
+  gap: var(--space-lg);
+}
+
+.profile-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.profile-page__back {
+  width: auto;
+  min-width: 0;
+  padding: 0 var(--space-md);
+  flex: 0 0 auto;
+  align-self: flex-start;
+}
+
+.profile-page__section {
+  margin-bottom: var(--space-lg);
+}
+
+.profile-page__section-title {
+  margin: 0 0 var(--space-md);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+/* History filters: stacked on mobile, side-by-side on wider screens. */
+.profile-history__filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.profile-history__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.profile-history__list {
+  list-style: none;
+  margin: var(--space-md) 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.profile-history__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.profile-history__item--entrada {
+  border-left-color: #14633a;
+}
+
+.profile-history__item--saida {
+  border-left-color: #9b4d1c;
+}
+
+.profile-history__tipo {
+  font-weight: 600;
+}
+
+.profile-history__when {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.profile-history__pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.profile-history__pager .btn-secondary {
+  width: auto;
+  min-width: 0;
+  flex: 0 0 auto;
+  padding: 0 var(--space-md);
+}
+
+.profile-history__page-info {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  flex: 1 1 auto;
+}
+
+@media (min-width: 481px) {
+  .profile-history__filters {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+
+  .profile-history__filters .form-field {
+    flex: 1 1 160px;
+    margin-bottom: 0;
+  }
+
+  .profile-history__actions {
+    flex-direction: row;
+    flex: 1 1 100%;
+    margin-top: var(--space-md);
+  }
+
+  .profile-history__actions .btn-primary,
+  .profile-history__actions .btn-secondary {
+    width: auto;
+    min-width: 160px;
+  }
+}

@@ -50,6 +50,7 @@ def login_colaborador(
         "sub": result["login"],
         "cpf": result["cpf"],
         "empresa_id": result["empresa_id"],
+        "gerente": result["gerente"],
     })
 
     return AuthTokenResponse(

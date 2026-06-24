@@ -53,7 +53,8 @@ class Colaborador(Base):
 
     empresa_id = Column(
         String,
-        ForeignKey("empresas.cnpj")
+        ForeignKey("empresas.cnpj"),
+        index=True
     )
 
     empresa = relationship(

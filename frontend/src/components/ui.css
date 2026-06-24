@@ -1,0 +1,117 @@
+/* FE-SHARED-7 — shared UI primitives (Spinner, EmptyState, ErrorBanner, Toast).
+   Mobile-first, reuses base.css tokens. No horizontal scroll; tap targets ≥48px. */
+
+/* ----- Spinner ------------------------------------------------------------- */
+.ui-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-lg) 0;
+  color: var(--color-text-muted);
+}
+
+.ui-spinner__circle {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: ui-spin 0.7s linear infinite;
+}
+
+.ui-spinner__label {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+@keyframes ui-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-spinner__circle {
+    animation-duration: 1.6s;
+  }
+}
+
+/* ----- EmptyState ---------------------------------------------------------- */
+.ui-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-sm);
+  padding: var(--space-lg) var(--space-md);
+  color: var(--color-text-muted);
+}
+
+.ui-empty__icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.ui-empty__message {
+  margin: 0;
+}
+
+/* ----- ErrorBanner --------------------------------------------------------- */
+.ui-error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin: 0 0 var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius);
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #f5c2c2;
+  font-size: 0.95rem;
+}
+
+.ui-error__message {
+  margin: 0;
+  flex: 1;
+}
+
+.ui-error__retry {
+  flex: 0 0 auto;
+  min-height: var(--tap-target);
+  padding: 0 var(--space-md);
+  border: 1px solid currentColor;
+  border-radius: var(--radius);
+  background: transparent;
+  color: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* ----- Toast --------------------------------------------------------------- */
+.ui-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--space-lg) + var(--safe-bottom));
+  transform: translateX(-50%);
+  z-index: 50;
+  max-width: calc(var(--shell-max-width) - 2 * var(--space-md));
+  width: calc(100% - 2 * var(--space-md));
+  padding: var(--space-md);
+  border-radius: var(--radius);
+  background: var(--color-text);
+  color: #ffffff;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  font-weight: 600;
+}
+
+.ui-toast--success {
+  background: #166534;
+}
+
+.ui-toast--error {
+  background: #991b1b;
+}

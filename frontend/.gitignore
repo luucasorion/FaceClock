@@ -1,0 +1,7 @@
+node_modules/
+dist/
+
+# Re-include frontend source dirs that the repo-root .gitignore catches
+# (root ignores `lib/` for Python; our SPA has src/lib for client helpers).
+!src/lib/
+!src/lib/**

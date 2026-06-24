@@ -5,6 +5,9 @@ from deepface import DeepFace
 from scipy.spatial.distance import cosine
 
 
+LIMIAR_RECONHECIMENTO = 0.65  # BR01
+
+
 class FacialService:
 
     def __init__(self, model_name: str = "ArcFace"):
@@ -62,7 +65,7 @@ class FacialService:
         self,
         embedding_1: list[float],
         embedding_2: list[float],
-        limiar: float = 0.6
+        limiar: float = LIMIAR_RECONHECIMENTO
     ) -> bool:
 
         similaridade = self.calcular_similaridade(

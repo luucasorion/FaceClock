@@ -1,0 +1,93 @@
+/* CameraCapture component styles (FE-SHARED-4).
+   Component-specific only — shared tokens/classes (.btn-primary, .thumb-zone)
+   live in base.css and are reused here, not duplicated. */
+
+.camera-capture {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Portrait, full-bleed video stage. The video fills the stage and is cropped
+   to cover, so framing matches the oval guide regardless of camera aspect. */
+.camera-capture__stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  background: #000;
+  overflow: hidden;
+  border-radius: var(--radius, 12px);
+  aspect-ratio: 3 / 4;
+}
+
+.camera-capture__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Mirror the front camera so the preview feels like a mirror. */
+  transform: scaleX(-1);
+}
+
+/* Centered oval face-guide overlay. */
+.camera-capture__guide {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 62%;
+  /* Taller than wide — face-shaped oval. */
+  aspect-ratio: 3 / 4;
+  border: 3px dashed rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+.camera-capture__hint {
+  position: absolute;
+  bottom: var(--space-md, 16px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  text-align: center;
+  color: #fff;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+/* Large auto-capture countdown digit centered over the video (FE-PUNCH-4).
+   Only rendered when the optional autoCaptureCountdown prop is on. */
+.camera-capture__countdown {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: clamp(5rem, 22vmin, 12rem);
+  font-weight: 800;
+  line-height: 1;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+}
+
+/* The capture canvas is never shown; it only grabs a frame. */
+.camera-capture__canvas {
+  display: none;
+}
+
+/* Error state replaces the stage with a clear message. */
+.camera-capture--error {
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-lg, 24px);
+  text-align: center;
+}
+
+.camera-capture__error-msg {
+  margin: 0;
+  color: var(--color-text, #1a1d21);
+  font-weight: 600;
+}

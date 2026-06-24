@@ -54,9 +54,9 @@ Based on the real code review of 2026-06-23 (re-audited against code on 2026-06-
 
 | Group | Tasks |
 |---|---|
-| ✅ Done | AUTH-1, AUTH-2, AUTH-3, BIO-3, PUNCH-1, EMPRESA-1, EMPRESA-2, REPORT-1, REPORT-2, REPORT-3, REPORT-4, COLAB-1, COLAB-2, PUNCH-2, BIO-2 |
-| 🚧 In progress | AUTHZ-1, AUTHZ-2, API-1 |
-| ⬜ To do | RECOG-1, AUTH-4, COLAB-3, REPORT-6, REPORT-5, PUNCH-3, BIO-1, RECOG-2, ARCH-1, ARCH-2, ARCH-3, ARCH-4 |
+| ✅ Done | AUTH-1, AUTH-2, AUTH-3, BIO-3, PUNCH-1, EMPRESA-1, EMPRESA-2, REPORT-1, REPORT-2, REPORT-3, REPORT-4, COLAB-1, COLAB-2, PUNCH-2, BIO-2, RECOG-1, AUTHZ-1, AUTHZ-2, AUTH-4, REPORT-6, COLAB-3, REPORT-5, PUNCH-3, AUTHZ-3 |
+| 🚧 In progress | API-1 |
+| ⬜ To do | BIO-1, RECOG-2, AUTHZ-4, ARCH-1, ARCH-2, ARCH-3, ARCH-4 |
 
 > Note (2026-06-23 re-audit): `application/use_cases/ponto/get_ponto_usecase.py` no longer exists — its history-grouping logic was relocated to `application/use_cases/relatorio/` (`_agrupamento.py` + the report use cases). Task file-references were corrected accordingly.
 
@@ -84,18 +84,12 @@ Based on the real code review of 2026-06-23 (re-audited against code on 2026-06-
 - SQLite + auto schema creation + lightweight `gerente` migration at startup — `infra/db/database.py`, `main.py`.
 
 ### Partially implemented
-- **Authorization (AUTHZ)**: `gerente` is persisted; `require_manager` is built and applied broadly (empresa edit/deactivate, collaborator edit/deactivate, company reports); BR06 company scoping is enforced on collaborator edit/deactivate, collaborator listing, and reports. **But**: registration hard-codes `gerente=False` (no controlled promotion path), and `gerente` is absent from JWT claims and from `ColaboradorResponse` (so `require_manager` still re-queries the DB). AUTHZ-1 remainder.
-- **Punch thresholds**: core punch flow works (including BR02), but thresholds deviate from BR01 — login uses the `0.6` default and embarcado uses a literal `0.4` (vs required `0.65`). RECOG-1.
+- **Authorization (AUTHZ)**: `gerente` is persisted and now surfaced in the JWT claims (login + registration tokens, identical shape) and in `ColaboradorResponse` (AUTHZ-1 done); `require_manager` is built and applied broadly (empresa edit/deactivate, collaborator edit/deactivate, company reports); BR06 company scoping is enforced on collaborator edit/deactivate, collaborator listing, and reports. Controlled promotion is intentionally manager-only via `PUT /colaborador/{cpf}`; public registration stays `gerente=False`. The first-manager **bootstrap is now solved (AUTHZ-3)**: `POST /empresa` atomically creates a CNPJ-derived placeholder manager — the only remaining hardening is AUTHZ-4 (force password change, since that bootstrap credential is predictable).
+- **Punch thresholds**: aligned to BR01 (0.65) via a single `LIMIAR_RECONHECIMENTO` constant in `facial_service.py`, reused by the login punch (`validar_rosto` default) and the embarcado punch cutoff (RECOG-1 done).
 - **Response shaping (API-1)**: collaborator and empresa endpoints use response DTOs, but punch endpoints still return ad-hoc dicts and login returns a hand-built dict.
 - **Domain model**: no dedicated PunchProfile entity — `Empresa.limite_hora` is the only hour limit.
 
 ### Still missing
-- Recognition thresholds aligned to BR01 (0.65) — still 0.6 / 0.4 (RECOG-1).
-- Bearer token issued on registration (AUTH-4).
-- `gerente` in JWT claims and `ColaboradorResponse`; a controlled manager-promotion path (AUTHZ-1 remainder).
-- Daily self punch-summary endpoint — "today's punches" (REPORT-6).
-- Composite DB indexes + pagination on punch history queries (REPORT-5).
-- Punch robustness: a live `TypeError` when an unenrolled collaborator punches via the login flow (`None`-guard on `colaborador.facial`), plus FacialService error translation and upload validation (PUNCH-3).
 - Single hardened enrollment path — registration still accepts a client-supplied `facial` list alongside the dedicated server-side endpoint (BIO-1).
 - Company existence/active validation at registration (RECOG-2).
 - Punch/login output DTOs (API-1 remainder); domain exceptions (ARCH-2); repository interfaces (ARCH-3); centralized DI wiring (ARCH-4); `FacialService` relocated to `infra/` (ARCH-1).
@@ -383,173 +377,201 @@ Completed tasks, grouped by priority. Retained for traceability and acceptance e
 - **Done when:**
   - N/A — out of scope. Future work tracked separately if RF13 is re-prioritized.
 
+### [RECOG-1] Align recognition thresholds with BR01 (0.65)
+- **Priority:** P0
+- **Status:** done
+- **Why it existed:** BR01 requires a minimum recognition similarity of **0.65** for a valid punch. Previously `FacialService.validar_rosto` defaulted `limiar=0.6`; `BaterPontoUseCase` called it without a threshold (silently 0.6); `BatidaPontoEmbarcadoUseCase` used a literal `0.4`. Both accepted faces that should be rejected.
+- **What was done (verified 2026-06-23):**
+  - Added a single module-level constant `LIMIAR_RECONHECIMENTO = 0.65  # BR01` in `application/services/facial_service.py`.
+  - `validar_rosto`'s default is now `limiar: float = LIMIAR_RECONHECIMENTO`, so the login punch (`BaterPontoUseCase`, which calls it with no threshold) inherits 0.65.
+  - `BatidaPontoEmbarcadoUseCase` imports the constant and rejects `melhor_similaridade < LIMIAR_RECONHECIMENTO` (was `< 0.4`); best-match selection then cutoff order preserved.
+  - Verified no recognition literal `0.6`/`0.4` remains in punch logic; smoke gate green.
+- **Relevant files / areas:**
+  - `application/services/facial_service.py`
+  - `application/use_cases/ponto/batida_ponto_embarcado_usecase.py`
+  - `application/use_cases/ponto/batida_ponto_usecase.py` (unchanged; inherits the default)
+- **Done when:**
+  - ✅ Both punch flows reject matches with similarity < 0.65 (inclusive boundary: 0.65 accepted).
+  - ✅ The threshold is defined in exactly one place and reused by all flows.
+  - ✅ No remaining literal `0.6`/`0.4` recognition thresholds exist in punch logic.
+- **Follow-up (non-blocking):** raising the embarcado cutoff 0.4→0.65 is a meaningful behavior tightening; legitimate blind-recognition punches may now be rejected more often — a recognition-quality concern for QA, not an architecture one.
+
+### [AUTHZ-1] Add `gerente` boolean to Colaborador (RF02)
+- **Priority:** P1
+- **Status:** done
+- **Why it existed:** RF02/BR03 distinguish Manager from Collaborator via a **boolean field (`gerente`) on `Colaborador`**, not a separate entity. The column existed and was persisted, but was absent from JWT claims and `ColaboradorResponse`, and registration advertised an ignored `gerente` field.
+- **What was done (verified 2026-06-23):**
+  - `gerente` Boolean column (default `False`, not null) on `Colaborador` + startup `ALTER TABLE` migration (pre-existing).
+  - `gerente` added to the JWT claims in **both** token-mint sites — login (`login_controller.py` via `LoginColaboradorUseCase`'s returned dict) and registration (`colaborador_controller.py`) — so both tokens carry an identical claim set `sub`/`cpf`/`empresa_id`/`gerente`.
+  - `gerente: bool` added to `ColaboradorResponse` (still no `senha`/`facial`); all construction sites (login `(**result)`, registration `model_validate`, `/me`, `/` list, `PUT`, `DELETE`) verified.
+  - Removed the ignored `gerente` field from the public `RegistroColaboradorRequest` so the API no longer advertises self-promotion; registration stays hard-coded `gerente=False`.
+  - Controlled promotion path: manager-only `PUT /colaborador/{cpf}` (COLAB-2) is the sole way to set `gerente=True`.
+- **Relevant files / areas:**
+  - `domains/models/colaborador.py`, `main.py` (migration)
+  - `presentation/schema/requests/registro_colaborador_request.py` (ignored field removed)
+  - `presentation/schema/responses/colaborador_response.py`
+  - `application/use_cases/colaborador/login_colaborador_usecase.py`
+  - `presentation/controller/colaborador_controller.py`, `login_controller.py`
+- **Done when:**
+  - ✅ `Colaborador` has a persisted `gerente` boolean; existing data continues to work.
+  - ✅ The flag is surfaced in tokens and responses, and settable only in a controlled (manager-gated) way.
+- **Follow-on (separate, not blocking):** first-manager bootstrap (no API path mints the first manager) — resolve via seed/CLI, never by reopening public registration. (AUTHZ-2's claim-read item is now done.)
+
+### [AUTHZ-2] Enforce manager-only access (BR03) and company-scoped access (BR06)
+- **Priority:** P1
+- **Status:** done
+- **Why it existed:** BR03 restricts report export and edit/delete of collaborator/company data to managers; BR06 restricts a collaborator to their own company's data. Coverage and scoping were complete; the last item was decoupling `require_manager` from the DB.
+- **What was done (verified 2026-06-23):**
+  - `require_manager()` now authorizes off the `gerente` JWT claim (`payload.get("gerente")`) — fail-closed — instead of re-querying `ColaboradorRepository`; the `db`/`get_db`/`Session`/repository imports were dropped from `auth.py` (AUTHZ-2 final item, depends on AUTHZ-1's claim).
+  - Applied to empresa edit/deactivate, collaborator edit/deactivate (COLAB-2), and company reports (REPORT-3).
+  - Company scoping (BR06) enforced at the domain level for empresa edit/deactivate, collaborator edit/deactivate, collaborator listing, and reports (`empresa_id` claim check).
+- **Relevant files / areas:**
+  - `presentation/dependencies/auth.py` (`require_manager`)
+  - collaborator, empresa, and report controllers
+- **Done when:**
+  - ✅ Non-managers receive 403 on manager-only endpoints; a manager cannot edit/view another company's data.
+  - ✅ Collaborator edit/deactivate and reports are manager-gated and company-scoped.
+  - ✅ Collaborators can only access their own company's history/profile.
+  - ✅ `require_manager` reads the role from the JWT claim (no DB re-query).
+- **Accepted trade-off:** a demoted/deactivated manager keeps manager access until their token expires (≤ `JWT_EXPIRY_MINUTES`, default 60). Live revocation/short-expiry deferred as a separate decision. Legacy pre-AUTHZ-1 tokens get a clean 403 and self-heal on re-login.
+
+### [AUTH-4] Issue a bearer token on collaborator registration
+- **Priority:** P1
+- **Status:** done
+- **Why it existed:** A collaborator must receive a bearer token upon registration so a newly-registered user reaches protected endpoints without a separate `/auth/login` call.
+- **What was done (verified 2026-06-23):** Confirmed already implemented in `presentation/controller/colaborador_controller.py` — `POST /colaborador/registro/` declares `response_model=AuthTokenResponse`, mints a JWT via `TokenService.gerar_token({...})` with the same claims shape as login (`sub`/`cpf`/`empresa_id`/`gerente` — `gerente` finalized by AUTHZ-1), and returns `AuthTokenResponse(access_token, token_type="bearer", colaborador=ColaboradorResponse)`. No code change was required this cycle; closed by verification.
+- **Relevant files / areas:**
+  - `presentation/controller/colaborador_controller.py` (`registro_colaborador`)
+  - `presentation/schema/responses/auth_response.py` (`AuthTokenResponse`, `token_type` defaults to `"bearer"`)
+  - `infra/security/token_service.py`
+- **Done when:**
+  - ✅ Registration returns a valid signed bearer token plus the safe collaborator DTO.
+  - ✅ The token authenticates against protected endpoints without a separate login call (identical claims to login).
+  - ✅ The response contains no `senha`/`facial` data (`ColaboradorResponse`).
+
+### [REPORT-6] Implement a daily punch-summary endpoint for the authenticated collaborator (RF09)
+- **Priority:** P1
+- **Status:** done
+- **Why it existed:** A collaborator needs a quick "today's punches" self-view (count + times) distinct from the arbitrary-range `/historico` and the manager company report.
+- **What was done (verified 2026-06-23):** Confirmed already implemented and mounted.
+  - `GET /relatorio/dia` — `presentation/controller/relatorio_controller.py:121-139`, protected by `Depends(get_current_colaborador)`, identity from the `cpf` claim; optional `data: date | None` query param defaulting to `datetime.utcnow().date()`.
+  - `HistoricoColaboradorUseCase.resumo_diario(colaborador_id, dia)` builds the single-day window (`time.min`/`time.max`) and **reuses** `historico_colaborador` + `agrupar_por_dia` — no new repository query; `tipo` derivation single-sourced from `_agrupamento.py`.
+  - `ResumoDiarioResponse { colaborador_id, data, total, batidas: list[BatidaItemResponse] }` — `presentation/schema/responses/resumo_diario_response.py`; reuses `BatidaItemResponse`. Matches the frontend contract.
+- **Relevant files / areas:**
+  - `presentation/controller/relatorio_controller.py`
+  - `application/use_cases/relatorio/historico_colaborador_usecase.py`, `_agrupamento.py`
+  - `presentation/schema/responses/resumo_diario_response.py`, `historico_ponto_response.py`
+- **Done when:**
+  - ✅ An authenticated collaborator fetches their own punches for a day: a count plus each punch time and derived entrada/saida type.
+  - ✅ Self-scoped and mounted in OpenAPI (route registered).
+  - ✅ Defaults to today; a specific day via `?data=` is supported.
+
+### [COLAB-3] Add an authenticated self-edit endpoint for a collaborator's own profile
+- **Priority:** P1
+- **Status:** done
+- **Why it existed:** The only edit path was the manager-gated `PUT /colaborador/{cpf}`; there was no endpoint a non-manager could call to update their own record (needed by the frontend employee-profile edit flow, FE-PROFILE-1).
+- **What was done (verified 2026-06-23):**
+  - New `PUT /colaborador/me` on `read_router`, guarded by `Depends(get_current_colaborador)` (any authenticated collaborator), declared **before** `PUT /{cpf}` so `me` isn't captured as a cpf.
+  - New narrow `EdicaoPerfilRequest` (`nome`/`login`/`senha` only — no `gerente`/`empresa_id`/`status`), so privilege/scope fields are unrepresentable at the API boundary.
+  - Reuses `EdicaoColaboradorUseCase` unchanged: identity (`target_cpf`, `requester_empresa_id`, `requester_login`) comes ONLY from the JWT; `gerente=None` is pinned so the manager flag is left unchanged (use case applies fields only `if ... is not None`, never touches `empresa_id`/`status`). Login uniqueness + password re-hash stay centralized.
+  - Returns `ColaboradorResponse` (no `senha`/`facial`).
+- **Relevant files / areas:**
+  - `presentation/controller/colaborador_controller.py` (`editar_perfil`)
+  - `presentation/schema/requests/edicao_perfil_request.py` (new)
+  - `application/use_cases/colaborador/edicao_colaborador_usecase.py` (reused, unchanged)
+- **Done when:**
+  - ✅ A collaborator updates their own `nome`/`login`/`senha` without a manager token.
+  - ✅ Cannot elevate to manager, move companies, or edit another collaborator via this endpoint.
+  - ✅ Password updates stored hashed; response has no `senha`/`facial`.
+  - ✅ Mounted and in OpenAPI (route count 21→22).
+- **Follow-ups (non-blocking, MVP-scope-aware):** (1) changing `login` does NOT reissue the JWT — the token keeps the old `sub` until re-login (would need a wider response shape); (2) optional input-validation hardening on `EdicaoPerfilRequest` (`min_length`, `extra="forbid"`) — input validation is explicitly out of MVP priority and the endpoint is already safe.
+
+### [REPORT-5] Add composite DB indexes and pagination to punch history queries
+- **Priority:** P2
+- **Status:** done
+- **Why it existed:** Time-range queries get slow without indexes as data grows, and unbounded history queries produce oversized payloads.
+- **What was done (verified 2026-06-23):**
+  - Composite index `ix_batida_colaborador_batida` on `BatidaPonto(colaborador_id, batida)` via `__table_args__`; `index=True` on `Colaborador.empresa_id`. Because `create_all` only indexes new tables, idempotent `CREATE INDEX IF NOT EXISTS` statements were added at startup in `main.py` (mirroring the `gerente` migration) using the real table names `batidas_ponto`/`colaboradores`.
+  - `listar_por_colaborador` and `listar_por_empresa` take **optional** `page`/`page_size` (`None` default) and apply `.offset().limit()` ONLY when both are set — pagination is **opt-in**, so the grouped `/historico`, `/dia`, and the company-report overtime math (index-based pairing over the full day) are unchanged. Added `contar_por_colaborador` for full-range count. `data_inicio`/`data_fim` stay required.
+  - New `BatidaPontoResponse` (safe fields `id`/`colaborador_id`/`geo`/`batida`; no embedding) and `HistoricoResponse` envelope `{ total, page, page_size, items }`.
+  - New self-scoped `GET /relatorio/historico/paginado` consuming the envelope (`total` from the count query; `page >= 1`, `page_size` in `[1,200]`).
+- **Relevant files / areas:**
+  - `domains/models/batida_ponto.py`, `domains/models/colaborador.py`, `main.py`
+  - `infra/repositories/batida_ponto_repository.py`
+  - `presentation/controller/relatorio_controller.py`
+  - new: `presentation/schema/responses/historico_response.py`, `batida_ponto_response.py`
+- **Done when:**
+  - ✅ Composite index on `(colaborador_id, batida)` and index on `empresa_id` (live on new + existing DBs).
+  - ✅ Both query methods accept page/page_size and apply correct offset/limit (opt-in).
+  - ✅ `data_inicio`/`data_fim` required.
+  - ✅ History response DTOs use the paginated envelope; never include embedding vectors.
+- **Note:** the paginated endpoint returns raw batidas without `tipo` (by design — task excludes it; `tipo` lives on the grouped `/historico`).
+
+### [PUNCH-3] Robust error handling and edge cases in punch flows
+- **Priority:** P2
+- **Status:** done
+- **Why it existed:** A live `TypeError` (500) when an unenrolled collaborator punched via `/ponto/` (`len(None)`), plus raw `ValueError`s from `FacialService` and no upload validation at the boundary.
+- **What was done (verified 2026-06-23):**
+  - **Live bug fixed:** `BaterPontoUseCase` now guards `if not colaborador.facial or len(colaborador.facial) < 128:` — short-circuits before `len()`, returning the existing clean 400 ("não possui biometria"); no auto-enroll (RF13 out of scope).
+  - The upfront `gerar_embedding(imagem)` in **both** `BaterPontoUseCase` and `BatidaPontoEmbarcadoUseCase` is wrapped in `try/except ValueError` → `HTTPException(400, "Imagem inválida ou nenhum rosto detectado")`. The embarcado per-collaborator `try/except Exception` loop was left unchanged.
+  - Upload validation at the controller via a shared `validar_upload_imagem` helper called by both punch endpoints: 415 non-image content-type, 400 empty, 413 over 5 MB (`MAX_UPLOAD_BYTES`).
+- **Relevant files / areas:**
+  - `application/use_cases/ponto/batida_ponto_usecase.py`
+  - `application/use_cases/ponto/batida_ponto_embarcado_usecase.py`
+  - `presentation/controller/batida_ponto_controller.py`
+  - (`facial_service.py` intentionally unchanged — translation lives in the use cases pending ARCH-2)
+- **Done when:**
+  - ✅ Missing biometrics, invalid images, and no-face cases return clear, consistent errors (no unhandled `ValueError`/`TypeError`).
+  - ✅ Basic upload validation happens at the controller.
+- **Follow-ups (non-blocking):** size cap runs after the body is read into memory (proxy/Content-Length pre-check is the real defense); content-type is client-asserted but degrades gracefully via the `ValueError` translation; enrollment endpoint has the same gaps (BIO-1); use-case `HTTPException`s remain pending ARCH-2.
+
+### [AUTHZ-3] Bootstrap the first manager atomically when a company is created
+- **Priority:** P1
+- **Status:** done
+- **Why it existed:** Manager bootstrap chicken-and-egg (flagged in AUTHZ-1/AUTHZ-2 and EMPRESA-2): public registration forces `gerente=False` and the only promotion path needs an *existing* manager, so a new company had no API way to get its first manager.
+- **What was done (verified 2026-06-24):**
+  - `POST /empresa` now creates, in **one transaction**, a CNPJ-derived placeholder manager `Colaborador`: `cpf="gestor_"+cnpj`, `login=cnpj`, `nome=razao_social`, `senha=HashService.hash(razao_social)` (bcrypt — never plaintext), `gerente=True`, `facial=None`, `empresa_id=cnpj`, `status=True`.
+  - New `EmpresaRepository.criar_com_gestor(empresa, gestor)` adds both + commits **once** (both persist or neither) with an explicit `rollback()` on failure; the existing `criar` is untouched. `CadastroEmpresaUseCase` takes `hash_service`; controller POST wires it.
+  - Sole creation-time `gerente=True` path; public `/colaborador/registro` still forces `False`. CNPJ uniqueness (409) still pre-checked — derived cpf/login can only collide if the CNPJ already exists.
+  - `EmpresaResponse` unchanged (no secret leak; manager `login` == cnpj, already in the response).
+- **Relevant files / areas:**
+  - `application/use_cases/empresa/cadastro_empresa_usecase.py`
+  - `infra/repositories/empresa_repository.py`
+  - `presentation/controller/empresa_controller.py`
+- **Done when:**
+  - ✅ Creating a company creates exactly one active manager atomically.
+  - ✅ The manager logs in immediately (`login`=CNPJ, `senha`=company name) and gets a `gerente:true` JWT. **Runtime-verified:** POST /empresa 201 → login 200 (gerente claim true) → manager-gated `GET /colaborador/` 200; wrong pw 401 (hashed); duplicate cnpj 409.
+  - ✅ No response/log leaks the hash/plaintext; manager `facial` is `None`.
+  - ✅ Public registration still `gerente=False`; AUTHZ-3 is the sole creation-time `gerente=True` path.
+- **Follow-up:** AUTHZ-4 (P2) — the bootstrap credential is predictable/public; force a password change on first manager login (marked with `# TODO(AUTHZ-4)`).
+
 ---
 
 ## 5. 🚧 To do / In progress
 
 The live work queue. Work top-down by priority: **P0 → P1 → P2 → P3**.
 
-### P0 — Critical tasks
-
-#### [RECOG-1] Align recognition thresholds with BR01 (0.65)
-- **Priority:** P0
-- **Status:** todo
-- **Why it exists:** BR01 requires a minimum recognition similarity of **0.65** for a valid punch. Confirmed in code: `FacialService.validar_rosto` still defaults `limiar=0.6`; `BaterPontoUseCase` calls it **without** passing a threshold (so it silently uses 0.6); `BatidaPontoEmbarcadoUseCase` still uses a literal `0.4`. Both accept faces that should be rejected, undermining anti-fraud guarantees. **This is the highest-priority open gap.**
-- **What must be done:**
-  - Define a single canonical threshold constant (0.65) in one place (config or facial service) so it cannot drift between flows.
-  - Update `BaterPontoUseCase` and `BatidaPontoEmbarcadoUseCase` to use the canonical 0.65 threshold.
-  - Change `FacialService.validar_rosto` default to the canonical value (or require it to be passed explicitly) so no caller silently uses a weaker value.
-- **Relevant files / areas:**
-  - `application/services/facial_service.py` (`validar_rosto` default 0.6)
-  - `application/use_cases/ponto/batida_ponto_usecase.py` (calls `validar_rosto` with no threshold)
-  - `application/use_cases/ponto/batida_ponto_embarcado_usecase.py` (literal `0.4`)
-- **Done when:**
-  - Both punch flows reject matches with similarity < 0.65.
-  - The threshold is defined in exactly one place and reused by all flows.
-  - No remaining literal `0.6` or `0.4` recognition thresholds exist in punch logic.
-
 ### P1 — Core product completion tasks
 
-#### [AUTH-4] Issue a bearer token on collaborator registration
-- **Priority:** P1
-- **Status:** todo
-- **Why it exists:** Requirement: a collaborator must receive a bearer token upon registration. Today `POST /colaborador/registro/` returns only a `ColaboradorResponse` (no token), so a newly-registered collaborator must make a separate `/auth/login` call before reaching any protected endpoint. The token-issuing logic already exists in `TokenService`.
-- **What must be done:**
-  - After a successful `RegistrarColaboradorUseCase.execute(...)`, mint a JWT with `TokenService.gerar_token(...)` using the same claims shape as login (`sub`=login, `cpf`, `empresa_id` — and `gerente` once AUTHZ-1 adds it to claims).
-  - Return a typed response wrapping `access_token`, `token_type: "bearer"`, and the existing `ColaboradorResponse` — mirror the login response shape (ties into API-1).
-  - Do not leak the password hash or facial vector in the response (reuse `ColaboradorResponse`).
-- **Relevant files / areas:**
-  - `presentation/controller/colaborador_controller.py` (`registro_colaborador`)
-  - `infra/security/token_service.py`
-  - `presentation/controller/login_controller.py` (claims shape to mirror)
-  - `presentation/schema/responses/` (typed registration/login response model — ties into API-1)
-- **Done when:**
-  - Registration returns a valid signed bearer token plus the safe collaborator DTO.
-  - The token authenticates against protected endpoints without a separate login call.
-  - The response contains no `senha` or `facial` data.
-
-#### [AUTHZ-1] Add `gerente` boolean to Colaborador (RF02)
-- **Priority:** P1
-- **Status:** in progress
-- **Why it exists:** RF02/BR03 distinguish Manager from Collaborator. The role is a **boolean field (`gerente`) on `Colaborador`**, not a separate entity.
-- **What was done:**
-  - `gerente` Boolean column (default `False`, not null) added to `Colaborador` — `domains/models/colaborador.py`.
-  - Startup `ALTER TABLE colaboradores ADD COLUMN gerente ...` migration guards existing DBs — `main.py`.
-  - `RegistroColaboradorRequest` accepts `gerente` and `RegistrarColaboradorUseCase` persists it.
-- **What still needs to be done:**
-  - The controller hard-codes `gerente=False` ("elevation locked until manager guard"). Implement a controlled promotion path (e.g. only an authenticated manager may set it). Until then no manager can be created via the API. (COLAB-2's edit path can set `gerente`, but registration cannot.)
-  - Include `gerente` in the JWT claims (login token currently carries only `sub`, `cpf`, `empresa_id`) so `require_manager` need not re-query the DB.
-  - Surface `gerente` in `ColaboradorResponse`.
-- **Relevant files / areas:**
-  - `domains/models/colaborador.py`, `main.py` (migration)
-  - `presentation/schema/requests/registro_colaborador_request.py`
-  - `presentation/schema/responses/colaborador_response.py`
-  - `application/use_cases/colaborador/registrar_colaborador_usecase.py`
-  - `presentation/controller/colaborador_controller.py`, `login_controller.py` (JWT claims)
-- **Done when:**
-  - ✅ `Colaborador` has a persisted `gerente` boolean; existing data continues to work.
-  - The flag is settable in a controlled way and surfaced in tokens and responses.
-
-#### [AUTHZ-2] Enforce manager-only access (BR03) and company-scoped access (BR06)
-- **Priority:** P1
-- **Status:** in progress
-- **Why it exists:** BR03 restricts report export and edit/delete of collaborator/company data to managers. BR06 restricts a collaborator to their own company's data.
-- **What was done:**
-  - `require_manager()` dependency — checks `gerente` (re-queried via `ColaboradorRepository`) and returns 403 for non-managers — `presentation/dependencies/auth.py`.
-  - Applied to empresa edit/deactivate; collaborator edit/deactivate (COLAB-2); company reports (REPORT-3).
-  - Company scoping (BR06) enforced at the domain level for empresa edit/deactivate, collaborator edit/deactivate, collaborator listing, and reports (`empresa_id` claim check).
-- **What still needs to be done:**
-  - Once `gerente` is in the JWT claims (AUTHZ-1), `require_manager` should read the claim instead of re-querying the DB. This is the only remaining item — the access-control coverage itself is effectively complete.
-- **Relevant files / areas:**
-  - `presentation/dependencies/auth.py` (`require_manager`)
-  - collaborator and report controllers (done)
-- **Done when:**
-  - ✅ Non-managers receive 403 on manager-only endpoints; a manager cannot edit/view another company's data.
-  - ✅ Collaborator edit/deactivate and reports are manager-gated and company-scoped.
-  - ✅ Collaborators can only access their own company's history/profile.
-  - `require_manager` reads the role from the JWT claim (blocked on AUTHZ-1).
-
-#### [REPORT-6] Implement a daily punch-summary endpoint for the authenticated collaborator (RF09)
-- **Priority:** P1
-- **Status:** todo
-- **Why it exists:** A collaborator must be able to see, for the current day, **how many punches they have recorded so far and at what times**. The existing history endpoints (REPORT-3) cover arbitrary date ranges and a manager's company-wide report, but there is no quick "today's punches" self-view.
-- **What must be done:**
-  - Add a self-access endpoint (e.g. `GET /relatorio/hoje` or `GET /relatorio/dia`) protected by `Depends(get_current_colaborador)`; identity from the `cpf` claim (matches `BatidaPonto.colaborador_id`, **not** `sub`).
-  - Default the day to "today" (server clock); optionally accept a `data` query param.
-  - Reuse the existing history retrieval (`historico_colaborador` in the `relatorio/` package / `BatidaPontoRepository.listar_por_colaborador`) with `data_inicio`/`data_fim` set to the start/end of the chosen day rather than adding a new repository query.
-  - Return a typed response with the punch `total` (count) and the ordered list of times (reuse/compose `BatidaItemResponse`, including the derived `tipo`).
-- **Relevant files / areas:**
-  - `presentation/controller/relatorio_controller.py` (new endpoint)
-  - `application/use_cases/relatorio/historico_colaborador_usecase.py`
-  - `infra/repositories/batida_ponto_repository.py` (`listar_por_colaborador`)
-  - new/extend: `presentation/schema/responses/` (daily-summary response DTO: `total` + ordered punch items)
-  - `presentation/dependencies/auth.py` (`get_current_colaborador`)
-- **Done when:**
-  - An authenticated collaborator can fetch their own punches for the current day: a count plus each punch time (and derived entrada/saida type).
-  - The endpoint is self-scoped and mounted in OpenAPI.
-  - Defaults to today; querying a specific day is supported.
-
-#### [COLAB-3] Add an authenticated self-edit endpoint for a collaborator's own profile
-- **Priority:** P1
-- **Status:** todo
-- **Why it exists:** A collaborator must be able to edit their own profile (RF09 / RF05 self-service), but the only edit path today is `PUT /colaborador/{cpf}`, which is gated by `require_manager`. There is no endpoint a non-manager can call to update their own record, so the frontend employee-profile edit flow has nothing to call. Reusing the manager endpoint from an employee context is wrong (it would 403 for non-managers and conflates self-edit with manager-edit authorization).
-- **What must be done:**
-  - Add a self-scoped endpoint (e.g. `PUT /colaborador/me`) protected by `Depends(get_current_colaborador)`; identity comes from the token (`sub`/`cpf`), never from a path param or body.
-  - Allow editing only safe self-service fields (e.g. `nome`, `login`, `senha`); **must not** allow a collaborator to set `gerente`, change `empresa_id`, or reactivate/deactivate themselves.
-  - Reuse `EdicaoColaboradorUseCase` (or a thin self-edit path on it) so login-uniqueness and password re-hashing stay centralized; pass the token identity as both requester and target so BR06 scoping holds.
-  - Return `ColaboradorResponse` (no `senha`/`facial`).
-- **Relevant files / areas:**
-  - `presentation/controller/colaborador_controller.py` (new `PUT /colaborador/me` handler)
-  - `application/use_cases/colaborador/edicao_colaborador_usecase.py`
-  - `presentation/schema/requests/edicao_colaborador_request.py` (reuse or a self-edit subset)
-  - `presentation/dependencies/auth.py` (`get_current_colaborador`)
-- **Done when:**
-  - An authenticated collaborator can update their own `nome`/`login`/`senha` without a manager token.
-  - A collaborator cannot elevate themselves to manager, move companies, or change another collaborator via this endpoint.
-  - Password updates are stored hashed; the response contains no `senha`/`facial`.
-  - The endpoint is mounted and appears in OpenAPI.
+_(No open P1 backend tasks — AUTHZ-3 completed 2026-06-24; see §4.)_
 
 ### P2 — Important improvements
 
-#### [REPORT-5] Add composite DB indexes and pagination to punch history queries
+#### [AUTHZ-4] Force password change on first manager login (predictable bootstrap credential)
 - **Priority:** P2
 - **Status:** todo
-- **Why it exists:** `BatidaPontoRepository` time-range queries will be slow without indexes as data grows, and unbounded history queries will produce oversized payloads. Pagination and indexing must be designed together.
+- **Why it exists:** AUTHZ-3 bootstraps the first manager with a **predictable, public** credential — `login` = CNPJ (public record), `senha` = `razao_social` (company name). Anyone who knows the company can guess it. This is acceptable only as a one-time bootstrap; the predictable credential must stop working after the manager sets a real password. **This is blocking-for-production even though it was non-blocking for AUTHZ-3.** (See the `# TODO(AUTHZ-4)` marker in `cadastro_empresa_usecase.py`.)
 - **What must be done:**
-  - Add a composite index on `BatidaPonto(colaborador_id, batida)` to `domains/models/batida_ponto.py` via `__table_args__`.
-  - Add an index on `Colaborador.empresa_id` to support the manager join (`listar_por_empresa`).
-  - Extend `listar_por_colaborador` and `listar_por_empresa` to accept `page: int` and `page_size: int` (default 50); apply `.offset().limit()` internally.
-  - Both `data_inicio` and `data_fim` must be required (no open-ended queries).
-  - Create `presentation/schema/responses/historico_response.py` with a paginated envelope: `{ total, page, page_size, items: list[BatidaPontoResponse] }`.
-  - Create `presentation/schema/responses/batida_ponto_response.py` with safe punch fields (no raw embedding vectors).
+  - Add a "must change password" signal for the bootstrapped manager (e.g. a `senha_provisoria`/`must_change_password` boolean on `Colaborador`, defaulted appropriately + a startup migration like the `gerente` one), set `True` only on the AUTHZ-3 bootstrap account.
+  - On login, if the flag is set, require a password change before issuing a usable session (or issue a restricted token that only permits the change-password call), then clear the flag.
+  - Provide a change-password path (reuse `PUT /colaborador/me`'s `senha` field or a dedicated endpoint) that clears the flag.
 - **Relevant files / areas:**
-  - `domains/models/batida_ponto.py` (add `__table_args__` composite index)
-  - `domains/models/colaborador.py` (add `empresa_id` index)
-  - `infra/repositories/batida_ponto_repository.py` (add pagination)
-  - new: `presentation/schema/responses/historico_response.py`
-  - new: `presentation/schema/responses/batida_ponto_response.py`
+  - `domains/models/colaborador.py` (+ `main.py` migration), `application/use_cases/colaborador/login_colaborador_usecase.py`
+  - `application/use_cases/empresa/cadastro_empresa_usecase.py` (set the flag on bootstrap)
+  - `presentation/controller/login_controller.py`, `colaborador_controller.py`
 - **Done when:**
-  - Composite index exists on `(colaborador_id, batida)` and index on `empresa_id`.
-  - Both repository query methods accept page/page_size and apply correct offset/limit.
-  - `data_inicio` and `data_fim` are required.
-  - History response DTOs use the paginated envelope and never include `facial` embedding vectors.
-
-#### [PUNCH-3] Robust error handling and edge cases in punch flows
-- **Priority:** P2
-- **Status:** todo
-- **Why it exists:** Punch flows have fragile spots. **Live bug:** `BaterPontoUseCase` checks `len(colaborador.facial) < 128` against a possibly-`None` value (the `facial` column is nullable), raising `TypeError` instead of a clear "not enrolled" error when a collaborator has no biometrics. (`BatidaPontoEmbarcadoUseCase` already guards with `if not colaborador.facial: continue`.) Image decode/embedding failures raise raw `ValueError` from `FacialService`.
-- **What must be done:**
-  - Guard against `colaborador.facial` being `None` before length checks in `BaterPontoUseCase` — a missing embedding must return a clear error ("collaborator not enrolled"), not auto-enroll (RF13 out of scope).
-  - Translate `FacialService` failures (invalid image, no face) into clear, consistent error responses.
-  - Validate uploaded file type/size at the controller boundary.
-- **Relevant files / areas:**
-  - `application/use_cases/ponto/batida_ponto_usecase.py`
-  - `application/use_cases/ponto/batida_ponto_embarcado_usecase.py`
-  - `application/services/facial_service.py`
-  - `presentation/controller/batida_ponto_controller.py`
-- **Done when:**
-  - Missing biometrics, invalid images, and no-face cases return clear, consistent errors (no unhandled `ValueError`/`TypeError`).
-  - Basic upload validation happens at the controller.
+  - A freshly bootstrapped manager must set a new password before the predictable credential stops working; after the change, the old (CNPJ/company-name) credential no longer authenticates.
+  - No regression to normal login for non-bootstrap accounts.
 
 #### [BIO-1] Consolidate and harden biometric enrollment
 - **Priority:** P2

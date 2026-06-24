@@ -1,0 +1,115 @@
+/* FE-PUNCH-2: authenticated punch home. Mobile-first, no horizontal scroll. */
+
+.punch-home {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+}
+
+.punch-home__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.punch-home__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.punch-home__subtitle {
+  margin: var(--space-sm) 0 0;
+  color: var(--color-text-muted);
+}
+
+/* Circular profile button pinned to the top corner, comfortable tap target. */
+.punch-home__profile-btn {
+  flex: 0 0 auto;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  text-decoration: none;
+  font-size: 1.25rem;
+  touch-action: manipulation;
+}
+
+/* Clock In sits above the cards, within thumb reach. */
+.punch-home__clock-in {
+  margin-top: var(--space-lg);
+}
+
+/* Wraps the shared Spinner during submit. */
+.punch-home__status {
+  margin: var(--space-lg) 0;
+  text-align: center;
+}
+
+/* Punch result feedback now lives in the shared PunchResult component
+   (components/PunchResult.css). */
+
+/* Today's punches. */
+.punch-home__today {
+  margin-top: var(--space-lg);
+}
+
+.punch-home__today-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.punch-home__today-title {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.punch-home__count {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.punch-card-list {
+  list-style: none;
+  margin: var(--space-md) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.punch-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.punch-card--entrada {
+  border-left-color: #16a34a;
+}
+
+.punch-card--saida {
+  border-left-color: #dc2626;
+}
+
+.punch-card__tipo {
+  font-weight: 600;
+}
+
+.punch-card__time {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}

@@ -4,6 +4,7 @@ from fastapi import HTTPException, status
 
 from domains.models.batida_ponto import BatidaPonto
 from application.use_cases.ponto.batida_ponto_usecase import INTERVALO_MINIMO
+from application.services.facial_service import LIMIAR_RECONHECIMENTO
 
 
 class BatidaPontoEmbarcadoUseCase:
@@ -24,9 +25,15 @@ class BatidaPontoEmbarcadoUseCase:
         geo: str
     ):
 
-        embedding_atual = self.facial_service.gerar_embedding(
-            imagem
-        )
+        try:
+            embedding_atual = self.facial_service.gerar_embedding(
+                imagem
+            )
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Imagem inválida ou nenhum rosto detectado"
+            )
 
         colaboradores = self.colaborador_repository.listar()
 
@@ -63,7 +70,7 @@ class BatidaPontoEmbarcadoUseCase:
                 detail="Nenhum colaborador compatível encontrado"
             )
 
-        if melhor_similaridade < 0.4:
+        if melhor_similaridade < LIMIAR_RECONHECIMENTO:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Pessoa não reconhecida"

@@ -475,6 +475,7 @@ FaceClock/
 - `POST /colaborador/registro/` accepts JSON body: `cpf`, `nome`, `login`, `senha`, `empresa_id`, `facial` (list of floats)
 - `RegistrarColaboradorUseCase` checks CPF and login uniqueness, hashes password with bcrypt, creates and persists `Colaborador`
 - The embedding is accepted directly from the client as `facial: list[float]` — not extracted server-side at registration
+- Registration returns `AuthTokenResponse` — a signed bearer token (same claims as login, including `gerente`) plus a safe `ColaboradorResponse`, so a new collaborator is auto-logged-in (AUTH-4 done). The public request no longer carries `gerente` and the controller forces `gerente=False` (AUTHZ-1)
 
 ### What is missing
 - No server-side facial image processing at registration time (embedding must be pre-computed by the client)
@@ -729,8 +730,11 @@ FaceClock/
 ### `empresa_controller.py`
 - Empty file — no routes defined
 
-### `relatorio_controller.py`
-- Empty file — no routes defined
+### `relatorio_controller.py` — prefix `/relatorio`, tag `Relatorio` (mounted)
+- `GET /relatorio/historico` — self history for a date range (bearer)
+- `GET /relatorio/dia` — self daily punch summary (`ResumoDiarioResponse`), defaults to today (bearer) — REPORT-6
+- `GET /relatorio/empresa/{empresa_id}` — manager company report, JSON/CSV (manager)
+- (See `TASKS.md §3` for canonical status — REPORT-1..4 + REPORT-6 done.)
 
 ## Status
 - partially implemented
@@ -768,16 +772,17 @@ FaceClock/
 - `FacialService.validar_rosto(e1, e2, limiar=0.6)` returns `True` if similarity >= limiar
 
 ### Thresholds in use
-- `BaterPontoUseCase` calls `validar_rosto()` with default threshold `0.6`
-- `BatidaPontoEmbarcadoUseCase` uses `0.4` as minimum similarity for blind recognition
-- BR01 requires `0.65` — neither threshold meets this requirement
+- A single canonical constant `LIMIAR_RECONHECIMENTO = 0.65` (BR01) is defined in `application/services/facial_service.py` (RECOG-1)
+- `BaterPontoUseCase` calls `validar_rosto()` with no threshold, inheriting the `0.65` default
+- `BatidaPontoEmbarcadoUseCase` imports the constant and rejects similarity `< 0.65`
+- BR01 (`0.65`) is now met by both flows
 
 ### Service location
 - `application/services/facial_service.py` — `FacialService` class
 - DeepFace is an external dependency; the service should live in `infra/` per clean architecture intent
 
 ## Status
-- partially implemented (core service works; thresholds deviate from BR01; service is in the wrong layer)
+- partially implemented (core service works; thresholds aligned to BR01 = 0.65 via `LIMIAR_RECONHECIMENTO` — RECOG-1; service is still in the wrong layer — ARCH-1)
 
 ## Evidence
 - `application/services/facial_service.py`
@@ -837,15 +842,18 @@ FaceClock/
 - Evidence: `application/use_cases/ponto/batida_ponto_usecase.py`
 
 ### Face validation before punch (login-based)
-- `BaterPontoUseCase` raises HTTP 401 if `validar_rosto()` returns False (threshold 0.6)
+- `BaterPontoUseCase` raises HTTP 401 if `validar_rosto()` returns False (threshold 0.65, BR01 — RECOG-1)
 - Evidence: `application/use_cases/ponto/batida_ponto_usecase.py`
 
 ### Blind recognition threshold (embarcado)
-- `BatidaPontoEmbarcadoUseCase` raises HTTP 401 if best similarity < 0.4
+- `BatidaPontoEmbarcadoUseCase` raises HTTP 401 if best similarity < 0.65 (BR01 — RECOG-1)
 - Evidence: `application/use_cases/ponto/batida_ponto_embarcado_usecase.py`
 
+### Minimum recognition threshold (BR01)
+- Both punch flows enforce a 0.65 minimum via the single `LIMIAR_RECONHECIMENTO` constant
+- Evidence: `application/services/facial_service.py`
+
 ## Rules NOT yet implemented
-- **BR01**: minimum threshold of 0.65 — current thresholds are 0.6 and 0.4
 - **BR02**: 5-minute interval between punches — not implemented anywhere
 - **BR03**: manager-only access for reports and editing — no role field, no middleware
 - **BR04 / BR05**: overtime calculation and flagging — not implemented
@@ -861,8 +869,8 @@ FaceClock/
 ## Missing
 - JWT token generation and validation — no code exists
 - Protected endpoints — no authentication middleware anywhere
-- Manager boolean flag (e.g. `gerente`) on `Colaborador` for the manager/collaborator distinction (RF02) — a single bool field, not a separate entity
-- Role-based access control (BR03), gated on the manager flag
+- ~~Manager boolean flag (e.g. `gerente`) on `Colaborador`~~ — implemented: persisted column, surfaced in JWT claims (login + registration) and `ColaboradorResponse`; controlled promotion via the manager-gated `PUT /colaborador/{cpf}` (AUTHZ-1 done). Open follow-on: no API path mints the first manager (bootstrap) — resolve via seed/CLI.
+- Role-based access control (BR03) — `require_manager` enforces it by reading the `gerente` JWT claim (fail-closed; no DB re-query) (AUTHZ-2 done). Accepted trade-off: role staleness bounded by token expiry (≤ `JWT_EXPIRY_MINUTES`).
 - Empresa CRUD endpoints — `empresa_controller.py` is empty, all empresa use cases are empty
 - Reporting endpoints — `relatorio_controller.py` is empty, `GetPontoUseCase` is empty
 - Collaborator query and editing endpoints — `GetColaboradorUseCase` and `EdicaoColaboradorUseCase` are empty

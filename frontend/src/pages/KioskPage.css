@@ -1,0 +1,11 @@
+/* FE-PUNCH-4: kiosk/totem screen.
+   Layout is driven by MUI `sx` in KioskPage.jsx (full-bleed Box + Container).
+   This file only carries kiosk-specific tweaks not expressible inline. */
+
+/* The totem is a public, full-screen device — never show a horizontal scroll,
+   and disable text selection / tap-highlight so taps feel like a kiosk. */
+.kiosk-stage {
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}

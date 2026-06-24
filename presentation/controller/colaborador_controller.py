@@ -30,6 +30,9 @@ from presentation.schema.requests.registro_colaborador_request import (
 from presentation.schema.requests.edicao_colaborador_request import (
     EdicaoColaboradorRequest
 )
+from presentation.schema.requests.edicao_perfil_request import (
+    EdicaoPerfilRequest
+)
 
 from presentation.schema.responses.colaborador_response import ColaboradorResponse
 from presentation.schema.responses.auth_response import AuthTokenResponse
@@ -83,6 +86,7 @@ def registro_colaborador(
         "sub": colaborador.login,
         "cpf": colaborador.cpf,
         "empresa_id": colaborador.empresa_id,
+        "gerente": colaborador.gerente,
     })
 
     return AuthTokenResponse(
@@ -137,6 +141,28 @@ def listar_colaboradores(
     repository = ColaboradorRepository(db)
     usecase = GetColaboradorUseCase(repository)
     return usecase.listar_por_empresa(payload["empresa_id"])
+
+
+# self-edit — identity comes ONLY from token claims; gerente is pinned and unchangeable.
+# Declared BEFORE PUT /{cpf} so "me" is not captured as a cpf path param.
+@read_router.put("/me", response_model=ColaboradorResponse)
+def editar_perfil(
+    body: EdicaoPerfilRequest,
+    db: Session = Depends(get_db),
+    payload: dict = Depends(get_current_colaborador),
+):
+    repository = ColaboradorRepository(db)
+    hash_service = HashService()
+    usecase = EdicaoColaboradorUseCase(repository, hash_service)
+    return usecase.executar(
+        requester_empresa_id=payload["empresa_id"],
+        requester_login=payload["sub"],
+        target_cpf=payload["cpf"],
+        nome=body.nome,
+        login=body.login,
+        gerente=None,
+        senha=body.senha,
+    )
 
 
 @read_router.put("/{cpf}", response_model=ColaboradorResponse)

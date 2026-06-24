@@ -1,0 +1,123 @@
+/* FaceClock — mobile-first base styles (FE-SHARED-1) */
+
+:root {
+  /* Neutral palette */
+  --color-bg: #f4f5f7;
+  --color-surface: #ffffff;
+  --color-text: #1a1d21;
+  --color-text-muted: #5b6471;
+  --color-border: #d8dce2;
+  --color-primary: #2563eb;
+  --color-primary-text: #ffffff;
+  --color-primary-active: #1d4ed8;
+
+  /* Layout tokens */
+  --shell-max-width: 480px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --radius: 12px;
+  --tap-target: 48px;
+
+  /* Safe-area insets (notches / home indicators) */
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  --font-stack: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
+/* Reset basics */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-stack);
+  color: var(--color-text);
+  background: var(--color-bg);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+/* App shell (FE-SHARED-9): the hard 480px desktop lock is retired. The MUI
+   `Container` inside AppLayout now owns the max content width (sm for
+   collaborator/auth/punch screens, lg for manager screens), so the shell only
+   stays full-width and guards against horizontal overflow. Kept for any markup
+   still referencing it and as the mobile-first overflow guard. */
+.app-shell {
+  width: 100%;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Thumb zone: pin primary actions to the bottom within thumb reach. */
+.thumb-zone {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-top: auto;
+  padding: var(--space-md);
+  padding-bottom: calc(var(--space-md) + var(--safe-bottom));
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
+
+/* Large, full-width primary tap target. */
+.btn-primary {
+  display: block;
+  width: 100%;
+  min-height: var(--tap-target);
+  padding: 0 var(--space-lg);
+  border: none;
+  border-radius: var(--radius);
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.btn-primary:active {
+  background: var(--color-primary-active);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Desktop: keep the button comfortably sized rather than edge-to-edge. */
+@media (min-width: 481px) {
+  .btn-primary {
+    width: auto;
+    min-width: 200px;
+  }
+}
