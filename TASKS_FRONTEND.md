@@ -76,8 +76,8 @@ The frontend scaffold now exists (`frontend/`, React+Vite); the screens are bein
 | ✅ Done (P1) | FE-SHARED-5, FE-SHARED-6, FE-ENROLL-1, FE-PROFILE-1, FE-MANAGER-1, FE-MANAGER-2 |
 | ✅ Done (P2) | FE-PUNCH-3, FE-SHARED-7 |
 | ✅ Done (Fixes) | FE-PROFILE-2 |
-| ✅ Done (Enh) | FE-SHARED-8 |
-| ⬜ Enhancements | FE-SHARED-9, FE-PUNCH-4, FE-UI-1, FE-UI-2 |
+| ✅ Done (Enh) | FE-SHARED-8, FE-SHARED-9 |
+| ⬜ Enhancements | FE-PUNCH-4, FE-UI-1, FE-UI-2 |
 
 **MVP frontend complete (2026-06-23).** Verified via `npm run build` (Vite) on each cycle. Remaining caveats: (a) ~~manager screens need a seeded manager~~ — **resolved by AUTHZ-3** (2026-06-24): `POST /empresa` now bootstraps a manager (`login`=CNPJ, `senha`=company name), so the manager flow is exercisable end-to-end (predictable credential to be hardened by AUTHZ-4); (b) `facial: []` at registration clears when BIO-1 lands; (c) clean "company not found" message arrives with RECOG-2; (d) the build gate proves compilation, not runtime/visual behavior (no headless browser run this pass).
 
@@ -496,7 +496,7 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
 
 #### [FE-SHARED-9] Responsive desktop + mobile app layout (break out of the 480px column)
 - **Priority:** P1
-- **Status:** todo — depends on FE-SHARED-8
+- **Status:** done — 2026-06-24. `src/components/AppLayout.jsx`: MUI `AppBar` (brand; Perfil/Sair when authed; Funcionários/Relatório when `gerente`; hamburger `Menu` on mobile) + a `Container` whose `maxWidth` is route-derived (`sm` for collaborator/auth/punch, `lg` for `/gerente/*`) with a `width` prop override; renders `<Outlet/>`. `App.jsx` wraps routes in the layout route (guards intact); `/kiosk` stays full-bleed outside it (for FE-PUNCH-4). `base.css` retired the hard 480px `.app-shell` cap (Container owns width) keeping `overflow-x:hidden`/thumb-zone/mobile-first. Surfaces manager nav (completes FE-AUTH-1's deferred item). **Verified:** `npm run build` green (JS 330→387 kB). Minor known cosmetic: MenuPage nests its own sm Container (harmless; FE-UI-1 cleans page internals).
 - **Why it exists:** Every screen is locked inside `.app-shell { max-width: 480px }`, so on desktop the whole app is a narrow centered phone column — manager tables and the report are badly cramped, and there is no app chrome (nav/header). NFR01 still wants one-handed mobile, but desktop deserves a real layout.
 - **What must be done:**
   - Replace the fixed `.app-shell` with an MUI responsive layout: an `AppBar`/top bar (brand + context-aware actions: profile, logout, manager links when `gerente`), and a responsive content `Container` whose `maxWidth` adapts — a comfortable reading column (`sm`) for collaborator/auth/punch screens, but a wide layout (`lg`/`xl`) for manager screens (employees list, report) so tables have room.

@@ -209,6 +209,11 @@ User confirmed: keep **MUI** and implement all queued tasks. Incoming user task 
 - MUI deps + theme.js (brand palette) + ThemeProvider/CssBaseline in main.jsx; MenuPage→MUI as proof. `npm install` 73 pkgs + build green (JS 330 kB). Commit `641aaa4`.
 - **Next:** FE-SHARED-9 (responsive desktop layout — break the 480px column; MUI AppBar + adaptive container + manager nav).
 
+### Cycle 23 — FE-SHARED-9 (P1 enhancement) — ✅ DONE
+- AppLayout (MUI AppBar + route-derived Container width + mobile hamburger; manager nav gated on gerente) + App wraps routes (guards intact, /kiosk full-bleed outside) + base.css 480px cap retired. Build green (JS 387 kB). Commit `44ff371`.
+- **Next:** FE-PUNCH-4 (kiosk/totem redesign — full-bleed landscape, idle+clock, single deliberate capture, large countdown result).
+
+
 
 
 
