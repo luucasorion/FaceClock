@@ -25,9 +25,15 @@ class BatidaPontoEmbarcadoUseCase:
         geo: str
     ):
 
-        embedding_atual = self.facial_service.gerar_embedding(
-            imagem
-        )
+        try:
+            embedding_atual = self.facial_service.gerar_embedding(
+                imagem
+            )
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Imagem inválida ou nenhum rosto detectado"
+            )
 
         colaboradores = self.colaborador_repository.listar()
 

@@ -3,7 +3,9 @@ from fastapi import (
     Depends,
     File,
     Form,
-    UploadFile
+    HTTPException,
+    UploadFile,
+    status
 )
 from sqlalchemy.orm import Session
 from infra.db.database import get_db
@@ -20,6 +22,29 @@ router = APIRouter(
     prefix="/ponto",
     tags=["Ponto"]
 )
+
+MAX_UPLOAD_BYTES = 5 * 1024 * 1024
+
+
+def validar_upload_imagem(imagem: UploadFile, conteudo: bytes) -> None:
+
+    if not imagem.content_type or not imagem.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Tipo de arquivo inválido; envie uma imagem"
+        )
+
+    if len(conteudo) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Imagem vazia"
+        )
+
+    if len(conteudo) > MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="Imagem muito grande"
+        )
 
 
 @router.post("/")
@@ -44,6 +69,8 @@ async def bater_ponto(
 
     imagem_bytes = await imagem.read()
 
+    validar_upload_imagem(imagem, imagem_bytes)
+
     return usecase.execute(
         login=current_colaborador["sub"],
         imagem=imagem_bytes,
@@ -59,6 +86,8 @@ async def bater_ponto_embarcado(
 ):
 
     imagem_bytes = await imagem.read()
+
+    validar_upload_imagem(imagem, imagem_bytes)
 
     colaborador_repository = ColaboradorRepository(db)
     batida_repository = BatidaPontoRepository(db)

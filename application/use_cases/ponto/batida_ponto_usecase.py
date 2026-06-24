@@ -45,16 +45,22 @@ class BaterPontoUseCase:
                 detail="Colaborador inativo"
             )
 
-        if len(colaborador.facial) < 128:
+        if not colaborador.facial or len(colaborador.facial) < 128:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Colaborador não possui biometria facial cadastrada"
             )
 
-        embedding_atual = (
-            self.facial_service
-            .gerar_embedding(imagem)
-        )
+        try:
+            embedding_atual = (
+                self.facial_service
+                .gerar_embedding(imagem)
+            )
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Imagem inválida ou nenhum rosto detectado"
+            )
 
         reconhecido = (
             self.facial_service
