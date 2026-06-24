@@ -70,8 +70,8 @@ The frontend scaffold now exists (`frontend/`, React+Vite); the screens are bein
 
 | Group | Tasks |
 |---|---|
-| ✅ Done | FE-SHARED-1, FE-SHARED-2, FE-SHARED-3, FE-SHARED-4 |
-| ⬜ P0 | FE-MENU-1, FE-AUTH-1, FE-AUTH-2, FE-AUTH-3, FE-PUNCH-1, FE-PUNCH-2 |
+| ✅ Done | FE-SHARED-1, FE-SHARED-2, FE-SHARED-3, FE-SHARED-4, FE-MENU-1 |
+| ⬜ P0 | FE-AUTH-1, FE-AUTH-2, FE-AUTH-3, FE-PUNCH-1, FE-PUNCH-2 |
 | ⬜ P1 | FE-SHARED-5, FE-SHARED-6, FE-ENROLL-1, FE-PROFILE-1, FE-MANAGER-1, FE-MANAGER-2 |
 | ⬜ P2 | FE-PUNCH-3, FE-SHARED-7 |
 
@@ -213,7 +213,7 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
 
 #### [FE-MENU-1] Initial menu screen
 - **Priority:** P0
-- **Status:** todo
+- **Status:** done — 2026-06-23. `src/pages/MenuPage.jsx` (+css): mobile-first stacked `.btn-primary` links to `/kiosk`, `/login`, `/registro/colaborador`, `/registro/empresa`; thumb-zone actions, no horizontal scroll. Wired into App `/`. Verified `npm run build` green.
 - **Why it exists:** The app needs a single entry point offering the four starting actions before any session exists.
 - **What must be done:**
   - `frontend/src/pages/MenuPage.jsx` with four entry points: **Kiosk clock-in**, **Login**, **Employee registration**, **Company registration**, each routing to its screen.

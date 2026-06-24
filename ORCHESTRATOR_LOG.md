@@ -120,6 +120,11 @@ for AUTHZ-2, AUTH-4 claims shape, and the frontend manager flow.
 - **Commit:** `2eec5cc`.
 - **All 4 shared P0 blocks (FE-SHARED-1..4) done.** Next: P0 screens — FE-MENU-1, then FE-AUTH-1/2/3, FE-PUNCH-1/2 (these replace App placeholders, so vite build compiles them as the real gate).
 
+### Cycle 13 — FE-MENU-1 (P0) — ✅ DONE
+- `MenuPage.jsx` (+css): 4 thumb-reach entry points → kiosk/login/registro-colaborador/registro-empresa; wired into App `/`. Build green (CSS/JS grew). Commit `eb00d84`.
+- **Next:** FE-AUTH-1 (login screen → setSession → /home).
+
+
 
 
 
