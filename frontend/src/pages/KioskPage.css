@@ -1,0 +1,73 @@
+/* FE-PUNCH-1: kiosk punch screen. Mobile-first, no horizontal scroll. */
+
+.kiosk-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+}
+
+.kiosk-header {
+  margin-top: var(--space-lg);
+  text-align: center;
+}
+
+.kiosk-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.kiosk-subtitle {
+  margin: var(--space-sm) 0 0;
+  color: var(--color-text-muted);
+}
+
+/* Ready / status / result panels fill the shell and push actions to the bottom. */
+.kiosk-ready,
+.kiosk-status,
+.kiosk-result {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+}
+
+.kiosk-instruction {
+  margin: var(--space-lg) 0;
+  text-align: center;
+  font-size: 1.125rem;
+  color: var(--color-text-muted);
+}
+
+.kiosk-link {
+  display: block;
+  margin-top: var(--space-md);
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+/* Result feedback — large, legible, color-coded by outcome. */
+.kiosk-result__message {
+  margin: auto 0;
+  padding: var(--space-lg) var(--space-md);
+  text-align: center;
+  font-size: 1.375rem;
+  font-weight: 600;
+  border-radius: var(--radius);
+}
+
+.kiosk-result--success .kiosk-result__message {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.kiosk-result--denied .kiosk-result__message {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.kiosk-result--error .kiosk-result__message {
+  background: #fee2e2;
+  color: #991b1b;
+}
