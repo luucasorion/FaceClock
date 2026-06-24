@@ -70,8 +70,8 @@ The frontend scaffold now exists (`frontend/`, React+Vite); the screens are bein
 
 | Group | Tasks |
 |---|---|
-| ✅ Done | FE-SHARED-1 |
-| ⬜ P0 | FE-SHARED-2, FE-SHARED-3, FE-SHARED-4, FE-MENU-1, FE-AUTH-1, FE-AUTH-2, FE-AUTH-3, FE-PUNCH-1, FE-PUNCH-2 |
+| ✅ Done | FE-SHARED-1, FE-SHARED-2 |
+| ⬜ P0 | FE-SHARED-3, FE-SHARED-4, FE-MENU-1, FE-AUTH-1, FE-AUTH-2, FE-AUTH-3, FE-PUNCH-1, FE-PUNCH-2 |
 | ⬜ P1 | FE-SHARED-5, FE-SHARED-6, FE-ENROLL-1, FE-PROFILE-1, FE-MANAGER-1, FE-MANAGER-2 |
 | ⬜ P2 | FE-PUNCH-3, FE-SHARED-7 |
 
@@ -158,7 +158,7 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
 
 #### [FE-SHARED-2] API client with bearer-token injection and per-resource wrappers
 - **Priority:** P0
-- **Status:** todo
+- **Status:** done — 2026-06-23. `src/api/client.js` (`request()` + `ApiError`): explicit-token bearer injection, FormData auto-detect (no `Content-Type` for multipart), error normalization for FastAPI string/array `detail` + network errors, 204/non-JSON handling. Resource wrappers `auth.js`, `colaborador.js` (incl. `editarPerfil`→`PUT /colaborador/me`, `cadastrarBiometria` multipart `imagem`), `ponto.js` (`imagem`+`geo`), `empresa.js`, `relatorio.js` (`dia`/`historico`/`empresa`; CSV returned as raw text). Exact paths/params per §5. **Verified:** `node --check` all modules + `npm run build` green.
 - **Why it exists:** Every screen talks to the REST API; a single client centralizes the base URL, JSON vs `multipart/form-data` handling, bearer-token injection, and error normalization so screens don't re-implement fetch.
 - **What must be done:**
   - `frontend/src/api/client.js`: a `request()` wrapper that injects `Authorization: Bearer <token>` when a token is present, handles JSON and `FormData` bodies (do **not** set `Content-Type` for `FormData`), and normalizes error responses (status + backend `detail`) into a consistent thrown error.

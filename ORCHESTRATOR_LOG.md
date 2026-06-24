@@ -102,6 +102,13 @@ for AUTHZ-2, AUTH-4 claims shape, and the frontend manager flow.
 - **Task files:** FE-SHARED-1 → done; §4 snapshot updated; added a frontend verify-gate note.
 - **Next:** FE-SHARED-2 (API client with bearer injection + per-resource wrappers).
 
+### Cycle 10 — FE-SHARED-2 (P0, `TASKS_FRONTEND.md`) — ✅ DONE
+- **Implementation:** `src/api/client.js` (request wrapper + ApiError) + 5 resource modules matching the §5 contract exactly (paths, query params, `imagem`/`geo` multipart fields, CSV as raw text). Token passed explicitly; storage deferred to FE-SHARED-3.
+- **Verify:** `node --check` on all 6 modules clean; `npm run build` green. (Modules not yet imported by entry, so build is unchanged — syntax check covers them.)
+- **Commit:** `e42cfc7`.
+- **Next:** FE-SHARED-3 (auth context + route guards; RequireManager now implementable via the `gerente` claim from AUTHZ-1).
+
+
 
 
 
