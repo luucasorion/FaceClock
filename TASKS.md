@@ -54,9 +54,9 @@ Based on the real code review of 2026-06-23 (re-audited against code on 2026-06-
 
 | Group | Tasks |
 |---|---|
-| ✅ Done | AUTH-1, AUTH-2, AUTH-3, BIO-3, PUNCH-1, EMPRESA-1, EMPRESA-2, REPORT-1, REPORT-2, REPORT-3, REPORT-4, COLAB-1, COLAB-2, PUNCH-2, BIO-2, RECOG-1, AUTHZ-1, AUTHZ-2, AUTH-4, REPORT-6, COLAB-3, REPORT-5 |
+| ✅ Done | AUTH-1, AUTH-2, AUTH-3, BIO-3, PUNCH-1, EMPRESA-1, EMPRESA-2, REPORT-1, REPORT-2, REPORT-3, REPORT-4, COLAB-1, COLAB-2, PUNCH-2, BIO-2, RECOG-1, AUTHZ-1, AUTHZ-2, AUTH-4, REPORT-6, COLAB-3, REPORT-5, PUNCH-3 |
 | 🚧 In progress | API-1 |
-| ⬜ To do | PUNCH-3, BIO-1, RECOG-2, ARCH-1, ARCH-2, ARCH-3, ARCH-4 |
+| ⬜ To do | BIO-1, RECOG-2, ARCH-1, ARCH-2, ARCH-3, ARCH-4 |
 
 > Note (2026-06-23 re-audit): `application/use_cases/ponto/get_ponto_usecase.py` no longer exists — its history-grouping logic was relocated to `application/use_cases/relatorio/` (`_agrupamento.py` + the report use cases). Task file-references were corrected accordingly.
 
@@ -90,7 +90,6 @@ Based on the real code review of 2026-06-23 (re-audited against code on 2026-06-
 - **Domain model**: no dedicated PunchProfile entity — `Empresa.limite_hora` is the only hour limit.
 
 ### Still missing
-- Punch robustness: a live `TypeError` when an unenrolled collaborator punches via the login flow (`None`-guard on `colaborador.facial`), plus FacialService error translation and upload validation (PUNCH-3).
 - Single hardened enrollment path — registration still accepts a client-supplied `facial` list alongside the dedicated server-side endpoint (BIO-1).
 - Company existence/active validation at registration (RECOG-2).
 - Punch/login output DTOs (API-1 remainder); domain exceptions (ARCH-2); repository interfaces (ARCH-3); centralized DI wiring (ARCH-4); `FacialService` relocated to `infra/` (ARCH-1).
@@ -487,17 +486,7 @@ Completed tasks, grouped by priority. Retained for traceability and acceptance e
   - ✅ Mounted and in OpenAPI (route count 21→22).
 - **Follow-ups (non-blocking, MVP-scope-aware):** (1) changing `login` does NOT reissue the JWT — the token keeps the old `sub` until re-login (would need a wider response shape); (2) optional input-validation hardening on `EdicaoPerfilRequest` (`min_length`, `extra="forbid"`) — input validation is explicitly out of MVP priority and the endpoint is already safe.
 
----
-
-## 5. 🚧 To do / In progress
-
-The live work queue. Work top-down by priority: **P0 → P1 → P2 → P3**.
-
-### P1 — Core product completion tasks
-
-### P2 — Important improvements
-
-#### [REPORT-5] Add composite DB indexes and pagination to punch history queries
+### [REPORT-5] Add composite DB indexes and pagination to punch history queries
 - **Priority:** P2
 - **Status:** done
 - **Why it existed:** Time-range queries get slow without indexes as data grows, and unbounded history queries produce oversized payloads.
@@ -518,22 +507,33 @@ The live work queue. Work top-down by priority: **P0 → P1 → P2 → P3**.
   - ✅ History response DTOs use the paginated envelope; never include embedding vectors.
 - **Note:** the paginated endpoint returns raw batidas without `tipo` (by design — task excludes it; `tipo` lives on the grouped `/historico`).
 
-#### [PUNCH-3] Robust error handling and edge cases in punch flows
+### [PUNCH-3] Robust error handling and edge cases in punch flows
 - **Priority:** P2
-- **Status:** todo
-- **Why it exists:** Punch flows have fragile spots. **Live bug:** `BaterPontoUseCase` checks `len(colaborador.facial) < 128` against a possibly-`None` value (the `facial` column is nullable), raising `TypeError` instead of a clear "not enrolled" error when a collaborator has no biometrics. (`BatidaPontoEmbarcadoUseCase` already guards with `if not colaborador.facial: continue`.) Image decode/embedding failures raise raw `ValueError` from `FacialService`.
-- **What must be done:**
-  - Guard against `colaborador.facial` being `None` before length checks in `BaterPontoUseCase` — a missing embedding must return a clear error ("collaborator not enrolled"), not auto-enroll (RF13 out of scope).
-  - Translate `FacialService` failures (invalid image, no face) into clear, consistent error responses.
-  - Validate uploaded file type/size at the controller boundary.
+- **Status:** done
+- **Why it existed:** A live `TypeError` (500) when an unenrolled collaborator punched via `/ponto/` (`len(None)`), plus raw `ValueError`s from `FacialService` and no upload validation at the boundary.
+- **What was done (verified 2026-06-23):**
+  - **Live bug fixed:** `BaterPontoUseCase` now guards `if not colaborador.facial or len(colaborador.facial) < 128:` — short-circuits before `len()`, returning the existing clean 400 ("não possui biometria"); no auto-enroll (RF13 out of scope).
+  - The upfront `gerar_embedding(imagem)` in **both** `BaterPontoUseCase` and `BatidaPontoEmbarcadoUseCase` is wrapped in `try/except ValueError` → `HTTPException(400, "Imagem inválida ou nenhum rosto detectado")`. The embarcado per-collaborator `try/except Exception` loop was left unchanged.
+  - Upload validation at the controller via a shared `validar_upload_imagem` helper called by both punch endpoints: 415 non-image content-type, 400 empty, 413 over 5 MB (`MAX_UPLOAD_BYTES`).
 - **Relevant files / areas:**
   - `application/use_cases/ponto/batida_ponto_usecase.py`
   - `application/use_cases/ponto/batida_ponto_embarcado_usecase.py`
-  - `application/services/facial_service.py`
   - `presentation/controller/batida_ponto_controller.py`
+  - (`facial_service.py` intentionally unchanged — translation lives in the use cases pending ARCH-2)
 - **Done when:**
-  - Missing biometrics, invalid images, and no-face cases return clear, consistent errors (no unhandled `ValueError`/`TypeError`).
-  - Basic upload validation happens at the controller.
+  - ✅ Missing biometrics, invalid images, and no-face cases return clear, consistent errors (no unhandled `ValueError`/`TypeError`).
+  - ✅ Basic upload validation happens at the controller.
+- **Follow-ups (non-blocking):** size cap runs after the body is read into memory (proxy/Content-Length pre-check is the real defense); content-type is client-asserted but degrades gracefully via the `ValueError` translation; enrollment endpoint has the same gaps (BIO-1); use-case `HTTPException`s remain pending ARCH-2.
+
+---
+
+## 5. 🚧 To do / In progress
+
+The live work queue. Work top-down by priority: **P0 → P1 → P2 → P3**.
+
+### P1 — Core product completion tasks
+
+### P2 — Important improvements
 
 #### [BIO-1] Consolidate and harden biometric enrollment
 - **Priority:** P2

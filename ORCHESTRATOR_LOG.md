@@ -80,6 +80,16 @@ for AUTHZ-2, AUTH-4 claims shape, and the frontend manager flow.
 - **Task files:** REPORT-5 → §4 done; §3 snapshot updated.
 - **Next:** PUNCH-3 (P2) — punch robustness (live `None`-guard TypeError on login punch when unenrolled; FacialService error translation; upload validation).
 
+### Cycle 8 — PUNCH-3 (P2, `TASKS.md`) — ✅ DONE
+- **Selected:** PUNCH-3 (punch robustness).
+- **Architecture:** plan kept in-scope — None-guard + `ValueError`→HTTPException in the use cases (NOT domain exceptions, that's ARCH-2) + shared upload-validation helper; enrollment untouched (BIO-1).
+- **Implementation:** 3 files — live None-guard fix, `gerar_embedding` ValueError translation in both punch flows, `validar_upload_imagem` (415/400/413) called by both endpoints. facial_service.py unchanged.
+- **Verify:** smoke green (23 routes); diff confirms None-guard short-circuits before len() and facial_service untouched; qa PASS (live bug fixed, no auto-enroll, no regression to 403/401/429 ordering, no scope bleed).
+- **Commit:** `8b8c5f0`.
+- **Task files:** PUNCH-3 → §4 done; §3 snapshot updated. **Also fixed a structural slip from cycle 7:** the REPORT-5 done block had been written under §5's "P2" subsection instead of §4 — relocated it into §4 alongside PUNCH-3.
+- **Next:** ⟶ user redirected to **frontend first** — switching to `TASKS_FRONTEND.md`. Remaining backend (BIO-1, RECOG-2, API-1 P2; ARCH-1..4 P3) deferred until after the frontend pass.
+
+
 
 
 
