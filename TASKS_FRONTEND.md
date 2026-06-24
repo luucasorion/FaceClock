@@ -55,6 +55,7 @@ Read order:
 | `FE-PUNCH-` | Kiosk punch + authenticated employee punch home |
 | `FE-PROFILE-` | Employee self-profile + own punch history/export |
 | `FE-MANAGER-` | Manager-only screens (My Employees, employee file, company report) |
+| `FE-UI-` | Visual redesign / component-library migration (MUI) — making screens prettier and desktop-friendly |
 
 IDs are numbered within each prefix.
 
@@ -74,8 +75,11 @@ The frontend scaffold now exists (`frontend/`, React+Vite); the screens are bein
 | ⬜ P0 | — (all done) |
 | ✅ Done (P1) | FE-SHARED-5, FE-SHARED-6, FE-ENROLL-1, FE-PROFILE-1, FE-MANAGER-1, FE-MANAGER-2 |
 | ✅ Done (P2) | FE-PUNCH-3, FE-SHARED-7 |
+| ⬜ Enhancements | FE-SHARED-8, FE-SHARED-9, FE-PUNCH-4, FE-UI-1, FE-UI-2 |
 
-**All frontend tasks complete (2026-06-23).** Verified via `npm run build` (Vite) on each cycle. Remaining caveats: (a) manager screens need a seeded manager to exercise end-to-end (backend bootstrap gap); (b) `facial: []` at registration clears when BIO-1 lands; (c) clean "company not found" message arrives with RECOG-2; (d) the build gate proves compilation, not runtime/visual behavior (no headless browser run this pass).
+**MVP frontend complete (2026-06-23).** Verified via `npm run build` (Vite) on each cycle. Remaining caveats: (a) manager screens need a seeded manager to exercise end-to-end (backend bootstrap gap); (b) `facial: []` at registration clears when BIO-1 lands; (c) clean "company not found" message arrives with RECOG-2; (d) the build gate proves compilation, not runtime/visual behavior (no headless browser run this pass).
+
+**Enhancement backlog (added 2026-06-24).** The MVP UI is functional but hand-rolled and constrained to a single 480px mobile column on every screen (cramped on desktop, especially the manager tables), and the kiosk flow is awkward. The `FE-SHARED-8/9`, `FE-PUNCH-4`, and `FE-UI-1/2` tasks below adopt **MUI (Material UI)** to make the app prettier and properly desktop-friendly. Do them in order: FE-SHARED-8 (MUI base) first — it blocks the rest.
 
 **Backend dependencies (in `TASKS.md`) that block frontend tasks**
 
@@ -440,6 +444,99 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
 - **Done when:**
   - Loading/empty/error states are consistent and use the shared primitives.
   - Every collaborator-facing screen passes the one-handed/no-horizontal-scroll check at mobile widths; manager screens degrade gracefully.
+
+### Enhancements — visual polish & desktop-friendly (MUI)
+
+> Added 2026-06-24. Goal: make the app prettier and genuinely desktop-friendly using **MUI (Material UI)** — a free (MIT) React component library — instead of the current hand-rolled CSS. The MVP behavior, routes, auth, API wiring, and NFR05 camera handling must be preserved; this is a presentation-layer change. Mobile-first (NFR01) still holds at small widths; the difference is that desktop now gets a real layout instead of a 480px column. Do them in order — **FE-SHARED-8 is a prerequisite for the rest.**
+
+#### [FE-SHARED-8] Adopt MUI: install, theme provider, baseline
+- **Priority:** P1
+- **Status:** todo
+- **Why it exists:** The UI is hand-rolled (`base.css`/`forms.css`) and visually plain. Adopting MUI gives consistent, accessible, attractive components and a theming system. This task only establishes the foundation; screens migrate in later tasks.
+- **What must be done:**
+  - Add deps to `frontend/package.json`: `@mui/material`, `@emotion/react`, `@emotion/styled`, `@mui/icons-material`, and (for the manager tables) the free community `@mui/x-data-grid` (MIT). Pin known-stable versions.
+  - Create `frontend/src/theme.js` — a `createTheme(...)` mapping the existing brand palette (primary `#2563eb`, neutral surface/bg/text from `base.css` tokens), typography, and sensible defaults (rounded corners, comfortable spacing). Keep a single source of truth for colors.
+  - Wrap the app: in `src/main.jsx` (or `App.jsx`) add `<ThemeProvider theme={theme}>` + `<CssBaseline/>` around the router. `CssBaseline` replaces the manual reset in `base.css` (keep `base.css` only for the few layout tokens still referenced until migration completes).
+  - Do NOT migrate every screen here — just prove the provider works (e.g. render one MUI `Button` somewhere, or convert the MenuPage buttons) and keep the app building.
+- **Relevant files / areas:**
+  - `frontend/package.json`
+  - new: `frontend/src/theme.js`
+  - `frontend/src/main.jsx`, `frontend/src/App.jsx`
+- **Done when:**
+  - `npm install` succeeds with MUI added; `npm run build` is green with `ThemeProvider`+`CssBaseline` mounted.
+  - A theme with the FaceClock brand colors is applied app-wide; at least one screen renders an MUI component to prove it works.
+  - No behavior/route/auth regression.
+
+#### [FE-SHARED-9] Responsive desktop + mobile app layout (break out of the 480px column)
+- **Priority:** P1
+- **Status:** todo — depends on FE-SHARED-8
+- **Why it exists:** Every screen is locked inside `.app-shell { max-width: 480px }`, so on desktop the whole app is a narrow centered phone column — manager tables and the report are badly cramped, and there is no app chrome (nav/header). NFR01 still wants one-handed mobile, but desktop deserves a real layout.
+- **What must be done:**
+  - Replace the fixed `.app-shell` with an MUI responsive layout: an `AppBar`/top bar (brand + context-aware actions: profile, logout, manager links when `gerente`), and a responsive content `Container` whose `maxWidth` adapts — a comfortable reading column (`sm`) for collaborator/auth/punch screens, but a wide layout (`lg`/`xl`) for manager screens (employees list, report) so tables have room.
+  - Use MUI breakpoints + `useMediaQuery`. Preserve mobile-first: at small widths keep one-handed reach (primary actions reachable, no horizontal scroll); on desktop, use the available width.
+  - Provide a layout primitive (e.g. `src/components/AppLayout.jsx`) that pages render inside, replacing the per-page `.app-shell` assumption. Collaborator vs manager width can be a prop or route-derived.
+  - Surface the manager entry points (My Employees, Company report) in the app bar/nav for managers (gated on `gerente`) — this also completes the deferred "route managers to manager entry points" note from FE-AUTH-1.
+- **Relevant files / areas:**
+  - new: `frontend/src/components/AppLayout.jsx`
+  - `frontend/src/App.jsx` (wrap routes in the layout), `frontend/src/styles/base.css` (retire the 480px lock)
+  - all `frontend/src/pages/*` (consume the new layout)
+- **Done when:**
+  - Collaborator/auth/punch screens remain one-handed with no horizontal scroll at ~360px; on desktop they show a centered comfortable column (not edge-to-edge, not a tiny 480px box).
+  - Manager screens use a wide desktop layout so tables/reports have room; they still degrade to stacked/scrollable-free on mobile.
+  - A responsive app bar exposes profile/logout and (for managers) the manager entry points.
+  - `npm run build` green; no route/auth regression.
+
+#### [FE-PUNCH-4] Redesign the kiosk/totem flow
+- **Priority:** P1
+- **Status:** todo — depends on FE-SHARED-8 (MUI); benefits from FE-SHARED-9
+- **Why it exists:** The current kiosk (`KioskPage.jsx`) is awkward as a public totem: it's rendered inside the 480px mobile column with a bottom thumb-zone (wrong for a wall/tablet device), the capture is a confusing two-tap sequence ("Bater ponto" → camera → "Capturar e bater ponto"), the header/branding is tiny, and after a punch it blindly auto-resets after 4s with no visible countdown. A kiosk should feel like a deliberate, legible, self-resetting totem.
+- **What must be done:**
+  - Make the kiosk a **full-bleed, landscape-friendly** screen that breaks out of the narrow app column (no bottom thumb-zone chrome; large centered stage).
+  - Add a clear **idle/welcome** state: prominent FaceClock branding, a **live clock** (current time/date), and a single large primary call-to-action to start a punch.
+  - Streamline capture to feel like one deliberate action (e.g. open camera with a clear oval guide and a single big "Capturar" — or an auto-countdown capture), then a **"Reconhecendo…"** state with the spinner.
+  - Make the **result** state large and color-coded (success / não reconhecido / muito cedo) using `PunchResult` (or an enlarged kiosk variant) — big icon + message readable from a distance — with a **visible auto-reset countdown** back to idle (and a manual "Próxima pessoa"). Tune the timing so it isn't jarringly fast.
+  - Preserve all behavior: public `POST /ponto/embarcado`, best-effort `geo`, NFR05 camera lifecycle (stream stopped + blob discarded after handoff), and the shared error taxonomy.
+  - Use MUI components (e.g. `Card`, `Typography`, `Button`, icons) for the visuals.
+- **Relevant files / areas:**
+  - `frontend/src/pages/KioskPage.jsx`, `frontend/src/pages/KioskPage.css`
+  - `frontend/src/components/CameraCapture.jsx` (may need a kiosk/landscape variant or a prop; do not break the punch-home/enroll consumers)
+  - `frontend/src/components/PunchResult.jsx` (kiosk-sized variant)
+- **Done when:**
+  - The kiosk presents an idle welcome (branding + live clock) and a single obvious way to start a punch; the capture is one deliberate step, not a confusing double tap.
+  - Recognizing and result states are large, legible from a distance, color-coded, and the result auto-resets to idle with a visible countdown plus a manual reset.
+  - It uses the full screen (landscape-friendly), not the 480px mobile column; still usable on a tablet in portrait.
+  - Camera/NFR05 behavior and the embarcado punch contract are unchanged; `npm run build` green.
+
+#### [FE-UI-1] Migrate collaborator/auth screens to MUI components
+- **Priority:** P2
+- **Status:** todo — depends on FE-SHARED-8/9
+- **Why it exists:** After the MUI foundation and layout land, the collaborator-facing screens should use MUI components for a consistent, polished look instead of the hand-rolled `forms.css`/page CSS.
+- **What must be done:**
+  - Migrate MenuPage, LoginPage, RegistroColaboradorPage, RegistroEmpresaPage, EnrollPage, PunchHomePage, ProfilePage to MUI: `TextField`, `Button`, `Card`, `Stack`, `Typography`, `Alert` (for errors), `Dialog`, etc. Replace the shared loading/empty/error primitives with MUI equivalents (`CircularProgress`, `Alert`) or restyle them on MUI.
+  - Keep all flows/endpoints/validation behavior identical; this is presentation-only.
+  - Retire the now-unused hand-rolled CSS as screens migrate.
+- **Relevant files / areas:**
+  - `frontend/src/pages/{MenuPage,LoginPage,RegistroColaboradorPage,RegistroEmpresaPage,EnrollPage,PunchHomePage,ProfilePage}.jsx`
+  - `frontend/src/components/{ProfileForm,Spinner,EmptyState,ErrorBanner,Toast}.jsx`
+  - `frontend/src/styles/forms.css` (retire as migrated)
+- **Done when:**
+  - The listed collaborator/auth screens render with MUI components and look consistent with the theme.
+  - Flows/endpoints unchanged; mobile one-handed + no horizontal scroll preserved; `npm run build` green.
+
+#### [FE-UI-2] Migrate manager screens to MUI (data tables + report)
+- **Priority:** P2
+- **Status:** todo — depends on FE-SHARED-8/9
+- **Why it exists:** The manager screens benefit most from a real desktop treatment: the employees list and the company report are tables that are cramped today. MUI's `Table`/`DataGrid` and `Dialog` make them readable and sortable on desktop.
+- **What must be done:**
+  - ManagerEmployeesPage → MUI `Table` or the free `@mui/x-data-grid` (sortable/filterable columns; row click → employee file). EmployeeFilePage → MUI form (via `ProfileForm` restyled on MUI) + a MUI `Dialog` confirm for deactivate (replacing `ConfirmModal`, or restyle it on MUI).
+  - ManagerReportPage → MUI table for the per-collaborator hours/overtime, with the BR05 overtime flag visually emphasized (chip/colored cell); keep the server CSV export.
+  - Presentation-only; preserve `listar`/`atualizar`/`desativar`/`relatorio.empresa` wiring and guard-error messages.
+- **Relevant files / areas:**
+  - `frontend/src/pages/{ManagerEmployeesPage,EmployeeFilePage,ManagerReportPage}.jsx`
+  - `frontend/src/components/{ProfileForm,ConfirmModal}.jsx`
+- **Done when:**
+  - Manager screens use MUI tables/dialogs and look polished on desktop (wide layout from FE-SHARED-9), degrading gracefully on mobile.
+  - All manager flows + guard-error handling unchanged; `npm run build` green.
 
 ---
 

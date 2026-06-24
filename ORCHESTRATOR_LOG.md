@@ -170,6 +170,20 @@ for AUTHZ-2, AUTH-4 claims shape, and the frontend manager flow.
 - FE deferrals tied to backend: `facial: []` at registration (clears w/ BIO-1); clean company-not-found (RECOG-2).
 - Frontend verified by build only — no runtime/browser QA this pass.
 
+---
+
+## Enhancement tasks authored (2026-06-24) — prettier + desktop-friendly via MUI
+
+User requested: make the frontend prettier and desktop-friendly, use a free CSS component library, and fix the awkward kiosk flow. Chosen library (user): **MUI (Material UI)**. Authored 5 new tasks in `TASKS_FRONTEND.md` (§3 adds the `FE-UI-` prefix; §4 snapshot adds an "Enhancements" row):
+- **FE-SHARED-8** (P1) — adopt MUI: deps (@mui/material, emotion, icons, @mui/x-data-grid), `theme.js`, `ThemeProvider`+`CssBaseline`. Prereq for the rest.
+- **FE-SHARED-9** (P1) — responsive desktop+mobile layout: break out of the 480px column, MUI `AppBar` + adaptive `Container` (narrow for collaborator, wide for manager), `AppLayout`; surfaces manager nav for `gerente` (completes FE-AUTH-1's deferred manager routing).
+- **FE-PUNCH-4** (P1) — redesign the kiosk/totem: full-bleed landscape, idle welcome + live clock, one deliberate capture (not the current two-tap), large color-coded result with a visible auto-reset countdown. Found concrete weirdness in `KioskPage.jsx`: 480px column + bottom thumb-zone on a totem, two-tap "Bater ponto"→"Capturar", tiny header, blind 4s auto-reset.
+- **FE-UI-1** (P2) — migrate collaborator/auth screens to MUI components.
+- **FE-UI-2** (P2) — migrate manager screens to MUI tables (`@mui/x-data-grid`) + dialogs.
+
+Presentation-layer only; flows/endpoints/auth/NFR05 preserved. Order: FE-SHARED-8 first (blocks the others). **Not yet implemented — awaiting go-ahead.**
+
+
 
 
 
