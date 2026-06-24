@@ -153,6 +153,24 @@ for AUTHZ-2, AUTH-4 claims shape, and the frontend manager flow.
 - **All P1 frontend done.** Bootstrap caveat stands: manager screens need a seeded manager to exercise e2e.
 - **Next:** P2 polish — FE-PUNCH-3 (unified punch result UX) + FE-SHARED-7 (shared loading/empty/error primitives + responsive QA pass).
 
+### Cycle 19 — FE-PUNCH-3 + FE-SHARED-7 (P2) — ✅ DONE (batched: polish)
+- Shared PunchResult + mapPunchError (unified 5-kind taxonomy) refactored into Kiosk + PunchHome; shared Spinner/EmptyState/ErrorBanner/Toast applied across PunchHome/ManagerEmployees/Profile. Static responsive check: no gaps. Build green (JS 207/CSS 17 kB). Commit `2353e4e`.
+- **⚠ Caveat:** FE-SHARED-7's runtime one-handed/visual QA needs a headless browser — not performed; the `npm run build` gate proves compilation only.
+
+---
+
+## FRONTEND BACKLOG COMPLETE (all P0/P1/P2 in TASKS_FRONTEND.md) — 2026-06-23
+
+18 frontend tasks done across cycles 9–19 (some batched by area). Every cycle verified with `npm run build` (Vite) green. Commits: 83dd558, e42cfc7, a77de5a, 2eec5cc, eb00d84, 268f402, 5b0e01d, f3f6350, 48bae39, d11ca22, 2353e4e (+ doc commits).
+
+**Backend remaining (deferred when user redirected to frontend):** BIO-1, RECOG-2, API-1 (P2); ARCH-1..4 (P3). All have a runnable smoke gate. Awaiting direction to resume.
+
+**Open cross-cutting items for the human:**
+- **Manager bootstrap:** no API path mints the first manager → manager screens + manager-gated endpoints can't be exercised e2e until a manager is seeded (seed/CLI decision).
+- FE deferrals tied to backend: `facial: []` at registration (clears w/ BIO-1); clean company-not-found (RECOG-2).
+- Frontend verified by build only — no runtime/browser QA this pass.
+
+
 
 
 

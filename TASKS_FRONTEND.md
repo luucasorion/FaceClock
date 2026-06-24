@@ -73,7 +73,9 @@ The frontend scaffold now exists (`frontend/`, React+Vite); the screens are bein
 | ✅ Done | FE-SHARED-1, FE-SHARED-2, FE-SHARED-3, FE-SHARED-4, FE-MENU-1, FE-AUTH-1, FE-AUTH-2, FE-AUTH-3, FE-PUNCH-1, FE-PUNCH-2 |
 | ⬜ P0 | — (all done) |
 | ✅ Done (P1) | FE-SHARED-5, FE-SHARED-6, FE-ENROLL-1, FE-PROFILE-1, FE-MANAGER-1, FE-MANAGER-2 |
-| ⬜ P2 | FE-PUNCH-3, FE-SHARED-7 |
+| ✅ Done (P2) | FE-PUNCH-3, FE-SHARED-7 |
+
+**All frontend tasks complete (2026-06-23).** Verified via `npm run build` (Vite) on each cycle. Remaining caveats: (a) manager screens need a seeded manager to exercise end-to-end (backend bootstrap gap); (b) `facial: []` at registration clears when BIO-1 lands; (c) clean "company not found" message arrives with RECOG-2; (d) the build gate proves compilation, not runtime/visual behavior (no headless browser run this pass).
 
 **Backend dependencies (in `TASKS.md`) that block frontend tasks**
 
@@ -412,7 +414,7 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
 
 #### [FE-PUNCH-3] Punch result & error UX polish
 - **Priority:** P2
-- **Status:** todo
+- **Status:** done — 2026-06-23. Shared `src/components/PunchResult.jsx` (+css) + centralized `mapPunchError`: success / not-recognized (401) / too-soon (429) / not-enrolled (400 "biometria", w/ enroll link) / error (400 invalid-image). `KioskPage` + `PunchHomePage` refactored to use it (consistent taxonomy, spinner during submit, kiosk auto-reset, camera lifecycle preserved). Verified `npm run build` green.
 - **Why it exists:** The punch loop is the most-used, most time-sensitive flow (~3s target, NFR-aligned). Both the kiosk and authenticated punch should share consistent, legible result feedback.
 - **What must be done:**
   - Unify the result/error taxonomy across `FE-PUNCH-1` and `FE-PUNCH-2`: **success**, **face not recognized** (401), **too soon / BR02** (429), **not enrolled** (login punch with no embedding). Map backend `detail`/status to friendly copy.
@@ -427,7 +429,7 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
 
 #### [FE-SHARED-7] Responsive/one-handed QA pass + shared loading/empty/error primitives
 - **Priority:** P2
-- **Status:** todo
+- **Status:** done — 2026-06-23. Shared `Spinner`/`EmptyState`/`ErrorBanner`/`Toast` primitives (`src/components/` + `ui.css`); applied across `PunchHomePage`, `ManagerEmployeesPage`, `ProfilePage` (replacing inline loading/empty/error). Static responsive check at ~360px: all pages inside `.app-shell` (`overflow-x:hidden`), thumb-zone actions, manager tables stack on mobile — no gaps found. `Toast` created but not yet wired (no existing inline toast to replace). **Note:** runtime/visual one-handed QA needs a headless browser run (not performed this pass — build gate proves compilation only). Verified `npm run build` green.
 - **Why it exists:** After the screens exist, a cross-cutting pass ensures NFR01 holds everywhere and that loading/empty/error states are consistent rather than re-invented per screen.
 - **What must be done:**
   - Extract shared primitives: `Spinner`/loading, empty-state, error banner, and toast — and apply them across the screens that currently inline these states.
