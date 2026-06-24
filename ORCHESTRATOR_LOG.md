@@ -183,6 +183,20 @@ User requested: make the frontend prettier and desktop-friendly, use a free CSS 
 
 Presentation-layer only; flows/endpoints/auth/NFR05 preserved. Order: FE-SHARED-8 first (blocks the others). **Not yet implemented — awaiting go-ahead.**
 
+---
+
+## Resume (2026-06-24) — user added AUTHZ-3 + FE-PROFILE-2; continue the loop (MUI confirmed)
+
+User confirmed: keep **MUI** and implement all queued tasks. Incoming user task edits committed (`374242e`). Order: FE-PROFILE-2 → AUTHZ-3 → FE-SHARED-8 → FE-SHARED-9 → FE-PUNCH-4 → P2 (BIO-1, RECOG-2, API-1, FE-UI-1/2) → P3 (ARCH-1..4).
+
+### Cycle 20 — FE-PROFILE-2 (P1 fix, `TASKS_FRONTEND.md`) — ✅ DONE
+- **Diagnosis:** code-traced then **reproduced at runtime** with the backend live — `GET /me` 200 → `PUT /me` (login change) 200 → `GET /me` same token **404** (sub-based identity strands the token; PUT succeeds by cpf).
+- **Fix (frontend-only):** ProfilePage editableFields → `['login','senha']` (nome read-only); login-change → `logout()`+redirect `/login` w/ message; senha-only keeps in-place refresh. LoginPage shows the message. ProfileForm `status` → boolean (Sim/Não). Manager EmployeeFilePage untouched.
+- **Verify:** `npm run build` green + the runtime API reproduction. (No headless-browser UI drive; underlying defect reproduced via API.) Backend (uvicorn :8000) started for the repro, then stopped.
+- **Commit:** `1d98d4f`.
+- **Next:** AUTHZ-3 (atomic first-manager bootstrap in POST /empresa).
+
+
 
 
 

@@ -75,7 +75,7 @@ The frontend scaffold now exists (`frontend/`, React+Vite); the screens are bein
 | ⬜ P0 | — (all done) |
 | ✅ Done (P1) | FE-SHARED-5, FE-SHARED-6, FE-ENROLL-1, FE-PROFILE-1, FE-MANAGER-1, FE-MANAGER-2 |
 | ✅ Done (P2) | FE-PUNCH-3, FE-SHARED-7 |
-| ⬜ Fixes | FE-PROFILE-2 (self-edit broken + lock fields to login/senha) |
+| ✅ Done (Fixes) | FE-PROFILE-2 |
 | ⬜ Enhancements | FE-SHARED-8, FE-SHARED-9, FE-PUNCH-4, FE-UI-1, FE-UI-2 |
 
 **MVP frontend complete (2026-06-23).** Verified via `npm run build` (Vite) on each cycle. Remaining caveats: (a) manager screens need a seeded manager to exercise end-to-end (backend bootstrap gap); (b) `facial: []` at registration clears when BIO-1 lands; (c) clean "company not found" message arrives with RECOG-2; (d) the build gate proves compilation, not runtime/visual behavior (no headless browser run this pass).
@@ -417,7 +417,7 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
 
 #### [FE-PROFILE-2] Review & fix the employee self-profile edit flow
 - **Priority:** P1
-- **Status:** todo
+- **Status:** done — 2026-06-24. **Root cause reproduced at runtime** (not just compiled): with the backend running, `GET /colaborador/me` → 200 with a fresh token, `PUT /colaborador/me` changing `login` → 200 (save succeeds, targets by `cpf`), then `GET /colaborador/me` with the **same** token → **404** — because `/me` resolves identity via `por_login(payload["sub"])` and `sub` is the now-stale old login. Fix (frontend-only): `ProfilePage` `editableFields` reduced to `['login','senha']` (`nome` read-only); on a successful save where `'login' in patch`, `logout()` + redirect to `/login` with a message (clean re-login → fresh token whose `sub` = new login) instead of reusing the stale token; senha-only keeps the in-place `setProfile`/`setSession` refresh. `LoginPage` surfaces `location.state.message`. `ProfileForm` `status` field `type` `text`→`boolean` so it renders `Sim`/`Não` (not `"true"/"false"`); manager `EmployeeFilePage` (edits `nome/login/gerente/senha`) untouched. Verified `npm run build` green + the runtime reproduction above. (UI not driven in a headless browser; the underlying defect was reproduced via the API and the client fix provably avoids reusing the stale token.)
 - **Why it exists:** The employee self-edit section (`FE-PROFILE-1`) currently does not work at runtime (the build gate only proves it compiles, not that the flow works), and it exposes too many editable fields. Two problems to resolve: **(1)** the self-edit flow is broken in the browser and must be diagnosed and fixed; **(2)** product decision (2026-06-24): a collaborator should edit **only `login` and `senha`** on their own profile — **`nome` becomes read-only** for self-edit. The manager edit screen (`EmployeeFilePage`, `PUT /colaborador/{cpf}`) is **out of scope** and must keep its current editable set (`nome`, `login`, `gerente`, `senha`).
 - **What must be done:**
   - **Frontend-only** (per decision): do **not** modify `application/`, `domains/`, `infra/`, `presentation/`. The `/me` endpoint may still technically accept `nome`; the self-edit form simply must not offer it (the form patches only changed fields, so an un-editable `nome` is never sent).
