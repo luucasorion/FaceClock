@@ -72,7 +72,8 @@ The frontend scaffold now exists (`frontend/`, React+Vite); the screens are bein
 |---|---|
 | ✅ Done | FE-SHARED-1, FE-SHARED-2, FE-SHARED-3, FE-SHARED-4, FE-MENU-1, FE-AUTH-1, FE-AUTH-2, FE-AUTH-3, FE-PUNCH-1, FE-PUNCH-2 |
 | ⬜ P0 | — (all done) |
-| ⬜ P1 | FE-SHARED-5, FE-SHARED-6, FE-ENROLL-1, FE-PROFILE-1, FE-MANAGER-1, FE-MANAGER-2 |
+| ✅ Done (P1) | FE-SHARED-5, FE-SHARED-6 |
+| ⬜ P1 | FE-ENROLL-1, FE-PROFILE-1, FE-MANAGER-1, FE-MANAGER-2 |
 | ⬜ P2 | FE-PUNCH-3, FE-SHARED-7 |
 
 **Backend dependencies (in `TASKS.md`) that block frontend tasks**
@@ -311,7 +312,7 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
 
 #### [FE-SHARED-5] `ProfileForm` component (read-only + edit toggle)
 - **Priority:** P1
-- **Status:** todo
+- **Status:** done — 2026-06-23. `src/components/ProfileForm.jsx` (+css): renders ColaboradorResponse read-only with Edit toggle; `editableFields` prop gates which fields are editable (`cpf` always locked, `gerente` checkbox, `senha` new-password input only if included); Save emits a changed-fields-only patch to injected `onSave` (employee→`PUT /me`, manager→`PUT /{cpf}`); `saving`/`error`/`disabled` props; Cancel reverts. Consumers import `styles/forms.css`. Verified esbuild + build green.
 - **Why it exists:** Both the employee profile and the manager employee file show the same collaborador fields with an Edit→Save pattern; only the Save target differs. One component avoids duplication.
 - **What must be done:**
   - `frontend/src/components/ProfileForm.jsx`: render `ColaboradorResponse` fields (`cpf` read-only always, `nome`, `login`, `empresa_id`, `status`) read-only by default; an **Edit** toggle enables editable fields; **Save** calls a caller-supplied `onSave(patch)` handler. Editable field set is caller-configurable (employee self-edit allows fewer fields than manager edit).
@@ -325,7 +326,7 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
 
 #### [FE-SHARED-6] CSV export helper
 - **Priority:** P1
-- **Status:** todo
+- **Status:** done — 2026-06-23. `src/lib/csv.js`: `punchesToCsv(items)` (cols `data,hora,tipo,geo`, derived from `batida`, RFC-4180 escaping, header row) + `downloadCsv(filename, content)` (Blob `text/csv` + UTF-8 BOM, temp `<a download>`, revokes URL). Verified `node --check` + build green.
 - **Why it exists:** The employee's own history endpoint (`/relatorio/historico`) returns JSON only — no server CSV. The employee history export must build the CSV client-side. (The manager company report already supports server-side CSV via `formato=csv`, so it does not need this helper.)
 - **What must be done:**
   - `frontend/src/lib/csv.js`: `punchesToCsv(items)` building a `.csv` string from a punch list (columns e.g. `data, hora, tipo, geo`), and a `downloadCsv(filename, content)` trigger.

@@ -140,6 +140,11 @@ for AUTHZ-2, AUTH-4 claims shape, and the frontend manager flow.
 - **Commit:** `5b0e01d`.
 - **All P0 frontend tasks complete.** Next: P1 — FE-SHARED-5 (ProfileForm), FE-SHARED-6 (CSV helper), FE-ENROLL-1, FE-PROFILE-1, FE-MANAGER-1/2 (FE-MANAGER unblocked by AUTHZ-1, but not exercisable e2e until a manager is seeded).
 
+### Cycle 16 — FE-SHARED-5 + FE-SHARED-6 (P1) — ✅ DONE (batched: P1 shared blocks)
+- ProfileForm.jsx (editableFields-gated edit, changed-fields-only onSave patch) + lib/csv.js (punchesToCsv RFC-4180 + downloadCsv). Neither imported by entry yet → esbuild JSX check + node --check + build green. Commit `f3f6350`.
+- **Next:** FE-ENROLL-1 (biometric enrollment via CameraCapture → cadastrarBiometria).
+
+
 
 
 
