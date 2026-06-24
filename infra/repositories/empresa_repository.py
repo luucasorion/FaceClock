@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 
 from domains.models.empresa import Empresa
+from domains.models.colaborador import Colaborador
 
 
 class EmpresaRepository:
@@ -13,6 +14,17 @@ class EmpresaRepository:
         self.db.commit()
         self.db.refresh(empresa)
         return empresa
+
+    def criar_com_gestor(self, empresa: Empresa, gestor: Colaborador) -> Empresa:
+        try:
+            self.db.add(empresa)
+            self.db.add(gestor)
+            self.db.commit()        # single commit -> both persist or neither
+            self.db.refresh(empresa)
+            return empresa
+        except Exception:
+            self.db.rollback()      # get_db only close()s; rollback explicitly
+            raise
 
     def buscar_por_cnpj(self, cnpj: str) -> Empresa | None:
         return self.db.query(Empresa).filter(Empresa.cnpj == cnpj).first()

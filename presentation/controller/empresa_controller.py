@@ -7,6 +7,7 @@ from infra.repositories.empresa_repository import EmpresaRepository
 from application.use_cases.empresa.cadastro_empresa_usecase import CadastroEmpresaUseCase
 from application.use_cases.empresa.get_empresa_usecase import GetEmpresaUseCase
 from application.use_cases.empresa.edicao_empresa_usecase import EdicaoEmpresaUseCase
+from application.services.hash_service import HashService
 
 from presentation.schema.requests.cadastro_empresa_request import CadastroEmpresaRequest
 from presentation.schema.requests.edicao_empresa_request import EdicaoEmpresaRequest
@@ -19,7 +20,8 @@ router = APIRouter(prefix="/empresa", tags=["Empresa"])
 @router.post("", response_model=EmpresaResponse, status_code=201)
 def cadastrar_empresa(body: CadastroEmpresaRequest, db: Session = Depends(get_db)):
     repo = EmpresaRepository(db)
-    usecase = CadastroEmpresaUseCase(repo)
+    hash_service = HashService()
+    usecase = CadastroEmpresaUseCase(repo, hash_service)
     return usecase.executar(
         cnpj=body.cnpj,
         razao_social=body.razao_social,
