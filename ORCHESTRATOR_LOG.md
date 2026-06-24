@@ -89,6 +89,20 @@ for AUTHZ-2, AUTH-4 claims shape, and the frontend manager flow.
 - **Task files:** PUNCH-3 → §4 done; §3 snapshot updated. **Also fixed a structural slip from cycle 7:** the REPORT-5 done block had been written under §5's "P2" subsection instead of §4 — relocated it into §4 alongside PUNCH-3.
 - **Next:** ⟶ user redirected to **frontend first** — switching to `TASKS_FRONTEND.md`. Remaining backend (BIO-1, RECOG-2, API-1 P2; ARCH-1..4 P3) deferred until after the frontend pass.
 
+---
+
+## Frontend pass (TASKS_FRONTEND.md) — Node 24 / npm 11 installed mid-run
+
+**Verify gate:** `npm install` + `npm run build` (Vite) from `frontend/`, run by the orchestrator in PowerShell with `C:\Program Files\nodejs` prepended to PATH each call (persistent shells don't keep env between calls). **Workflow note:** the runbook's "frontend agent" doesn't exist in this workspace; frontend implementation routed to the general-purpose agent. For pure-greenfield frontend tasks the backend-focused architecture agent adds little, so I plan those inline and run the build gate myself.
+
+### Cycle 9 — FE-SHARED-1 (P0, `TASKS_FRONTEND.md`) — ✅ DONE
+- **Implementation:** general-purpose agent wrote the `frontend/` Vite scaffold (package.json, index.html, vite.config.js w/ dev proxy →:8000, main.jsx, App.jsx router w/ all routes as placeholders, mobile-first base.css, .gitignore). Backend/markdown untouched.
+- **Verify:** `npm install` → 66 pkgs, exit 0; `npm run build` → vite, 34 modules, exit 0. (npm 11 blocked esbuild postinstall via allow-scripts, but the build was unaffected.)
+- **Commit:** `83dd558` (source + package-lock; node_modules/dist gitignored).
+- **Task files:** FE-SHARED-1 → done; §4 snapshot updated; added a frontend verify-gate note.
+- **Next:** FE-SHARED-2 (API client with bearer injection + per-resource wrappers).
+
+
 
 
 

@@ -62,14 +62,16 @@ IDs are numbered within each prefix.
 
 ## 4. Current Completion Snapshot
 
-The frontend is **greenfield — no `frontend/` directory exists yet** (confirmed 2026-06-23). Every task below is `todo`.
+The frontend scaffold now exists (`frontend/`, React+Vite); the screens are being built out. Updated during the orchestrator run on 2026-06-23.
+
+**Verification gate (frontend):** `npm install` + `npm run build` (Vite) from `frontend/`, run by the orchestrator. Node 24 / npm 11 confirmed available at `C:\Program Files\nodejs` (prepend to PATH per call). There is no automated test suite; the build gate proves the app compiles, not runtime correctness.
 
 **At a glance**
 
 | Group | Tasks |
 |---|---|
-| ✅ Done | — (none) |
-| ⬜ P0 | FE-SHARED-1, FE-SHARED-2, FE-SHARED-3, FE-SHARED-4, FE-MENU-1, FE-AUTH-1, FE-AUTH-2, FE-AUTH-3, FE-PUNCH-1, FE-PUNCH-2 |
+| ✅ Done | FE-SHARED-1 |
+| ⬜ P0 | FE-SHARED-2, FE-SHARED-3, FE-SHARED-4, FE-MENU-1, FE-AUTH-1, FE-AUTH-2, FE-AUTH-3, FE-PUNCH-1, FE-PUNCH-2 |
 | ⬜ P1 | FE-SHARED-5, FE-SHARED-6, FE-ENROLL-1, FE-PROFILE-1, FE-MANAGER-1, FE-MANAGER-2 |
 | ⬜ P2 | FE-PUNCH-3, FE-SHARED-7 |
 
@@ -138,7 +140,7 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
 
 #### [FE-SHARED-1] Scaffold the React + Vite app with routing and a responsive base
 - **Priority:** P0
-- **Status:** todo
+- **Status:** done — 2026-06-23. `frontend/` Vite app: `package.json` (react 18.3, react-dom 18.3, react-router-dom 6.26, vite 5.4, @vitejs/plugin-react 4.3), `index.html` (responsive `viewport-fit=cover`), `vite.config.js` (port 5173 + dev proxy `/auth`,`/colaborador`,`/ponto`,`/empresa`,`/relatorio` → `http://localhost:8000`), `src/main.jsx`, `src/App.jsx` (BrowserRouter with all screen routes as inline placeholders + `*` NotFound), `src/styles/base.css` (mobile-first: `.app-shell` max-width 480px / `overflow-x:hidden` / 100dvh, `.thumb-zone` with safe-area inset, `.btn-primary` 48px). `.gitignore` for node_modules/dist. **Verified:** `npm install` (66 pkgs) + `npm run build` (vite, 34 modules) both exit 0. Route paths: `/`,`/login`,`/registro/colaborador`,`/registro/empresa`,`/enroll`,`/kiosk`,`/home`,`/perfil`,`/gerente/colaboradores`,`/gerente/colaboradores/:cpf`,`/gerente/relatorio`.
 - **Why it exists:** There is no `frontend/` directory. Every other task needs a Vite app, a router, and a mobile-first layout shell to live in.
 - **What must be done:**
   - Create `frontend/` as a Vite React app (`index.html`, `package.json`, `vite.config.js`, `src/main.jsx`, `src/App.jsx`).
