@@ -213,6 +213,11 @@ User confirmed: keep **MUI** and implement all queued tasks. Incoming user task 
 - AppLayout (MUI AppBar + route-derived Container width + mobile hamburger; manager nav gated on gerente) + App wraps routes (guards intact, /kiosk full-bleed outside) + base.css 480px cap retired. Build green (JS 387 kB). Commit `44ff371`.
 - **Next:** FE-PUNCH-4 (kiosk/totem redesign — full-bleed landscape, idle+clock, single deliberate capture, large countdown result).
 
+### Cycle 24 — FE-PUNCH-4 (P1 enhancement) — ✅ DONE
+- KioskPage rewritten as full-bleed MUI totem (idle+live clock, single CTA, 3-2-1 auto-capture via default-off CameraCapture prop, big countdown result reusing mapPunchError). Other CameraCapture consumers unaffected. Build green (JS 391 kB). Commit `49aed0d`.
+- **All P1 enhancement tasks done.** Next (P2): FE-UI-1 (migrate collaborator/auth screens to MUI), FE-UI-2 (manager screens to MUI tables/dialogs); then backend P2 (BIO-1, RECOG-2, API-1, AUTHZ-4) and P3 (ARCH-1..4).
+
+
 
 
 

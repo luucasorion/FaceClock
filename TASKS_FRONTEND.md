@@ -76,8 +76,8 @@ The frontend scaffold now exists (`frontend/`, React+Vite); the screens are bein
 | ✅ Done (P1) | FE-SHARED-5, FE-SHARED-6, FE-ENROLL-1, FE-PROFILE-1, FE-MANAGER-1, FE-MANAGER-2 |
 | ✅ Done (P2) | FE-PUNCH-3, FE-SHARED-7 |
 | ✅ Done (Fixes) | FE-PROFILE-2 |
-| ✅ Done (Enh) | FE-SHARED-8, FE-SHARED-9 |
-| ⬜ Enhancements | FE-PUNCH-4, FE-UI-1, FE-UI-2 |
+| ✅ Done (Enh) | FE-SHARED-8, FE-SHARED-9, FE-PUNCH-4 |
+| ⬜ Enhancements | FE-UI-1, FE-UI-2 |
 
 **MVP frontend complete (2026-06-23).** Verified via `npm run build` (Vite) on each cycle. Remaining caveats: (a) ~~manager screens need a seeded manager~~ — **resolved by AUTHZ-3** (2026-06-24): `POST /empresa` now bootstraps a manager (`login`=CNPJ, `senha`=company name), so the manager flow is exercisable end-to-end (predictable credential to be hardened by AUTHZ-4); (b) `facial: []` at registration clears when BIO-1 lands; (c) clean "company not found" message arrives with RECOG-2; (d) the build gate proves compilation, not runtime/visual behavior (no headless browser run this pass).
 
@@ -515,7 +515,7 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
 
 #### [FE-PUNCH-4] Redesign the kiosk/totem flow
 - **Priority:** P1
-- **Status:** todo — depends on FE-SHARED-8 (MUI); benefits from FE-SHARED-9
+- **Status:** done — 2026-06-24. `KioskPage.jsx` rewritten as a full-bleed MUI totem: idle welcome (large branding + live ticking clock + one CTA), a single deliberate capture via a new **default-off** `CameraCapture` `autoCaptureCountdown` prop (3-2-1 overlay → auto-capture, replacing the old two-tap), large centered "Reconhecendo…" spinner, and a big color-coded result with a visible ~6s auto-reset countdown + manual "Próxima pessoa". Reuses `mapPunchError` for taxonomy; preserves `POST /ponto/embarcado`, best-effort geo, NFR05 teardown. PunchHomePage/EnrollPage unaffected (prop default-off). **Verified:** `npm run build` green. (Runtime camera/countdown behavior needs a device/browser — not driven this pass.)
 - **Why it exists:** The current kiosk (`KioskPage.jsx`) is awkward as a public totem: it's rendered inside the 480px mobile column with a bottom thumb-zone (wrong for a wall/tablet device), the capture is a confusing two-tap sequence ("Bater ponto" → camera → "Capturar e bater ponto"), the header/branding is tiny, and after a punch it blindly auto-resets after 4s with no visible countdown. A kiosk should feel like a deliberate, legible, self-resetting totem.
 - **What must be done:**
   - Make the kiosk a **full-bleed, landscape-friendly** screen that breaks out of the narrow app column (no bottom thumb-zone chrome; large centered stage).
