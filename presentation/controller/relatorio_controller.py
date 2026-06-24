@@ -23,6 +23,9 @@ from application.use_cases.relatorio.horas_trabalhadas_usecase import (
 from presentation.schema.responses.historico_ponto_response import (
     HistoricoPontoResponse,
 )
+from presentation.schema.responses.historico_response import (
+    HistoricoResponse,
+)
 from presentation.schema.responses.resumo_diario_response import (
     ResumoDiarioResponse,
 )
@@ -116,6 +119,37 @@ def historico_proprio(
     # BR06: identity comes from the token; BatidaPonto.colaborador_id holds CPF.
     usecase = HistoricoColaboradorUseCase(BatidaPontoRepository(db))
     return usecase.historico_colaborador(payload["cpf"], data_inicio, data_fim)
+
+
+@router.get("/historico/paginado", response_model=HistoricoResponse)
+def historico_proprio_paginado(
+    data_inicio: datetime = Query(...),
+    data_fim: datetime = Query(...),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(50, ge=1, le=200),
+    db: Session = Depends(get_db),
+    payload: dict = Depends(get_current_colaborador),
+):
+    # BR06: identity comes from the token; BatidaPonto.colaborador_id holds CPF.
+    batida_repo = BatidaPontoRepository(db)
+
+    items = batida_repo.listar_por_colaborador(
+        payload["cpf"],
+        data_inicio,
+        data_fim,
+        page=page,
+        page_size=page_size,
+    )
+    total = batida_repo.contar_por_colaborador(
+        payload["cpf"], data_inicio, data_fim
+    )
+
+    return HistoricoResponse(
+        total=total,
+        page=page,
+        page_size=page_size,
+        items=items,
+    )
 
 
 @router.get("/dia", response_model=ResumoDiarioResponse)
