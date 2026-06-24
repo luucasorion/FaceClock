@@ -1,0 +1,50 @@
+/* FE-MENU-1: menu screen layout. Mobile-first, stacked, no horizontal scroll. */
+
+.menu-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+}
+
+.menu-header {
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-lg);
+  text-align: center;
+}
+
+.menu-title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.menu-subtitle {
+  margin: var(--space-sm) 0 0;
+  color: var(--color-text-muted);
+}
+
+/* Stack actions and keep them in the thumb zone at the bottom. */
+.menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-top: auto;
+  padding-bottom: var(--safe-bottom);
+}
+
+/* Links styled as primary buttons need flex centering for their text. */
+.menu-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  text-align: center;
+}
+
+/* Desktop: keep buttons centered and comfortably sized, not edge-to-edge. */
+@media (min-width: 481px) {
+  .menu-actions {
+    align-items: center;
+  }
+}
