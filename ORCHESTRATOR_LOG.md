@@ -205,6 +205,11 @@ User confirmed: keep **MUI** and implement all queued tasks. Incoming user task 
 - **Impact:** the manager flow (FE-MANAGER-1/2) is now exercisable e2e — a fresh company has a working manager login.
 - **Next:** FE-SHARED-8 (adopt MUI — base/theme; blocks the other enhancement tasks).
 
+### Cycle 22 — FE-SHARED-8 (P1 enhancement) — ✅ DONE
+- MUI deps + theme.js (brand palette) + ThemeProvider/CssBaseline in main.jsx; MenuPage→MUI as proof. `npm install` 73 pkgs + build green (JS 330 kB). Commit `641aaa4`.
+- **Next:** FE-SHARED-9 (responsive desktop layout — break the 480px column; MUI AppBar + adaptive container + manager nav).
+
+
 
 
 
