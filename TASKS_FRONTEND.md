@@ -70,8 +70,8 @@ The frontend scaffold now exists (`frontend/`, React+Vite); the screens are bein
 
 | Group | Tasks |
 |---|---|
-| ✅ Done | FE-SHARED-1, FE-SHARED-2 |
-| ⬜ P0 | FE-SHARED-3, FE-SHARED-4, FE-MENU-1, FE-AUTH-1, FE-AUTH-2, FE-AUTH-3, FE-PUNCH-1, FE-PUNCH-2 |
+| ✅ Done | FE-SHARED-1, FE-SHARED-2, FE-SHARED-3 |
+| ⬜ P0 | FE-SHARED-4, FE-MENU-1, FE-AUTH-1, FE-AUTH-2, FE-AUTH-3, FE-PUNCH-1, FE-PUNCH-2 |
 | ⬜ P1 | FE-SHARED-5, FE-SHARED-6, FE-ENROLL-1, FE-PROFILE-1, FE-MANAGER-1, FE-MANAGER-2 |
 | ⬜ P2 | FE-PUNCH-3, FE-SHARED-7 |
 
@@ -178,7 +178,7 @@ These are defined as their own tasks (Section 7) because multiple screens reuse 
 
 #### [FE-SHARED-3] Auth context and route guards
 - **Priority:** P0
-- **Status:** todo
+- **Status:** done — 2026-06-23. `src/auth/AuthContext.jsx` (`AuthProvider`/`useAuth`): stores `token` + `colaborador`, hydrates synchronously from `localStorage` (`faceclock.auth`), persists on change, clears on logout; exposes `token`/`colaborador`/`cpf`/`empresaId`/`login`/`gerente`/`isAuthenticated` + `setSession`/`logout`. `src/auth/guards.jsx`: `RequireAuth`→`/login`, `RequireManager`→`/home` if not `gerente` (both `<Outlet/>`+child forms). **AUTHZ-1 is done**, so `RequireManager` gates on the real `gerente` claim/field (no longer blocked). App wraps router in `AuthProvider`; `/home`,`/perfil`,`/enroll` behind `RequireAuth`, `/gerente/*` behind `RequireManager`. **Verified:** `npm run build` green (37 modules).
 - **Why it exists:** The JWT must be stored once and shared; protected screens need a guard; the manager flow needs role gating. Login and registration both return a token + `colaborador` that must be captured app-wide.
 - **What must be done:**
   - `frontend/src/auth/AuthContext.jsx`: store the JWT and the `colaborador`; expose `login`, `cpf`, `empresa_id` (decoded from the token or the `colaborador`), plus `setSession(token, colaborador)` and `logout()`. Persist the token (e.g. `localStorage`) so a refresh keeps the session; **never** persist captured images.

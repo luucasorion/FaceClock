@@ -108,6 +108,13 @@ for AUTHZ-2, AUTH-4 claims shape, and the frontend manager flow.
 - **Commit:** `e42cfc7`.
 - **Next:** FE-SHARED-3 (auth context + route guards; RequireManager now implementable via the `gerente` claim from AUTHZ-1).
 
+### Cycle 11 — FE-SHARED-3 (P0, `TASKS_FRONTEND.md`) — ✅ DONE
+- **Implementation:** `AuthContext.jsx` (token+colaborador, localStorage hydrate/persist, useAuth) + `guards.jsx` (RequireAuth, RequireManager gating on the real `gerente` claim — AUTHZ-1 unblocked it) + App wrapped in AuthProvider with guards on demo routes.
+- **Verify:** `npm run build` green; module count 34→37 and bundle grew, confirming the JSX is compiled into the entry (real gate for JSX, since `node --check` can't parse JSX).
+- **Commit:** `a77de5a`.
+- **Next:** FE-SHARED-4 (`CameraCapture` — getUserMedia + oval guide → Blob; reused by kiosk/punch/enroll).
+
+
 
 
 
