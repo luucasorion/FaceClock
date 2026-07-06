@@ -22,7 +22,7 @@ class BatidaPontoEmbarcadoUseCase:
     def execute(
         self,
         imagem: bytes,
-        geo: str
+        geo: str | None = None
     ):
 
         try:

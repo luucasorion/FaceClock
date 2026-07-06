@@ -77,11 +77,10 @@ async def bater_ponto(
         geo=geo
     )
 
-# PUBLIC — kiosk endpoint; identity established via facial recognition, not a bearer token
 @router.post("/embarcado")
 async def bater_ponto_embarcado(
     imagem: UploadFile = File(...),
-    geo: str = Form(...),
+    geo: str = Form(None),
     db: Session = Depends(get_db)
 ):
 
