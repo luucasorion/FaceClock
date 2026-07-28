@@ -1,29 +1,117 @@
-/* FaceClock — mobile-first base styles (FE-SHARED-1) */
+/* FaceClock — Valtech Design System base styles (FE-REBRAND-1, #17)
+
+   Single source of truth for design tokens. The raw Valtech palette lives on
+   `--val-*`; the legacy semantic tokens (`--color-*`, `--radius`, `--font-*`)
+   from the pre-rebrand UI are re-mapped onto the Valtech values so existing
+   CSS/screens shift to the new skin without breaking while the per-screen
+   restyle PRs (#20–#26) land. */
+
+/* ------------------------------------------------------------------ */
+/* Fonts — Valtech Neue (display) + Sons (body).                       */
+/* Licensed OTFs are NOT redistributed in the repo. Drop them into     */
+/* frontend/public/fonts/ (see that folder's README). Until then the   */
+/* declared fallback stack ("Helvetica Neue", Arial) is used — which    */
+/* matches the design prototype's own fallback.                        */
+/* ------------------------------------------------------------------ */
+@font-face {
+  font-family: 'Valtech Neue';
+  src: url('/fonts/ValtechNeue-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Valtech Neue';
+  src: url('/fonts/ValtechNeue-Book.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Valtech Neue';
+  src: url('/fonts/ValtechNeue-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Sons';
+  src: url('/fonts/Sons-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Sons';
+  src: url('/fonts/Sons-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Sons';
+  src: url('/fonts/Sons-Semibold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
-  /* Neutral palette */
-  --color-bg: #f4f5f7;
-  --color-surface: #ffffff;
-  --color-text: #1a1d21;
-  --color-text-muted: #5b6471;
-  --color-border: #d8dce2;
-  --color-primary: #2563eb;
-  --color-primary-text: #ffffff;
-  --color-primary-active: #1d4ed8;
+  /* --- Valtech palette (raw tokens) -------------------------------- */
+  --val-black: #000000; /* ink, primary buttons, app bar, kiosk bg */
+  --val-white: #ffffff; /* surfaces, cards */
+  --val-bone: #f3f2ef; /* page background */
+  --val-stone: #d1d3ca; /* hairline borders, dividers */
+  --val-graphite: #4c4c49; /* secondary / muted text */
+  --val-signal-red: #ff5959; /* signal: hover, "saída" accent, urgent */
+  --val-teal: #36a7a0; /* "entrada" accent (spectrum member) */
+  --val-lime: #b3ff60; /* active status chip fill */
+  --val-orange: #ff9e46; /* overtime chip fill */
+  --val-spectrum: linear-gradient(
+    90deg,
+    #002fa7 0%,
+    #0554a8 15%,
+    #36a7a0 32%,
+    #b2ff60 50%,
+    #def25f 62%,
+    #ff9e46 78%,
+    #ff5959 90%,
+    #d84265 100%
+  );
+  --val-muted-on-dark: #cfd1c8; /* text on dark surfaces */
+  --val-subtle: #7a7a78; /* subtle text */
+  --val-inner-divider: #eae9e5; /* divider inside cards */
 
-  /* Layout tokens */
+  /* --- Typography -------------------------------------------------- */
+  --font-display: 'Valtech Neue', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 'Sons', 'Helvetica Neue', Arial, sans-serif;
+  /* Legacy alias — kept so any remaining `var(--font-stack)` reads Sons. */
+  --font-stack: var(--font-body);
+
+  /* --- Legacy semantic tokens re-mapped onto Valtech --------------- */
+  --color-bg: var(--val-bone);
+  --color-surface: var(--val-white);
+  --color-text: var(--val-black);
+  --color-text-muted: var(--val-graphite);
+  --color-border: var(--val-stone);
+  --color-primary: var(--val-black);
+  --color-primary-text: var(--val-white);
+  --color-primary-active: var(--val-signal-red);
+
+  /* --- Layout tokens ----------------------------------------------- */
   --shell-max-width: 480px;
+  --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 16px;
   --space-lg: 24px;
-  --radius: 12px;
+  --space-xl: 32px;
+  --radius: 0; /* Valtech: sharp corners (0 default, 2px inputs, 999px pills) */
+  --radius-input: 2px;
+  --radius-pill: 999px;
   --tap-target: 48px;
 
   /* Safe-area insets (notches / home indicators) */
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-
-  --font-stack: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
-    sans-serif;
 }
 
 /* Reset basics */
@@ -40,12 +128,25 @@ body {
 }
 
 body {
-  font-family: var(--font-stack);
+  font-family: var(--font-body);
   color: var(--color-text);
   background: var(--color-bg);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+/* Headings use the display face at Valtech's light weight. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  font-weight: 300;
+  letter-spacing: -0.015em;
+  line-height: 1.05;
 }
 
 img,
@@ -61,6 +162,21 @@ select,
 textarea {
   font: inherit;
   color: inherit;
+}
+
+/* Eyebrow / label helper (Sons 11px uppercase). */
+.val-eyebrow {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--val-graphite);
+}
+
+/* Tabular figures for times/hours. */
+.val-tnum {
+  font-variant-numeric: tabular-nums;
 }
 
 /* App shell (FE-SHARED-9): the hard 480px desktop lock is retired. The MUI
@@ -89,7 +205,7 @@ textarea {
   border-top: 1px solid var(--color-border);
 }
 
-/* Large, full-width primary tap target. */
+/* Large, full-width primary tap target (Valtech: solid black, sharp, red hover). */
 .btn-primary {
   display: block;
   width: 100%;
@@ -99,14 +215,21 @@ textarea {
   border-radius: var(--radius);
   background: var(--color-primary);
   color: var(--color-primary-text);
+  font-family: var(--font-body);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   touch-action: manipulation;
+  transition: background 180ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.btn-primary:hover {
+  background: var(--val-signal-red);
 }
 
 .btn-primary:active {
-  background: var(--color-primary-active);
+  background: var(--val-signal-red);
+  transform: scale(0.98);
 }
 
 .btn-primary:disabled {
