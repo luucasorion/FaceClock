@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/design/frontend-redesign/assets/github-banner.png" alt="FaceClock — Ponto de trabalho vinculado à identidade" width="100%">
+</p>
+
 # FaceClock
 
 ![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
