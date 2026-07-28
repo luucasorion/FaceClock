@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/valtech-design-system-a3539c1e-450a-4cb1-86a6-5cc761a2d8bd/colors_and_type.css">
+<link rel="stylesheet" href="_ds/valtech-design-system-a3539c1e-450a-4cb1-86a6-5cc761a2d8bd/styles.css">
+<script src="_ds/valtech-design-system-a3539c1e-450a-4cb1-86a6-5cc761a2d8bd/_ds_bundle.js"></script>
+<style>
+  body{background:#E5E4DF;margin:0;}
+  .fc-h{font-family:"Valtech Neue","Helvetica Neue",sans-serif;font-weight:300;letter-spacing:-0.015em;line-height:0.98;margin:0;}
+  .fc-b{font-family:"Sons","Helvetica Neue",sans-serif;}
+  .fc-eye{font-family:"Sons",sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#4C4C49;font-weight:500;}
+  .fc-badge{font-family:"Sons",sans-serif;font-size:12px;font-weight:600;letter-spacing:0.02em;background:#000;color:#fff;padding:3px 9px;display:inline-block;}
+  a{color:#000;}a:hover{color:#FF5959;}
+</style>
+</helmet>
+
+<!-- ===================== TURN 2 · DESKTOP SIZES ===================== -->
+<section style="max-width:1360px;margin:0 auto;padding:64px 48px 8px;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;"><span class="fc-badge">2</span><span class="fc-eye">Telas · tamanho desktop (responsivo)</span></div>
+  <h2 class="fc-h" style="font-size:clamp(30px,3.4vw,48px);max-width:20ch;">As mesmas telas em desktop</h2>
+  <p class="fc-b" style="font-size:16px;color:#4C4C49;max-width:64ch;margin:20px 0 44px;line-height:1.5;">Seguindo o <em>AppLayout</em>: telas de gerente em coluna larga (<code>lg</code>) para as tabelas respirarem — <a href="#2a">2a</a> colaboradores, <a href="#2b">2b</a> relatório; telas de colaborador/login numa coluna central confortável (<code>sm</code>) — <a href="#2c">2c</a> bater ponto, <a href="#2d">2d</a> login. App bar preto com banda espectral, superfícies planas.</p>
+
+  <div style="display:flex;flex-direction:column;gap:52px;">
+
+    <!-- ===== 2a Manager Employees (wide) ===== -->
+    <div id="2a">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"><span class="fc-badge">2a</span><span class="fc-eye">Gerente · colaboradores · lg</span></div>
+      <div style="width:1180px;max-width:100%;border:1px solid #D1D3CA;background:#fff;box-shadow:0 24px 60px rgba(0,0,0,0.16);">
+        <div style="display:flex;align-items:center;gap:8px;padding:11px 16px;background:#F3F2EF;border-bottom:1px solid #D1D3CA;">
+          <span style="width:11px;height:11px;border-radius:50%;background:#D1D3CA;"></span><span style="width:11px;height:11px;border-radius:50%;background:#D1D3CA;"></span><span style="width:11px;height:11px;border-radius:50%;background:#D1D3CA;"></span>
+          <div class="fc-b" style="margin-left:14px;background:#fff;border:1px solid #D1D3CA;border-radius:999px;padding:5px 16px;font-size:12px;color:#4C4C49;">faceclock.app/gerente/colaboradores</div>
+        </div>
+        <div style="background:#000;color:#fff;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 32px;">
+            <div style="display:flex;align-items:center;gap:11px;"><svg viewBox="0 0 48 48" fill="none" width="24" height="24" style="color:#fff;"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="2.4"/><g stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="24" y1="18" x2="24" y2="8"/><line x1="24" y1="30" x2="24" y2="40"/><line x1="30" y1="24" x2="40" y2="24"/><line x1="18" y1="24" x2="8" y2="24"/></g><circle cx="24" cy="24" r="3" fill="currentColor"/></svg><span class="fc-h" style="font-size:19px;">FaceClock</span></div>
+            <div class="fc-b" style="display:flex;gap:28px;font-size:14px;color:#cfd1c8;"><span style="color:#fff;">Funcionários</span><span>Relatório</span><span>Perfil</span><span>Sair</span></div>
+          </div>
+          <div style="height:3px;background:var(--val-spectrum);"></div>
+        </div>
+        <div style="background:#F3F2EF;padding:32px 40px 44px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px;">
+            <div style="color:#000;"><div class="fc-h" style="font-size:36px;">Meus colaboradores</div><div class="fc-b" style="font-size:14px;color:#4C4C49;margin-top:4px;">Colaboradores da sua empresa. Clique em um para abrir a ficha.</div></div>
+            <button class="fc-b" style="background:#fff;color:#000;border:1px solid #000;padding:11px 20px;font-size:14px;font-weight:500;cursor:pointer;">Relatório</button>
+          </div>
+          <div style="border:1px solid #D1D3CA;background:#fff;">
+            <div style="display:grid;grid-template-columns:1.6fr 1.2fr 1.2fr 0.9fr 0.7fr;background:#000;color:#fff;padding:13px 20px;"><span class="fc-eye" style="color:#fff;">Nome</span><span class="fc-eye" style="color:#fff;">Login</span><span class="fc-eye" style="color:#fff;">CPF</span><span class="fc-eye" style="color:#fff;">Status</span><span class="fc-eye" style="color:#fff;">Gerente</span></div>
+            <div style="display:grid;grid-template-columns:1.6fr 1.2fr 1.2fr 0.9fr 0.7fr;align-items:center;padding:15px 20px;border-top:1px solid #EAE9E5;"><span class="fc-b" style="font-size:14px;font-weight:600;">Ana Souza</span><span class="fc-b" style="font-size:14px;color:#4C4C49;">ana.souza</span><span class="fc-b" style="font-size:14px;color:#4C4C49;font-variant-numeric:tabular-nums;">123.456.789-01</span><span><span class="fc-b" style="font-size:11px;background:#B3FF60;color:#000;padding:3px 10px;">Ativo</span></span><span style="color:#000;"><svg viewBox="0 0 24 24" fill="none" width="18" height="18" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></span></div>
+            <div style="display:grid;grid-template-columns:1.6fr 1.2fr 1.2fr 0.9fr 0.7fr;align-items:center;padding:15px 20px;border-top:1px solid #EAE9E5;"><span class="fc-b" style="font-size:14px;font-weight:600;">Bruno Lima</span><span class="fc-b" style="font-size:14px;color:#4C4C49;">bruno.lima</span><span class="fc-b" style="font-size:14px;color:#4C4C49;font-variant-numeric:tabular-nums;">234.567.890-12</span><span><span class="fc-b" style="font-size:11px;background:#B3FF60;color:#000;padding:3px 10px;">Ativo</span></span><span class="fc-b" style="font-size:14px;color:#7a7a78;">—</span></div>
+            <div style="display:grid;grid-template-columns:1.6fr 1.2fr 1.2fr 0.9fr 0.7fr;align-items:center;padding:15px 20px;border-top:1px solid #EAE9E5;"><span class="fc-b" style="font-size:14px;font-weight:600;">Carla Dias</span><span class="fc-b" style="font-size:14px;color:#4C4C49;">carla.dias</span><span class="fc-b" style="font-size:14px;color:#4C4C49;font-variant-numeric:tabular-nums;">345.678.901-23</span><span><span class="fc-b" style="font-size:11px;border:1px solid #D1D3CA;color:#4C4C49;padding:3px 10px;">Inativo</span></span><span class="fc-b" style="font-size:14px;color:#7a7a78;">—</span></div>
+            <div style="display:grid;grid-template-columns:1.6fr 1.2fr 1.2fr 0.9fr 0.7fr;align-items:center;padding:15px 20px;border-top:1px solid #EAE9E5;"><span class="fc-b" style="font-size:14px;font-weight:600;">Diego Alves</span><span class="fc-b" style="font-size:14px;color:#4C4C49;">diego.alves</span><span class="fc-b" style="font-size:14px;color:#4C4C49;font-variant-numeric:tabular-nums;">456.789.012-34</span><span><span class="fc-b" style="font-size:11px;background:#B3FF60;color:#000;padding:3px 10px;">Ativo</span></span><span style="color:#000;"><svg viewBox="0 0 24 24" fill="none" width="18" height="18" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></span></div>
+            <div style="display:grid;grid-template-columns:1.6fr 1.2fr 1.2fr 0.9fr 0.7fr;align-items:center;padding:15px 20px;border-top:1px solid #EAE9E5;"><span class="fc-b" style="font-size:14px;font-weight:600;">Elena Rocha</span><span class="fc-b" style="font-size:14px;color:#4C4C49;">elena.rocha</span><span class="fc-b" style="font-size:14px;color:#4C4C49;font-variant-numeric:tabular-nums;">567.890.123-45</span><span><span class="fc-b" style="font-size:11px;background:#B3FF60;color:#000;padding:3px 10px;">Ativo</span></span><span class="fc-b" style="font-size:14px;color:#7a7a78;">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 2b Manager Report (wide) ===== -->
+    <div id="2b">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"><span class="fc-badge">2b</span><span class="fc-eye">Gerente · relatório · lg</span></div>
+      <div style="width:1180px;max-width:100%;border:1px solid #D1D3CA;background:#fff;box-shadow:0 24px 60px rgba(0,0,0,0.16);">
+        <div style="display:flex;align-items:center;gap:8px;padding:11px 16px;background:#F3F2EF;border-bottom:1px solid #D1D3CA;">
+          <span style="width:11px;height:11px;border-radius:50%;background:#D1D3CA;"></span><span style="width:11px;height:11px;border-radius:50%;background:#D1D3CA;"></span><span style="width:11px;height:11px;border-radius:50%;background:#D1D3CA;"></span>
+          <div class="fc-b" style="margin-left:14px;background:#fff;border:1px solid #D1D3CA;border-radius:999px;padding:5px 16px;font-size:12px;color:#4C4C49;">faceclock.app/gerente/relatorio</div>
+        </div>
+        <div style="background:#000;color:#fff;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 32px;">
+            <div style="display:flex;align-items:center;gap:11px;"><svg viewBox="0 0 48 48" fill="none" width="24" height="24" style="color:#fff;"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="2.4"/><g stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="24" y1="18" x2="24" y2="8"/><line x1="24" y1="30" x2="24" y2="40"/><line x1="30" y1="24" x2="40" y2="24"/><line x1="18" y1="24" x2="8" y2="24"/></g><circle cx="24" cy="24" r="3" fill="currentColor"/></svg><span class="fc-h" style="font-size:19px;">FaceClock</span></div>
+            <div class="fc-b" style="display:flex;gap:28px;font-size:14px;color:#cfd1c8;"><span>Funcionários</span><span style="color:#fff;">Relatório</span><span>Perfil</span><span>Sair</span></div>
+          </div>
+          <div style="height:3px;background:var(--val-spectrum);"></div>
+        </div>
+        <div style="background:#F3F2EF;padding:32px 40px 44px;color:#000;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:22px;">
+            <div><div class="fc-h" style="font-size:36px;">Relatório da empresa</div><div class="fc-b" style="font-size:14px;color:#4C4C49;margin-top:4px;">Horas trabalhadas por colaborador no período.</div></div>
+            <button class="fc-b" style="background:#fff;color:#000;border:1px solid #000;padding:11px 20px;font-size:14px;font-weight:500;cursor:pointer;">Colaboradores</button>
+          </div>
+          <div style="background:#fff;border:1px solid #D1D3CA;padding:20px;display:flex;gap:16px;align-items:flex-end;margin-bottom:22px;">
+            <div style="width:200px;"><div class="fc-b" style="font-size:12px;color:#4C4C49;margin-bottom:6px;">Data início</div><div style="border:1px solid #D1D3CA;border-radius:2px;padding:10px 12px;font-family:Sons;font-size:14px;">2026-07-01</div></div>
+            <div style="width:200px;"><div class="fc-b" style="font-size:12px;color:#4C4C49;margin-bottom:6px;">Data fim</div><div style="border:1px solid #D1D3CA;border-radius:2px;padding:10px 12px;font-family:Sons;font-size:14px;">2026-07-28</div></div>
+            <button class="fc-b" style="background:#000;color:#fff;border:none;padding:12px 22px;font-size:14px;font-weight:500;cursor:pointer;">Gerar relatório</button>
+            <button class="fc-b" style="background:#fff;color:#000;border:1px solid #000;padding:12px 22px;font-size:14px;font-weight:500;cursor:pointer;">Exportar CSV</button>
+          </div>
+          <div style="border:1px solid #D1D3CA;background:#fff;">
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;background:#000;color:#fff;padding:13px 20px;"><span class="fc-eye" style="color:#fff;">Colaborador</span><span class="fc-eye" style="color:#fff;text-align:right;">Horas trabalhadas</span><span class="fc-eye" style="color:#fff;text-align:right;">Hora extra</span><span class="fc-eye" style="color:#fff;text-align:center;">Excedeu limite</span></div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;align-items:center;padding:15px 20px;border-top:1px solid #EAE9E5;"><span class="fc-b" style="font-size:14px;font-weight:600;">Ana Souza</span><span class="fc-b" style="font-size:14px;text-align:right;font-variant-numeric:tabular-nums;">42h 10m</span><span class="fc-b" style="font-size:14px;text-align:right;font-variant-numeric:tabular-nums;">2h 00m</span><span style="text-align:center;"><span class="fc-b" style="font-size:11px;background:#FF9E46;color:#000;padding:3px 10px;">Sim</span></span></div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;align-items:center;padding:15px 20px;border-top:1px solid #EAE9E5;"><span class="fc-b" style="font-size:14px;font-weight:600;">Bruno Lima</span><span class="fc-b" style="font-size:14px;text-align:right;font-variant-numeric:tabular-nums;">40h 00m</span><span class="fc-b" style="font-size:14px;text-align:right;font-variant-numeric:tabular-nums;">0h 00m</span><span class="fc-b" style="font-size:14px;text-align:center;color:#4C4C49;">Não</span></div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;align-items:center;padding:15px 20px;border-top:1px solid #EAE9E5;"><span class="fc-b" style="font-size:14px;font-weight:600;">Carla Dias</span><span class="fc-b" style="font-size:14px;text-align:right;font-variant-numeric:tabular-nums;">45h 30m</span><span class="fc-b" style="font-size:14px;text-align:right;font-variant-numeric:tabular-nums;">4h 00m</span><span style="text-align:center;"><span class="fc-b" style="font-size:11px;background:#FF9E46;color:#000;padding:3px 10px;">Sim</span></span></div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;align-items:center;padding:15px 20px;border-top:1px solid #EAE9E5;"><span class="fc-b" style="font-size:14px;font-weight:600;">Diego Alves</span><span class="fc-b" style="font-size:14px;text-align:right;font-variant-numeric:tabular-nums;">38h 45m</span><span class="fc-b" style="font-size:14px;text-align:right;font-variant-numeric:tabular-nums;">0h 00m</span><span class="fc-b" style="font-size:14px;text-align:center;color:#4C4C49;">Não</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 2c + 2d narrow desktop ===== -->
+    <div style="display:flex;flex-wrap:wrap;gap:40px;">
+      <!-- 2c Punch Home desktop (sm centered) -->
+      <div id="2c" style="flex:1 1 560px;min-width:480px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"><span class="fc-badge">2c</span><span class="fc-eye">Colaborador · bater ponto · sm</span></div>
+        <div style="border:1px solid #D1D3CA;background:#fff;box-shadow:0 24px 60px rgba(0,0,0,0.16);">
+          <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:#F3F2EF;border-bottom:1px solid #D1D3CA;">
+            <span style="width:10px;height:10px;border-radius:50%;background:#D1D3CA;"></span><span style="width:10px;height:10px;border-radius:50%;background:#D1D3CA;"></span><span style="width:10px;height:10px;border-radius:50%;background:#D1D3CA;"></span>
+            <div class="fc-b" style="margin-left:12px;background:#fff;border:1px solid #D1D3CA;border-radius:999px;padding:4px 14px;font-size:11px;color:#4C4C49;">faceclock.app/home</div>
+          </div>
+          <div style="background:#000;color:#fff;"><div style="display:flex;align-items:center;justify-content:space-between;padding:14px 28px;"><div style="display:flex;align-items:center;gap:10px;"><svg viewBox="0 0 48 48" fill="none" width="22" height="22" style="color:#fff;"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="2.6"/><g stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="24" y1="18" x2="24" y2="8"/><line x1="24" y1="30" x2="24" y2="40"/><line x1="30" y1="24" x2="40" y2="24"/><line x1="18" y1="24" x2="8" y2="24"/></g><circle cx="24" cy="24" r="3" fill="currentColor"/></svg><span class="fc-h" style="font-size:18px;">FaceClock</span></div><div class="fc-b" style="display:flex;gap:22px;font-size:13px;color:#cfd1c8;"><span>Perfil</span><span>Sair</span></div></div><div style="height:3px;background:var(--val-spectrum);"></div></div>
+          <div style="background:#F3F2EF;padding:34px 0;"><div style="max-width:600px;margin:0 auto;padding:0 28px;color:#000;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><div class="fc-h" style="font-size:30px;">Olá, Ana</div><div class="fc-b" style="font-size:14px;color:#4C4C49;margin-top:2px;">Bater ponto</div></div><div style="width:44px;height:44px;border:1px solid #D1D3CA;background:#fff;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" width="21" height="21" stroke="#000" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></div></div>
+            <button class="fc-b" style="background:#000;color:#fff;border:none;padding:15px;font-size:15px;font-weight:500;cursor:pointer;width:100%;margin-top:22px;">Bater ponto</button>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:28px;"><span class="fc-h" style="font-size:20px;">Hoje</span><span class="fc-b" style="font-size:13px;color:#4C4C49;">3 registros</span></div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px;">
+              <div style="background:#fff;border:1px solid #D1D3CA;border-left:3px solid #36A7A0;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;"><span class="fc-b" style="font-size:14px;font-weight:600;">Entrada</span><span class="fc-b" style="font-size:13px;color:#4C4C49;font-variant-numeric:tabular-nums;">08:02</span></div>
+              <div style="background:#fff;border:1px solid #D1D3CA;border-left:3px solid #FF5959;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;"><span class="fc-b" style="font-size:14px;font-weight:600;">Saída</span><span class="fc-b" style="font-size:13px;color:#4C4C49;font-variant-numeric:tabular-nums;">12:01</span></div>
+              <div style="background:#fff;border:1px solid #D1D3CA;border-left:3px solid #36A7A0;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;"><span class="fc-b" style="font-size:14px;font-weight:600;">Entrada</span><span class="fc-b" style="font-size:13px;color:#4C4C49;font-variant-numeric:tabular-nums;">13:00</span></div>
+            </div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- 2d Login desktop -->
+      <div id="2d" style="flex:1 1 440px;min-width:400px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"><span class="fc-badge">2d</span><span class="fc-eye">Login · desktop</span></div>
+        <div style="border:1px solid #D1D3CA;background:#fff;box-shadow:0 24px 60px rgba(0,0,0,0.16);">
+          <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:#F3F2EF;border-bottom:1px solid #D1D3CA;">
+            <span style="width:10px;height:10px;border-radius:50%;background:#D1D3CA;"></span><span style="width:10px;height:10px;border-radius:50%;background:#D1D3CA;"></span><span style="width:10px;height:10px;border-radius:50%;background:#D1D3CA;"></span>
+            <div class="fc-b" style="margin-left:12px;background:#fff;border:1px solid #D1D3CA;border-radius:999px;padding:4px 14px;font-size:11px;color:#4C4C49;">faceclock.app/login</div>
+          </div>
+          <div style="background:#F3F2EF;padding:48px 32px;min-height:420px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="max-width:360px;margin:0 auto;width:100%;color:#000;">
+              <div style="text-align:center;margin-bottom:26px;"><div class="fc-h" style="font-size:34px;">Entrar</div><div class="fc-b" style="font-size:13px;color:#4C4C49;margin-top:6px;">Acesse sua conta FaceClock</div></div>
+              <div style="background:#fff;border:1px solid #D1D3CA;padding:26px 24px;display:flex;flex-direction:column;gap:18px;">
+                <div><div class="fc-b" style="font-size:12px;color:#4C4C49;margin-bottom:6px;">Login</div><div style="border:1px solid #000;border-radius:2px;padding:11px 12px;font-family:Sons;font-size:14px;">ana.souza</div></div>
+                <div><div class="fc-b" style="font-size:12px;color:#4C4C49;margin-bottom:6px;">Senha</div><div style="border:1px solid #D1D3CA;border-radius:2px;padding:11px 12px;font-family:Sons;font-size:14px;color:#7a7a78;letter-spacing:2px;">••••••••</div></div>
+                <button class="fc-b" style="background:#000;color:#fff;border:none;padding:14px;font-size:15px;font-weight:500;cursor:pointer;margin-top:4px;">Entrar</button>
+                <div class="fc-b" style="font-size:13px;text-align:center;text-decoration:underline;text-underline-offset:3px;">Criar conta de colaborador</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===================== TURN 1 ===================== -->
+<section style="max-width:1360px;margin:0 auto;padding:64px 48px 8px;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+    <span style="color:#000;display:inline-flex;">
+      <svg viewBox="0 0 48 48" fill="none" width="40" height="40"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="2"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="24" y1="18" x2="24" y2="7"/><line x1="24" y1="30" x2="24" y2="41"/><line x1="30" y1="24" x2="41" y2="24"/><line x1="18" y1="24" x2="7" y2="24"/><line x1="28.2" y1="19.8" x2="36" y2="12"/><line x1="28.2" y1="28.2" x2="36" y2="36"/><line x1="19.8" y1="28.2" x2="12" y2="36"/><line x1="19.8" y1="19.8" x2="12" y2="12"/></g><circle cx="24" cy="24" r="3" fill="currentColor"/></svg>
+    </span>
+    <span class="fc-eye">FaceClock · Redesign de marca &amp; interface</span>
+  </div>
+  <h1 class="fc-h" style="font-size:clamp(44px,6vw,88px);max-width:16ch;">Uma identidade nítida para o ponto por reconhecimento facial.</h1>
+  <p class="fc-b" style="font-size:18px;color:#4C4C49;max-width:60ch;margin:24px 0 0;line-height:1.5;">Restyle completo sobre o sistema Valtech — preto/branco disciplinado, tipografia Valtech Neue Light, o espectro prismático reservado para os momentos-herói. Três direções de logo (<a href="#1a">1a</a> / <a href="#1b">1b</a> / <a href="#1c">1c</a>), o banner de repositório (<a href="#1d">1d</a>) e todas as telas redesenhadas (<a href="#1e">1e</a>).</p>
+</section>
+
+<!-- ===================== LOGO DIRECTIONS ===================== -->
+<section style="max-width:1360px;margin:0 auto;padding:56px 48px;">
+  <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:8px;"><span class="fc-eye">01 — Logo</span></div>
+  <h2 class="fc-h" style="font-size:clamp(30px,3.4vw,48px);margin-bottom:36px;">Três direções de marca</h2>
+
+  <div style="display:flex;flex-wrap:wrap;gap:28px;">
+
+    <!-- 1a -->
+    <div id="1a" style="flex:1 1 380px;min-width:340px;border:1px solid #D1D3CA;background:#fff;">
+      <div style="padding:18px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #EAE9E5;"><span class="fc-badge">1a</span><span class="fc-eye">Lockup horizontal</span></div>
+      <div style="background:#F3F2EF;padding:56px 32px;display:flex;align-items:center;justify-content:center;gap:16px;color:#000;">
+        <svg viewBox="0 0 48 48" fill="none" width="52" height="52"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="2"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="24" y1="18" x2="24" y2="7"/><line x1="24" y1="30" x2="24" y2="41"/><line x1="30" y1="24" x2="41" y2="24"/><line x1="18" y1="24" x2="7" y2="24"/><line x1="28.2" y1="19.8" x2="36" y2="12"/><line x1="28.2" y1="28.2" x2="36" y2="36"/><line x1="19.8" y1="28.2" x2="12" y2="36"/><line x1="19.8" y1="19.8" x2="12" y2="12"/></g><circle cx="24" cy="24" r="3" fill="currentColor"/></svg>
+        <span class="fc-h" style="font-size:38px;letter-spacing:-0.02em;">FaceClock</span>
+      </div>
+      <div style="display:flex;">
+        <div style="flex:1;background:#000;padding:26px;display:flex;align-items:center;justify-content:center;gap:11px;color:#fff;">
+          <svg viewBox="0 0 48 48" fill="none" width="30" height="30"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="2.4"/><g stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="24" y1="18" x2="24" y2="7"/><line x1="24" y1="30" x2="24" y2="41"/><line x1="30" y1="24" x2="41" y2="24"/><line x1="18" y1="24" x2="7" y2="24"/><line x1="28.2" y1="19.8" x2="36" y2="12"/><line x1="28.2" y1="28.2" x2="36" y2="36"/><line x1="19.8" y1="28.2" x2="12" y2="36"/><line x1="19.8" y1="19.8" x2="12" y2="12"/></g><circle cx="24" cy="24" r="3" fill="currentColor"/></svg>
+          <span class="fc-h" style="font-size:22px;">FaceClock</span>
+        </div>
+      </div>
+      <p class="fc-b" style="font-size:13px;color:#4C4C49;line-height:1.5;padding:18px 22px;margin:0;">Marca-anel: o asterisco Valtech vira os ponteiros do relógio, e o anel também lê como o guia oval da câmera. Une produto e marca num só glifo.</p>
+    </div>
+
+    <!-- 1b -->
+    <div id="1b" style="flex:1 1 380px;min-width:340px;border:1px solid #D1D3CA;background:#fff;">
+      <div style="padding:18px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #EAE9E5;"><span class="fc-badge">1b</span><span class="fc-eye">Empilhado · face</span></div>
+      <div style="background:#F3F2EF;padding:44px 32px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:#000;">
+        <svg viewBox="0 0 48 48" fill="none" width="58" height="58"><ellipse cx="24" cy="23" rx="14" ry="18" stroke="currentColor" stroke-width="2"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="24" y1="8.5" x2="24" y2="11.5"/><line x1="34.5" y1="23" x2="37.5" y2="23"/><line x1="24" y1="37.5" x2="24" y2="40.5"/><line x1="10.5" y1="23" x2="13.5" y2="23"/><line x1="24" y1="23" x2="24" y2="15"/><line x1="24" y1="23" x2="30" y2="26"/></g><circle cx="24" cy="23" r="2.3" fill="currentColor"/></svg>
+        <span class="fc-h" style="font-size:30px;letter-spacing:-0.015em;">FaceClock</span>
+      </div>
+      <div style="display:flex;">
+        <div style="flex:1;background:#000;padding:26px;display:flex;align-items:center;justify-content:center;gap:12px;color:#fff;">
+          <svg viewBox="0 0 48 48" fill="none" width="30" height="30"><ellipse cx="24" cy="23" rx="14" ry="18" stroke="currentColor" stroke-width="2.4"/><g stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="24" y1="8.5" x2="24" y2="11.5"/><line x1="34.5" y1="23" x2="37.5" y2="23"/><line x1="24" y1="37.5" x2="24" y2="40.5"/><line x1="10.5" y1="23" x2="13.5" y2="23"/><line x1="24" y1="23" x2="24" y2="15"/><line x1="24" y1="23" x2="30" y2="26"/></g><circle cx="24" cy="23" r="2.3" fill="currentColor"/></svg>
+          <span class="fc-h" style="font-size:22px;">FaceClock</span>
+        </div>
+      </div>
+      <p class="fc-b" style="font-size:13px;color:#4C4C49;line-height:1.5;padding:18px 22px;margin:0;">Mais literal: o oval do rosto com ponteiros e marcações de relógio dentro. Empilhado, ótimo para splash e cabeçalhos verticais.</p>
+    </div>
+
+    <!-- 1c -->
+    <div id="1c" style="flex:1 1 380px;min-width:340px;border:1px solid #D1D3CA;background:#fff;">
+      <div style="padding:18px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #EAE9E5;"><span class="fc-badge">1c</span><span class="fc-eye">Ícone de app · favicon</span></div>
+      <div style="background:#F3F2EF;padding:40px 32px;display:flex;align-items:center;justify-content:center;gap:24px;">
+        <div style="width:96px;height:96px;background:#000;display:flex;align-items:center;justify-content:center;color:#fff;">
+          <svg viewBox="0 0 48 48" fill="none" width="54" height="54"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="2.2"/><g stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="24" y1="18" x2="24" y2="7"/><line x1="24" y1="30" x2="24" y2="41"/><line x1="30" y1="24" x2="41" y2="24"/><line x1="18" y1="24" x2="7" y2="24"/><line x1="28.2" y1="19.8" x2="36" y2="12"/><line x1="28.2" y1="28.2" x2="36" y2="36"/><line x1="19.8" y1="28.2" x2="12" y2="36"/><line x1="19.8" y1="19.8" x2="12" y2="12"/></g><circle cx="24" cy="24" r="3" fill="currentColor"/></svg>
+        </div>
+        <div style="width:96px;height:96px;border-radius:22px;background:#000;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+          <div style="position:absolute;inset:0;background:var(--val-spectrum);opacity:0.9;"></div>
+          <div style="position:absolute;inset:3px;border-radius:19px;background:#000;"></div>
+          <svg viewBox="0 0 48 48" fill="none" width="54" height="54" style="position:relative;color:#fff;"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="2.2"/><g stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="24" y1="18" x2="24" y2="7"/><line x1="24" y1="30" x2="24" y2="41"/><line x1="30" y1="24" x2="41" y2="24"/><line x1="18" y1="24" x2="7" y2="24"/><line x1="28.2" y1="19.8" x2="36" y2="12"/><line x1="28.2" y1="28.2" x2="36" y2="36"/><line x1="19.8" y1="28.2" x2="12" y2="36"/><line x1="19.8" y1="19.8" x2="12" y2="12"/></g><circle cx="24" cy="24" r="3" fill="currentColor"/></svg>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+          <div style="width:40px;height:40px;background:#000;display:flex;align-items:center;justify-content:center;color:#fff;"><svg viewBox="0 0 48 48" fill="none" width="24" height="24"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="3"/><g stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="24" y1="17" x2="24" y2="8"/><line x1="24" y1="31" x2="24" y2="40"/><line x1="31" y1="24" x2="40" y2="24"/><line x1="17" y1="24" x2="8" y2="24"/></g><circle cx="24" cy="24" r="3.4" fill="currentColor"/></svg></div>
+          <div style="width:22px;height:22px;background:#000;display:flex;align-items:center;justify-content:center;color:#fff;"><svg viewBox="0 0 48 48" fill="none" width="15" height="15"><circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="4"/><g stroke="currentColor" stroke-width="4" stroke-linecap="round"><line x1="24" y1="16" x2="24" y2="8"/><line x1="32" y1="24" x2="40" y2="24"/></g><circle cx="24" cy="24" r="4" fill="currentColor"/></svg></div>
+        </div>
+      </div>
+      <div style="display:flex;">
+        <div style="flex:1;background:#000;padding:26px;display:flex;align-items:center;justify-content:center;color:#fff;">
+          <span class="fc-h" style="font-size:30px;letter-spacing:-0.02em;">F<span style="color:#B3FF60;">*</span></span>
+        </div>
+      </div>
+      <p class="fc-b" style="font-size:13px;color:#4C4C49;line-height:1.5;padding:18px 22px;margin:0;">A marca-anel reduzida a ladrilho de app — plano (sharp) e iOS (arredondado com aro espectral), favicon e o monograma “F✳”.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===================== BANNER ===================== -->
+<section id="1d" style="max-width:1360px;margin:0 auto;padding:56px 48px;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;"><span class="fc-badge">1d</span><span class="fc-eye">02 — Banner de repositório · 1280 × 640</span></div>
+  <h2 class="fc-h" style="font-size:clamp(30px,3.4vw,48px);margin-bottom:32px;">GitHub social banner</h2>
+
+  <div style="width:1280px;max-width:100%;aspect-ratio:1280/640;background:#000;position:relative;overflow:hidden;color:#fff;box-shadow:0 30px 80px rgba(0,0,0,0.3);">
+    <div style="position:absolute;top:0;left:0;right:0;height:6px;background:var(--val-spectrum);z-index:3;"></div>
+    <img src="assets/prism3.jpg" alt="" style="position:absolute;right:0;top:0;height:100%;width:56%;object-fit:cover;opacity:0.9;">
+    <div style="position:absolute;inset:0;background:linear-gradient(90deg,#000 40%,rgba(0,0,0,0.55) 62%,rgba(0,0,0,0) 100%);"></div>
+    <div style="position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:center;padding:0 88px;">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;color:#fff;">
+        <svg viewBox="0 0 48 48" fill="none" width="54" height="54"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="2"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="24" y1="18" x2="24" y2="7"/><line x1="24" y1="30" x2="24" y2="41"/><line x1="30" y1="24" x2="41" y2="24"/><line x1="18" y1="24" x2="7" y2="24"/><line x1="28.2" y1="19.8" x2="36" y2="12"/><line x1="28.2" y1="28.2" x2="36" y2="36"/><line x1="19.8" y1="28.2" x2="12" y2="36"/><line x1="19.8" y1="19.8" x2="12" y2="12"/></g><circle cx="24" cy="24" r="3" fill="currentColor"/></svg>
+        <span class="fc-h" style="font-size:46px;letter-spacing:-0.02em;">FaceClock</span>
+      </div>
+      <h3 class="fc-h" style="font-size:52px;max-width:15ch;line-height:1.0;">Ponto de trabalho vinculado à identidade.</h3>
+      <p class="fc-b" style="font-size:19px;color:#cfd1c8;max-width:42ch;margin:20px 0 28px;line-height:1.4;">Reconhecimento facial no totem, relatórios de horas por empresa — presença que não se empresta.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <span class="fc-b" style="font-size:14px;border:1px solid rgba(255,255,255,0.28);padding:8px 16px;color:#fff;">Python · FastAPI</span>
+        <span class="fc-b" style="font-size:14px;border:1px solid rgba(255,255,255,0.28);padding:8px 16px;color:#fff;">React · Vite</span>
+        <span class="fc-b" style="font-size:14px;border:1px solid rgba(255,255,255,0.28);padding:8px 16px;color:#fff;">DeepFace · ArcFace</span>
+      </div>
+    </div>
+    <img src="assets/asterisk-white.png" alt="" style="position:absolute;right:44px;bottom:40px;width:44px;opacity:0.9;z-index:2;">
+  </div>
+</section>
+
+<!-- ===================== SCREENS ===================== -->
+<section id="1e" style="max-width:1360px;margin:0 auto;padding:56px 48px 96px;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;"><span class="fc-badge">1e</span><span class="fc-eye">03 — Interface (mobile-first · pt-BR)</span></div>
+  <h2 class="fc-h" style="font-size:clamp(30px,3.4vw,48px);margin-bottom:14px;">Todas as telas, novo revestimento</h2>
+  <p class="fc-b" style="font-size:16px;color:#4C4C49;max-width:64ch;margin:0 0 44px;line-height:1.5;">Mesmos fluxos e layout — pele Valtech: superfícies planas, bordas de 1px, cantos retos, Valtech Neue nos títulos, Sons no corpo. Espectro só nos momentos de sucesso. Entrada em teal, saída em vermelho-sinal.</p>
+
+  <!-- PHONE GALLERY -->
+  <div style="display:flex;flex-wrap:wrap;gap:40px 36px;align-items:flex-start;">
+
+    <!-- ===== Menu ===== -->
+    <div style="flex:0 0 auto;">
+      <span class="fc-eye" style="display:block;margin-bottom:12px;">Menu · entrada pública</span>
+      <div style="width:300px;background:#000;border-radius:38px;padding:11px;box-shadow:0 24px 60px rgba(0,0,0,0.22);">
+        <div style="background:#F3F2EF;border-radius:29px;overflow:hidden;height:620px;position:relative;display:flex;flex-direction:column;">
+          <div style="height:26px;display:flex;justify-content:center;align-items:center;"><div style="width:96px;height:6px;background:#000;border-radius:99px;opacity:0.85;"></div></div>
+          <div style="flex:1;display:flex;flex-direction:column;padding:30px 26px 28px;">
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:16px;color:#000;">
+              <svg viewBox="0 0 48 48" fill="none" width="60" height="60"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="2"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="24" y1="18" x2="24" y2="7"/><line x1="24" y1="30" x2="24" y2="41"/><line x1="30" y1="24" x2="41" y2="24"/><line x1="18" y1="24" x2="7" y2="24"/><line x1="28.2" y1="19.8" x2="36" y2="12"/><line x1="28.2" y1="28.2" x2="36" y2="36"/><line x1="19.8" y1="28.2" x2="12" y2="36"/><line x1="19.8" y1="19.8" x2="12" y2="12"/></g><circle cx="24" cy="24" r="3" fill="currentColor"/></svg>
+              <div class="fc-h" style="font-size:34px;letter-spacing:-0.02em;">FaceClock</div>
+              <div class="fc-b" style="font-size:14px;color:#4C4C49;max-width:24ch;">Controle de ponto por reconhecimento facial</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <button class="fc-b" style="background:#000;color:#fff;border:1px solid #000;padding:15px;font-size:15px;font-weight:500;cursor:pointer;">Bater ponto (totem)</button>
+              <button class="fc-b" style="background:#fff;color:#000;border:1px solid #000;padding:15px;font-size:15px;font-weight:500;cursor:pointer;">Entrar</button>
+              <button class="fc-b" style="background:#fff;color:#000;border:1px solid #D1D3CA;padding:15px;font-size:15px;font-weight:500;cursor:pointer;">Cadastrar colaborador</button>
+              <button class="fc-b" style="background:#fff;color:#000;border:1px solid #D1D3CA;padding:15px;font-size:15px;font-weight:500;cursor:pointer;">Cadastrar empresa</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Login ===== -->
+    <div style="flex:0 0 auto;">
+      <span class="fc-eye" style="display:block;margin-bottom:12px;">Login</span>
+      <div style="width:300px;background:#000;border-radius:38px;padding:11px;box-shadow:0 24px 60px rgba(0,0,0,0.22);">
+        <div style="background:#F3F2EF;border-radius:29px;overflow:hidden;height:620px;position:relative;display:flex;flex-direction:column;">
+          <div style="height:26px;display:flex;justify-content:center;align-items:center;"><div style="width:96px;height:6px;background:#000;border-radius:99px;opacity:0.85;"></div></div>
+          <div style="flex:1;padding:26px 24px;">
+            <div style="text-align:center;margin-bottom:26px;color:#000;">
+              <div class="fc-h" style="font-size:32px;">Entrar</div>
+              <div class="fc-b" style="font-size:13px;color:#4C4C49;margin-top:6px;">Acesse sua conta FaceClock</div>
+            </div>
+            <div style="background:#fff;border:1px solid #D1D3CA;padding:22px 20px;display:flex;flex-direction:column;gap:18px;">
+              <div><div class="fc-b" style="font-size:12px;color:#4C4C49;margin-bottom:6px;">Login</div><div style="border:1px solid #000;padding:11px 12px;font-family:Sons;font-size:14px;">ana.souza</div></div>
+              <div><div class="fc-b" style="font-size:12px;color:#4C4C49;margin-bottom:6px;">Senha</div><div style="border:1px solid #D1D3CA;padding:11px 12px;font-family:Sons;font-size:14px;color:#7a7a78;letter-spacing:2px;">••••••••</div></div>
+              <button class="fc-b" style="background:#000;color:#fff;border:none;padding:14px;font-size:15px;font-weight:500;cursor:pointer;margin-top:4px;">Entrar</button>
+              <div class="fc-b" style="font-size:13px;text-align:center;text-decoration:underline;text-underline-offset:3px;color:#000;">Criar conta de colaborador</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Punch home: idle ===== -->
+    <div style="flex:0 0 auto;">
+      <span class="fc-eye" style="display:block;margin-bottom:12px;">Bater ponto · início</span>
+      <div style="width:300px;background:#000;border-radius:38px;padding:11px;box-shadow:0 24px 60px rgba(0,0,0,0.22);">
+        <div style="background:#F3F2EF;border-radius:29px;overflow:hidden;height:620px;position:relative;display:flex;flex-direction:column;">
+          <div style="background:#000;color:#fff;padding-top:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 18px 14px;">
+              <div style="display:flex;align-items:center;gap:9px;"><svg viewBox="0 0 48 48" fill="none" width="22" height="22" style="color:#fff;"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="2.6"/><g stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="24" y1="18" x2="24" y2="8"/><line x1="24" y1="30" x2="24" y2="40"/><line x1="30" y1="24" x2="40" y2="24"/><line x1="18" y1="24" x2="8" y2="24"/></g><circle cx="24" cy="24" r="3" fill="currentColor"/></svg><span class="fc-h" style="font-size:17px;">FaceClock</span></div>
+              <div style="display:flex;flex-direction:column;gap:4px;"><span style="width:18px;height:2px;background:#fff;"></span><span style="width:18px;height:2px;background:#fff;"></span><span style="width:18px;height:2px;background:#fff;"></span></div>
+            </div>
+            <div style="height:3px;background:var(--val-spectrum);"></div>
+          </div>
+          <div style="flex:1;padding:20px 22px;overflow:hidden;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;color:#000;">
+              <div><div class="fc-h" style="font-size:26px;">Olá, Ana</div><div class="fc-b" style="font-size:13px;color:#4C4C49;margin-top:2px;">Bater ponto</div></div>
+              <div style="width:42px;height:42px;border:1px solid #D1D3CA;background:#fff;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" width="20" height="20" stroke="#000" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></div>
+            </div>
+            <button class="fc-b" style="background:#000;color:#fff;border:none;padding:16px;font-size:15px;font-weight:500;cursor:pointer;width:100%;margin-top:22px;">Bater ponto</button>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:28px;color:#000;"><span class="fc-h" style="font-size:19px;">Hoje</span><span class="fc-b" style="font-size:12px;color:#4C4C49;">3 registros</span></div>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-top:14px;">
+              <div style="background:#fff;border:1px solid #D1D3CA;border-left:3px solid #36A7A0;padding:13px 15px;display:flex;justify-content:space-between;align-items:center;"><span class="fc-b" style="font-size:14px;font-weight:600;">Entrada</span><span class="fc-b" style="font-size:13px;color:#4C4C49;font-variant-numeric:tabular-nums;">08:02</span></div>
+              <div style="background:#fff;border:1px solid #D1D3CA;border-left:3px solid #FF5959;padding:13px 15px;display:flex;justify-content:space-between;align-items:center;"><span class="fc-b" style="font-size:14px;font-weight:600;">Saída</span><span class="fc-b" style="font-size:13px;color:#4C4C49;font-variant-numeric:tabular-nums;">12:01</span></div>
+              <div style="background:#fff;border:1px solid #D1D3CA;border-left:3px solid #36A7A0;padding:13px 15px;display:flex;justify-content:space-between;align-items:center;"><span class="fc-b" style="font-size:14px;font-weight:600;">Entrada</span><span class="fc-b" style="font-size:13px;color:#4C4C49;font-variant-numeric:tabular-nums;">13:00</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Punch home: capturing ===== -->
+    <div style="flex:0 0 auto;">
+      <span class="fc-eye" style="display:block;margin-bottom:12px;">Captura de rosto</span>
+      <div style="width:300px;background:#000;border-radius:38px;padding:11px;box-shadow:0 24px 60px rgba(0,0,0,0.22);">
+        <div style="background:#F3F2EF;border-radius:29px;overflow:hidden;height:620px;position:relative;display:flex;flex-direction:column;">
+          <div style="background:#000;color:#fff;padding-top:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 18px 14px;">
+              <div style="display:flex;align-items:center;gap:9px;"><svg viewBox="0 0 48 48" fill="none" width="22" height="22" style="color:#fff;"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="2.6"/><g stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="24" y1="18" x2="24" y2="8"/><line x1="24" y1="30" x2="24" y2="40"/><line x1="30" y1="24" x2="40" y2="24"/><line x1="18" y1="24" x2="8" y2="24"/></g><circle cx="24" cy="24" r="3" fill="currentColor"/></svg><span class="fc-h" style="font-size:17px;">FaceClock</span></div>
+            </div>
+            <div style="height:3px;background:var(--val-spectrum);"></div>
+          </div>
+          <div style="flex:1;padding:20px 22px;display:flex;flex-direction:column;">
+            <div style="flex:1;background:#000;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+              <img src="assets/prism1.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.28;">
+              <div style="width:60%;aspect-ratio:3/4;border:3px dashed rgba(255,255,255,0.9);border-radius:50%;box-shadow:0 0 0 999px rgba(0,0,0,0.35);"></div>
+              <div class="fc-b" style="position:absolute;bottom:16px;left:0;right:0;text-align:center;color:#fff;font-weight:600;font-size:14px;text-shadow:0 1px 2px rgba(0,0,0,0.6);">Olhe para a câmera…</div>
+            </div>
+            <button class="fc-b" style="background:#000;color:#fff;border:none;padding:15px;font-size:15px;font-weight:500;cursor:pointer;width:100%;margin-top:16px;">Capturar e bater ponto</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Punch home: success ===== -->
+    <div style="flex:0 0 auto;">
+      <span class="fc-eye" style="display:block;margin-bottom:12px;">Sucesso · momento-herói</span>
+      <div style="width:300px;background:#000;border-radius:38px;padding:11px;box-shadow:0 24px 60px rgba(0,0,0,0.22);">
+        <div style="background:#F3F2EF;border-radius:29px;overflow:hidden;height:620px;position:relative;display:flex;flex-direction:column;">
+          <div style="background:#000;color:#fff;padding-top:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 18px 14px;">
+              <div style="display:flex;align-items:center;gap:9px;"><svg viewBox="0 0 48 48" fill="none" width="22" height="22" style="color:#fff;"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="2.6"/><g stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="24" y1="18" x2="24" y2="8"/><line x1="24" y1="30" x2="24" y2="40"/><line x1="30" y1="24" x2="40" y2="24"/><line x1="18" y1="24" x2="8" y2="24"/></g><circle cx="24" cy="24" r="3" fill="currentColor"/></svg><span class="fc-h" style="font-size:17px;">FaceClock</span></div>
+            </div>
+            <div style="height:3px;background:var(--val-spectrum);"></div>
+          </div>
+          <div style="flex:1;padding:24px 22px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;color:#000;">
+            <div style="width:112px;height:112px;border-radius:50%;background:var(--val-spectrum);display:flex;align-items:center;justify-content:center;"><div style="width:92px;height:92px;border-radius:50%;background:#F3F2EF;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" width="46" height="46" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></div></div>
+            <div class="fc-h" style="font-size:30px;">Ponto registrado!</div>
+            <div class="fc-b" style="font-size:14px;color:#4C4C49;">Entrada às 13:00 · Ana Souza</div>
+            <button class="fc-b" style="background:#fff;color:#000;border:1px solid #000;padding:13px 30px;font-size:14px;font-weight:500;cursor:pointer;margin-top:8px;">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Profile ===== -->
+    <div style="flex:0 0 auto;">
+      <span class="fc-eye" style="display:block;margin-bottom:12px;">Perfil &amp; histórico</span>
+      <div style="width:300px;background:#000;border-radius:38px;padding:11px;box-shadow:0 24px 60px rgba(0,0,0,0.22);">
+        <div style="background:#F3F2EF;border-radius:29px;overflow:hidden;height:620px;position:relative;display:flex;flex-direction:column;">
+          <div style="background:#000;color:#fff;padding-top:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 18px 14px;">
+              <div style="display:flex;align-items:center;gap:9px;"><svg viewBox="0 0 48 48" fill="none" width="22" height="22" style="color:#fff;"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="2.6"/><g stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="24" y1="18" x2="24" y2="8"/><line x1="24" y1="30" x2="24" y2="40"/><line x1="30" y1="24" x2="40" y2="24"/><line x1="18" y1="24" x2="8" y2="24"/></g><circle cx="24" cy="24" r="3" fill="currentColor"/></svg><span class="fc-h" style="font-size:17px;">FaceClock</span></div>
+              <div style="display:flex;flex-direction:column;gap:4px;"><span style="width:18px;height:2px;background:#fff;"></span><span style="width:18px;height:2px;background:#fff;"></span><span style="width:18px;height:2px;background:#fff;"></span></div>
+            </div>
+            <div style="height:3px;background:var(--val-spectrum);"></div>
+          </div>
+          <div style="flex:1;padding:20px 22px;overflow:hidden;color:#000;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><div class="fc-h" style="font-size:24px;">Meu perfil</div><div class="fc-b" style="font-size:12px;color:#4C4C49;margin-top:2px;">Seus dados e histórico.</div></div><span class="fc-b" style="font-size:13px;border:1px solid #000;padding:8px 14px;">Voltar</span></div>
+            <div style="background:#fff;border:1px solid #D1D3CA;padding:18px;margin-top:16px;display:flex;flex-direction:column;gap:14px;">
+              <div><div class="fc-eye" style="margin-bottom:4px;">Nome</div><div class="fc-b" style="font-size:15px;">Ana Souza</div></div>
+              <div style="border-top:1px solid #EAE9E5;padding-top:12px;"><div class="fc-eye" style="margin-bottom:4px;">Login</div><div class="fc-b" style="font-size:15px;">ana.souza</div></div>
+            </div>
+            <div class="fc-h" style="font-size:18px;margin-top:22px;">Histórico de pontos</div>
+            <div style="display:flex;gap:9px;margin-top:12px;">
+              <div style="flex:1;border:1px solid #D1D3CA;background:#fff;padding:9px 11px;"><div class="fc-b" style="font-size:10px;color:#4C4C49;">Início</div><div class="fc-b" style="font-size:13px;">01/07</div></div>
+              <div style="flex:1;border:1px solid #D1D3CA;background:#fff;padding:9px 11px;"><div class="fc-b" style="font-size:10px;color:#4C4C49;">Fim</div><div class="fc-b" style="font-size:13px;">28/07</div></div>
+              <button class="fc-b" style="background:#000;color:#fff;border:none;padding:0 16px;font-size:13px;font-weight:500;">Buscar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Manager: employees ===== -->
+    <div style="flex:0 0 auto;">
+      <span class="fc-eye" style="display:block;margin-bottom:12px;">Gerente · colaboradores</span>
+      <div style="width:300px;background:#000;border-radius:38px;padding:11px;box-shadow:0 24px 60px rgba(0,0,0,0.22);">
+        <div style="background:#F3F2EF;border-radius:29px;overflow:hidden;height:620px;position:relative;display:flex;flex-direction:column;">
+          <div style="background:#000;color:#fff;padding-top:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 18px 14px;">
+              <div style="display:flex;align-items:center;gap:9px;"><svg viewBox="0 0 48 48" fill="none" width="22" height="22" style="color:#fff;"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="2.6"/><g stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="24" y1="18" x2="24" y2="8"/><line x1="24" y1="30" x2="24" y2="40"/><line x1="30" y1="24" x2="40" y2="24"/><line x1="18" y1="24" x2="8" y2="24"/></g><circle cx="24" cy="24" r="3" fill="currentColor"/></svg><span class="fc-h" style="font-size:17px;">FaceClock</span></div>
+              <div style="display:flex;flex-direction:column;gap:4px;"><span style="width:18px;height:2px;background:#fff;"></span><span style="width:18px;height:2px;background:#fff;"></span><span style="width:18px;height:2px;background:#fff;"></span></div>
+            </div>
+            <div style="height:3px;background:var(--val-spectrum);"></div>
+          </div>
+          <div style="flex:1;padding:20px 20px;overflow:hidden;color:#000;">
+            <div class="fc-h" style="font-size:23px;">Meus colaboradores</div>
+            <div class="fc-b" style="font-size:12px;color:#4C4C49;margin-top:3px;">Toque para abrir a ficha.</div>
+            <div style="border:1px solid #D1D3CA;margin-top:16px;background:#fff;">
+              <div style="display:flex;justify-content:space-between;padding:10px 13px;background:#000;color:#fff;"><span class="fc-eye" style="color:#fff;">Nome</span><span class="fc-eye" style="color:#fff;">Status</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:13px;border-top:1px solid #EAE9E5;"><div><div class="fc-b" style="font-size:14px;font-weight:600;">Ana Souza</div><div class="fc-b" style="font-size:11px;color:#4C4C49;">ana.souza</div></div><span class="fc-b" style="font-size:11px;background:#B3FF60;color:#000;padding:3px 9px;">Ativo</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:13px;border-top:1px solid #EAE9E5;"><div><div class="fc-b" style="font-size:14px;font-weight:600;">Bruno Lima</div><div class="fc-b" style="font-size:11px;color:#4C4C49;">bruno.lima</div></div><span class="fc-b" style="font-size:11px;background:#B3FF60;color:#000;padding:3px 9px;">Ativo</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:13px;border-top:1px solid #EAE9E5;"><div><div class="fc-b" style="font-size:14px;font-weight:600;">Carla Dias</div><div class="fc-b" style="font-size:11px;color:#4C4C49;">carla.dias</div></div><span class="fc-b" style="font-size:11px;border:1px solid #D1D3CA;color:#4C4C49;padding:3px 9px;">Inativo</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:13px;border-top:1px solid #EAE9E5;"><div><div class="fc-b" style="font-size:14px;font-weight:600;">Diego Alves</div><div class="fc-b" style="font-size:11px;color:#4C4C49;">diego.alves</div></div><span class="fc-b" style="font-size:11px;background:#B3FF60;color:#000;padding:3px 9px;">Ativo</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Manager: report ===== -->
+    <div style="flex:0 0 auto;">
+      <span class="fc-eye" style="display:block;margin-bottom:12px;">Gerente · relatório</span>
+      <div style="width:300px;background:#000;border-radius:38px;padding:11px;box-shadow:0 24px 60px rgba(0,0,0,0.22);">
+        <div style="background:#F3F2EF;border-radius:29px;overflow:hidden;height:620px;position:relative;display:flex;flex-direction:column;">
+          <div style="background:#000;color:#fff;padding-top:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 18px 14px;">
+              <div style="display:flex;align-items:center;gap:9px;"><svg viewBox="0 0 48 48" fill="none" width="22" height="22" style="color:#fff;"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="2.6"/><g stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="24" y1="18" x2="24" y2="8"/><line x1="24" y1="30" x2="24" y2="40"/><line x1="30" y1="24" x2="40" y2="24"/><line x1="18" y1="24" x2="8" y2="24"/></g><circle cx="24" cy="24" r="3" fill="currentColor"/></svg><span class="fc-h" style="font-size:17px;">FaceClock</span></div>
+              <div style="display:flex;flex-direction:column;gap:4px;"><span style="width:18px;height:2px;background:#fff;"></span><span style="width:18px;height:2px;background:#fff;"></span><span style="width:18px;height:2px;background:#fff;"></span></div>
+            </div>
+            <div style="height:3px;background:var(--val-spectrum);"></div>
+          </div>
+          <div style="flex:1;padding:20px 20px;overflow:hidden;color:#000;">
+            <div class="fc-h" style="font-size:23px;">Relatório da empresa</div>
+            <div class="fc-b" style="font-size:12px;color:#4C4C49;margin-top:3px;">Horas por colaborador no período.</div>
+            <div style="background:#fff;border:1px solid #D1D3CA;padding:14px;margin-top:14px;display:flex;gap:9px;align-items:flex-end;">
+              <div style="flex:1;"><div class="fc-b" style="font-size:10px;color:#4C4C49;margin-bottom:4px;">Início</div><div style="border:1px solid #D1D3CA;padding:8px 10px;font-family:Sons;font-size:12px;">01/07</div></div>
+              <div style="flex:1;"><div class="fc-b" style="font-size:10px;color:#4C4C49;margin-bottom:4px;">Fim</div><div style="border:1px solid #D1D3CA;padding:8px 10px;font-family:Sons;font-size:12px;">28/07</div></div>
+              <button class="fc-b" style="background:#000;color:#fff;border:none;padding:9px 13px;font-size:12px;font-weight:500;">Gerar</button>
+            </div>
+            <div style="border:1px solid #D1D3CA;margin-top:14px;background:#fff;">
+              <div style="display:flex;padding:9px 12px;background:#000;color:#fff;"><span class="fc-eye" style="color:#fff;flex:1.4;">Colab.</span><span class="fc-eye" style="color:#fff;flex:1;text-align:right;">Horas</span><span class="fc-eye" style="color:#fff;flex:0.8;text-align:right;">Extra</span></div>
+              <div style="display:flex;padding:12px;border-top:1px solid #EAE9E5;align-items:center;"><span class="fc-b" style="font-size:13px;font-weight:600;flex:1.4;">Ana S.</span><span class="fc-b" style="font-size:13px;flex:1;text-align:right;font-variant-numeric:tabular-nums;">42h 10m</span><span class="fc-b" style="font-size:13px;flex:0.8;text-align:right;font-variant-numeric:tabular-nums;">2h 00m</span></div>
+              <div style="display:flex;padding:12px;border-top:1px solid #EAE9E5;align-items:center;"><span class="fc-b" style="font-size:13px;font-weight:600;flex:1.4;">Bruno L.</span><span class="fc-b" style="font-size:13px;flex:1;text-align:right;font-variant-numeric:tabular-nums;">40h 00m</span><span class="fc-b" style="font-size:13px;flex:0.8;text-align:right;font-variant-numeric:tabular-nums;">0h 00m</span></div>
+              <div style="display:flex;padding:12px;border-top:1px solid #EAE9E5;align-items:center;"><span class="fc-b" style="font-size:13px;font-weight:600;flex:1.4;">Carla D.</span><span class="fc-b" style="font-size:13px;flex:1;text-align:right;font-variant-numeric:tabular-nums;">45h 30m</span><span style="flex:0.8;text-align:right;"><span class="fc-b" style="font-size:11px;background:#FF9E46;color:#000;padding:2px 7px;">4h</span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== KIOSK (totem) ===== -->
+  <div style="margin-top:64px;">
+    <span class="fc-eye" style="display:block;margin-bottom:16px;">Totem / kiosk · tela cheia pública</span>
+    <div style="display:flex;flex-wrap:wrap;gap:32px;">
+
+      <!-- kiosk idle -->
+      <div style="flex:1 1 520px;min-width:420px;">
+        <div style="background:#111;border-radius:20px;padding:14px;box-shadow:0 30px 70px rgba(0,0,0,0.28);">
+          <div style="background:#000;border-radius:8px;overflow:hidden;aspect-ratio:16/10;position:relative;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+            <img src="assets/prism5.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.16;">
+            <div style="position:absolute;top:0;left:0;right:0;height:5px;background:var(--val-spectrum);"></div>
+            <div style="position:relative;display:flex;align-items:center;gap:13px;color:#fff;">
+              <svg viewBox="0 0 48 48" fill="none" width="34" height="34"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="2"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="24" y1="18" x2="24" y2="7"/><line x1="24" y1="30" x2="24" y2="41"/><line x1="30" y1="24" x2="41" y2="24"/><line x1="18" y1="24" x2="7" y2="24"/><line x1="28.2" y1="19.8" x2="36" y2="12"/><line x1="28.2" y1="28.2" x2="36" y2="36"/><line x1="19.8" y1="28.2" x2="12" y2="36"/><line x1="19.8" y1="19.8" x2="12" y2="12"/></g><circle cx="24" cy="24" r="3" fill="currentColor"/></svg>
+              <span class="fc-h" style="font-size:26px;">FaceClock</span>
+            </div>
+            <div class="fc-h" style="position:relative;font-size:clamp(56px,9vw,104px);letter-spacing:-0.02em;font-variant-numeric:tabular-nums;margin-top:14px;">08:41</div>
+            <div class="fc-b" style="position:relative;font-size:15px;color:#cfd1c8;margin-top:2px;">terça-feira, 28 de julho de 2026</div>
+            <div style="position:relative;margin-top:30px;background:#fff;color:#000;border-radius:999px;padding:16px 44px;display:flex;align-items:center;gap:11px;"><svg viewBox="0 0 24 24" fill="none" width="22" height="22" stroke="#000" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="fc-b" style="font-size:19px;font-weight:600;">Bater ponto</span></div>
+            <img src="assets/asterisk-white.png" alt="" style="position:absolute;right:22px;bottom:20px;width:26px;opacity:0.85;">
+          </div>
+        </div>
+      </div>
+
+      <!-- kiosk success -->
+      <div style="flex:1 1 520px;min-width:420px;">
+        <div style="background:#111;border-radius:20px;padding:14px;box-shadow:0 30px 70px rgba(0,0,0,0.28);">
+          <div style="background:#000;border-radius:8px;overflow:hidden;aspect-ratio:16/10;position:relative;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+            <div style="position:absolute;top:0;left:0;right:0;height:5px;background:var(--val-spectrum);"></div>
+            <div style="width:132px;height:132px;border-radius:50%;background:var(--val-spectrum);display:flex;align-items:center;justify-content:center;"><div style="width:108px;height:108px;border-radius:50%;background:#000;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" width="58" height="58" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></div></div>
+            <div class="fc-h" style="font-size:clamp(36px,6vw,60px);margin-top:22px;">Ponto registrado!</div>
+            <div class="fc-b" style="font-size:18px;color:#cfd1c8;margin-top:10px;">Bem-vinda, Ana · 08:41</div>
+            <div class="fc-b" style="font-size:13px;color:#7a7a78;margin-top:26px;">Voltando em 5…</div>
+            <div style="margin-top:12px;background:#fff;color:#000;border-radius:999px;padding:12px 34px;"><span class="fc-b" style="font-size:16px;font-weight:600;">Próxima pessoa</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+</x-dc>
+</body>
+</html>
