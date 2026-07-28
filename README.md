@@ -190,6 +190,7 @@ PORT=8000
 | [`docs/adr/`](docs/adr/) | Decisões de arquitetura — [0002 clean architecture](docs/adr/0002-clean-architecture-layering.md) · [0009 gitflow-lite](docs/adr/0009-gitflow-lite-branching.md) · [0010 Valtech DS](docs/adr/0010-adopt-valtech-design-system.md) |
 | [Wiki](https://github.com/luucasorion/FaceClock/wiki) | Guia de frontend, Design System e todas as telas (Valtech DS) |
 | [Design (handoff)](docs/design/frontend-redesign/) | Fonte da verdade visual: tokens, specs por tela, protótipo e assets |
+| [`assets/`](assets/) | Marca do repositório — logo (claro/escuro) e banner social (1280×640) |
 | [GitHub Issues](https://github.com/luucasorion/FaceClock/issues) | Backlog (labels `P2`/`P3` + domínio); rebrand no épico [#28](https://github.com/luucasorion/FaceClock/issues/28) |
 
 ## Fluxo de trabalho Git
