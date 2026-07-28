@@ -41,8 +41,18 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import GroupsIcon from '@mui/icons-material/Groups';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import { useAuth } from '../auth/AuthContext.jsx';
+import { valtech } from '../theme.js';
+import BrandMark from './BrandMark.jsx';
 
 const MAX_WIDTH = { narrow: 'sm', wide: 'lg' };
+
+// The prismatic spectrum band that forms the app bar's bottom edge (rule 5).
+const SpectrumBand = ({ height = 3 }) => (
+  <Box
+    aria-hidden
+    sx={{ height, width: '100%', background: valtech.spectrum, flexShrink: 0 }}
+  />
+);
 
 export default function AppLayout({ width }) {
   const theme = useTheme();
@@ -80,23 +90,36 @@ export default function AppLayout({ width }) {
     { to: '/gerente/relatorio', label: 'Relatório', icon: <AssessmentIcon fontSize="small" /> },
   ];
 
+  // Active nav item renders in white; the rest in muted-on-dark (#cfd1c8).
+  const navColor = (to) =>
+    location.pathname.startsWith(to) ? valtech.white : valtech.mutedOnDark;
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
-      <AppBar position="static" elevation={1}>
+      <AppBar
+        position="static"
+        elevation={0}
+        sx={{
+          bgcolor: valtech.black,
+          color: valtech.white,
+          boxShadow: 'none',
+        }}
+      >
         <Toolbar>
-          <Typography
-            variant="h6"
+          <Box
             component={Link}
             to={brandTo}
+            aria-label="FaceClock — início"
             sx={{
               flexGrow: 1,
-              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
               color: 'inherit',
               textDecoration: 'none',
             }}
           >
-            FaceClock
-          </Typography>
+            <BrandMark markSize={26} wordSize={20} strokeWidth={2.4} />
+          </Box>
 
           {isAuthenticated && (
             <>
@@ -150,23 +173,42 @@ export default function AppLayout({ width }) {
                     managerEntries.map((e) => (
                       <Button
                         key={e.to}
-                        color="inherit"
                         component={Link}
                         to={e.to}
                         startIcon={e.icon}
+                        disableRipple
+                        sx={{
+                          color: navColor(e.to),
+                          textDecoration: 'none',
+                          '&:hover': { color: valtech.white, bgcolor: 'transparent' },
+                        }}
                       >
                         {e.label}
                       </Button>
                     ))}
                   <Button
-                    color="inherit"
                     component={Link}
                     to="/perfil"
                     startIcon={<PersonOutlineIcon />}
+                    disableRipple
+                    sx={{
+                      color: navColor('/perfil'),
+                      textDecoration: 'none',
+                      '&:hover': { color: valtech.white, bgcolor: 'transparent' },
+                    }}
                   >
                     Perfil
                   </Button>
-                  <Button color="inherit" onClick={handleLogout} startIcon={<LogoutIcon />}>
+                  <Button
+                    onClick={handleLogout}
+                    startIcon={<LogoutIcon />}
+                    disableRipple
+                    sx={{
+                      color: valtech.mutedOnDark,
+                      textDecoration: 'none',
+                      '&:hover': { color: valtech.signalRed, bgcolor: 'transparent' },
+                    }}
+                  >
                     Sair
                   </Button>
                 </Box>
@@ -174,6 +216,7 @@ export default function AppLayout({ width }) {
             </>
           )}
         </Toolbar>
+        <SpectrumBand />
       </AppBar>
 
       <Container
