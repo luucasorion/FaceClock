@@ -20,9 +20,9 @@ import {
   Card,
   CardContent,
   Stack,
-  TextField,
   Typography,
 } from '@mui/material';
+import LabeledField from '../components/LabeledField.jsx';
 import * as empresaApi from '../api/empresa.js';
 import { ApiError } from '../api/client.js';
 
@@ -74,7 +74,7 @@ export default function RegistroEmpresaPage() {
     return (
       <Box component="main" sx={{ width: '100%', mt: 2 }}>
         <Box component="header" sx={{ textAlign: 'center', mb: 3 }}>
-          <Typography variant="h4" component="h1" fontWeight={700}>
+          <Typography variant="h1" component="h1">
             Empresa cadastrada
           </Typography>
         </Box>
@@ -114,7 +114,7 @@ export default function RegistroEmpresaPage() {
   return (
     <Box component="main" sx={{ width: '100%', mt: 2 }}>
       <Box component="header" sx={{ textAlign: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" fontWeight={700}>
+        <Typography variant="h1" component="h1">
           Cadastrar empresa
         </Typography>
         <Typography variant="body1" color="text.secondary">
@@ -128,7 +128,7 @@ export default function RegistroEmpresaPage() {
             <Stack spacing={2}>
               {error && <Alert severity="error">{error}</Alert>}
 
-              <TextField
+              <LabeledField
                 id="cnpj"
                 name="cnpj"
                 label="CNPJ"
@@ -141,7 +141,7 @@ export default function RegistroEmpresaPage() {
                 fullWidth
               />
 
-              <TextField
+              <LabeledField
                 id="razao_social"
                 name="razao_social"
                 label="Razão social"
@@ -153,7 +153,7 @@ export default function RegistroEmpresaPage() {
                 fullWidth
               />
 
-              <TextField
+              <LabeledField
                 id="endereco"
                 name="endereco"
                 label="Endereço"
@@ -165,7 +165,7 @@ export default function RegistroEmpresaPage() {
                 fullWidth
               />
 
-              <TextField
+              <LabeledField
                 id="limite_hora"
                 name="limite_hora"
                 label="Limite de horas"

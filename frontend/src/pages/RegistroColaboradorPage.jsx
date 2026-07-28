@@ -19,9 +19,9 @@ import {
   Card,
   CardContent,
   Stack,
-  TextField,
   Typography,
 } from '@mui/material';
+import LabeledField from '../components/LabeledField.jsx';
 import { useAuth } from '../auth/AuthContext.jsx';
 import * as colaboradorApi from '../api/colaborador.js';
 import { ApiError } from '../api/client.js';
@@ -86,10 +86,10 @@ export default function RegistroColaboradorPage() {
   return (
     <Box component="main" sx={{ width: '100%', mt: 2 }}>
       <Box component="header" sx={{ textAlign: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" fontWeight={700}>
+        <Typography variant="h1" component="h1">
           Cadastrar colaborador
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
           Crie sua conta para bater ponto
         </Typography>
       </Box>
@@ -100,7 +100,7 @@ export default function RegistroColaboradorPage() {
             <Stack spacing={2}>
               {error && <Alert severity="error">{error}</Alert>}
 
-              <TextField
+              <LabeledField
                 id="cpf"
                 name="cpf"
                 label="CPF"
@@ -113,7 +113,7 @@ export default function RegistroColaboradorPage() {
                 fullWidth
               />
 
-              <TextField
+              <LabeledField
                 id="nome"
                 name="nome"
                 label="Nome"
@@ -125,7 +125,7 @@ export default function RegistroColaboradorPage() {
                 fullWidth
               />
 
-              <TextField
+              <LabeledField
                 id="login"
                 name="login"
                 label="Login"
@@ -137,7 +137,7 @@ export default function RegistroColaboradorPage() {
                 fullWidth
               />
 
-              <TextField
+              <LabeledField
                 id="senha"
                 name="senha"
                 label="Senha"
@@ -149,7 +149,7 @@ export default function RegistroColaboradorPage() {
                 fullWidth
               />
 
-              <TextField
+              <LabeledField
                 id="empresa_id"
                 name="empresa_id"
                 label="Identificador da empresa (CNPJ)"
