@@ -46,10 +46,11 @@ import { useAuth } from '../auth/AuthContext.jsx';
 import { baterPonto } from '../api/ponto.js';
 import { dia } from '../api/relatorio.js';
 import { acquireGeo } from '../lib/geo.js';
+import { valtech } from '../theme.js';
 
 // phase: idle → capturing → submitting → result
 export default function PunchHomePage() {
-  const { token } = useAuth();
+  const { token, colaborador } = useAuth();
 
   const [phase, setPhase] = useState('idle');
   const [result, setResult] = useState(null); // { kind, message }
@@ -120,10 +121,10 @@ export default function PunchHomePage() {
         sx={{ mt: 1 }}
       >
         <Box>
-          <Typography variant="h5" component="h1" fontWeight={700}>
-            Olá!
+          <Typography variant="h1" component="h1">
+            {colaborador?.nome ? `Olá, ${colaborador.nome}` : 'Olá!'}
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
             Bater ponto
           </Typography>
         </Box>
@@ -131,7 +132,13 @@ export default function PunchHomePage() {
           component={Link}
           to="/perfil"
           aria-label="Abrir perfil"
-          sx={{ border: 1, borderColor: 'divider' }}
+          sx={{
+            border: 1,
+            borderColor: 'divider',
+            borderRadius: 0,
+            width: 42,
+            height: 42,
+          }}
         >
           <PersonOutlineIcon />
         </IconButton>
@@ -170,7 +177,12 @@ export default function PunchHomePage() {
 
       {phase === 'result' && result && (
         <Box sx={{ mt: 3 }}>
-          <PunchResult result={result} onRetry={dismissResult} retryLabel="Fechar" />
+          <PunchResult
+            result={result}
+            meta={result.kind === 'success' && colaborador?.nome ? colaborador.nome : undefined}
+            onRetry={dismissResult}
+            retryLabel="Fechar"
+          />
         </Box>
       )}
 
@@ -204,8 +216,8 @@ export default function PunchHomePage() {
                 key={b.id}
                 variant="outlined"
                 sx={{
-                  borderLeft: 4,
-                  borderLeftColor: b.tipo === 'entrada' ? '#16a34a' : '#dc2626',
+                  borderLeft: '3px solid',
+                  borderLeftColor: b.tipo === 'entrada' ? valtech.teal : valtech.signalRed,
                 }}
               >
                 <ListItem>
