@@ -31,7 +31,7 @@ export default defineConfig({
       // Generate the SW + manifest in dev too, so the install prompt and
       // standalone launch can be tested with `vite dev`, not only the build.
       devOptions: { enabled: true },
-      includeAssets: ['favicon.png', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'brand-mark.svg', 'app-icon.svg'],
       manifest: {
         name: 'FaceClock — Totem',
         short_name: 'FaceClock',
@@ -42,8 +42,8 @@ export default defineConfig({
         scope: '/',
         display: 'standalone',
         orientation: 'portrait',
-        background_color: '#f4f5f7', // --color-bg
-        theme_color: '#2563eb', // --color-primary
+        background_color: '#f3f2ef', // --val-bone
+        theme_color: '#000000', // --val-black
         icons: [
           {
             src: 'pwa-192x192.png',
@@ -62,6 +62,15 @@ export default defineConfig({
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
+          },
+          {
+            // Crisp vector icon for browsers that support SVG icons; the PNGs
+            // above remain the fallback. Regenerate the PNGs from this source
+            // (app-icon.svg) when a rasteriser is available — see brand README.
+            src: 'app-icon.svg',
+            sizes: 'any',
+            type: 'image/svg+xml',
+            purpose: 'any',
           },
         ],
       },
