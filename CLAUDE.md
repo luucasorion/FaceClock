@@ -57,6 +57,17 @@ Reference: https://github.com/fastapi/full-stack-fastapi-template — when a Fas
 - Never leak `senha` (hash), `facial` (embedding), tokens, or secrets in responses or logs (NFR04/NFR05).
 - Prefer small, incremental, reviewable steps over large rewrites.
 
+## Frontend (visual source of truth)
+
+The frontend (`frontend/`, React + Vite + MUI) is being rebranded to the **Valtech Design System** — a **pure restyle** (no route/flow/guard/`CameraCapture`/API changes). See [ADR 0010](docs/adr/0010-adopt-valtech-design-system.md).
+
+**Before any frontend styling work, these two files are the guide — consult them, don't improvise:**
+
+1. [`docs/design/frontend-redesign/README.md`](docs/design/frontend-redesign/README.md) — the handoff: design language, exact tokens (colors/type/spacing/radius), per-screen specs + MUI mapping, responsive rules, assets, and target touch-points.
+2. [`docs/design/frontend-redesign/FaceClock Redesign.dc.html`](docs/design/frontend-redesign/FaceClock%20Redesign.dc.html) — the hi-fi prototype: exact SVG path data, hex values, and markup to copy from.
+
+Match them pixel-close. The look is **not** the MUI default (no blue, no rounded corners, no elevation). Tokens live once in `frontend/src/theme.js` + `frontend/src/styles/base.css`. Work is tracked under epic [#28](https://github.com/luucasorion/FaceClock/issues/28) (`FE-REBRAND-*`).
+
 ## Git workflow
 
 Gitflow-lite — see [ADR 0009](docs/adr/0009-gitflow-lite-branching.md).
