@@ -20,3 +20,4 @@ Format: `NNNN-short-title.md`, numbered sequentially. Status is one of
 | [0007](0007-manager-as-boolean-flag.md) | Model the manager role as a boolean, not a separate entity | Accepted |
 | [0008](0008-recognition-threshold-single-source.md) | Single recognition threshold of 0.65 (BR01) | Accepted |
 | [0009](0009-gitflow-lite-branching.md) | Gitflow-lite branching workflow | Accepted |
+| [0010](0010-adopt-valtech-design-system.md) | Rebrand the frontend to the Valtech Design System | Accepted |
