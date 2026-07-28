@@ -40,6 +40,7 @@ import {
   Alert,
   Box,
   Button,
+  Divider,
   FormControlLabel,
   Stack,
   Switch,
@@ -159,13 +160,14 @@ export default function ProfileForm({
     return v === undefined || v === null || v === '' ? '—' : String(v);
   };
 
-  // Read-only value styled to read like a field value (label above, value below).
+  // Read-only value styled to read like a field value: Valtech eyebrow label
+  // above, Sons 15px value below.
   const ReadOnlyField = ({ label, children }) => (
     <Box>
-      <Typography variant="caption" color="text.secondary" component="div">
+      <Typography variant="overline" component="div" sx={{ mb: 0.5 }}>
         {label}
       </Typography>
-      <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
+      <Typography variant="body1" sx={{ wordBreak: 'break-word', fontSize: 15 }}>
         {children}
       </Typography>
     </Box>
@@ -179,7 +181,7 @@ export default function ProfileForm({
         </Alert>
       ) : null}
 
-      <Stack spacing={2}>
+      <Stack spacing={2} divider={editing ? undefined : <Divider flexItem />}>
         {visibleFields.map((def) => {
           const editableNow = editing && isEditable(def.name);
           const fieldId = `profile-${def.name}`;
