@@ -49,7 +49,7 @@ def validar_upload_imagem(imagem: UploadFile, conteudo: bytes) -> None:
 
 @router.post("/")
 async def bater_ponto(
-    geo: str = Form(...),
+    geo: str | None = Form(None),
     imagem: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_colaborador: dict = Depends(get_current_colaborador)
@@ -80,7 +80,7 @@ async def bater_ponto(
 @router.post("/embarcado")
 async def bater_ponto_embarcado(
     imagem: UploadFile = File(...),
-    geo: str = Form(None),
+    geo: str | None = Form(None),
     db: Session = Depends(get_db)
 ):
 
