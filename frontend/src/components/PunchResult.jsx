@@ -35,13 +35,49 @@ const DEFAULT_MESSAGE = {
   error: 'Não foi possível registrar o ponto. Tente novamente.',
 };
 
+// The prismatic success ring — the ONE hero moment on the collaborator flow
+// (rule 5). `size` lets the kiosk render a larger ring on its dark stage.
+function SuccessRing({ size = 112, inner = 92, innerBg = 'var(--val-bone)', checkColor = '#000' }) {
+  const check = Math.round(size * 0.41);
+  return (
+    <span
+      className="punch-result__ring"
+      style={{ width: size, height: size }}
+      aria-hidden="true"
+    >
+      <span
+        className="punch-result__ring-inner"
+        style={{ width: inner, height: inner, background: innerBg }}
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width={check}
+          height={check}
+          fill="none"
+          stroke={checkColor}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M4 12.5l5 5L20 6.5" />
+        </svg>
+      </span>
+    </span>
+  );
+}
+
 export default function PunchResult({
   result,
+  meta,
   onReset,
   onRetry,
   resetLabel = 'Próxima pessoa',
   retryLabel = 'Tentar novamente',
   enrollTo = '/enroll',
+  ringSize,
+  ringInner,
+  ringInnerBg,
+  ringCheckColor,
 }) {
   if (!result) return null;
   const kind = result.kind || 'error';
@@ -49,7 +85,17 @@ export default function PunchResult({
 
   return (
     <div className={`punch-result punch-result--${kind}`} role="status" aria-live="polite">
+      {kind === 'success' && (
+        <SuccessRing
+          size={ringSize}
+          inner={ringInner}
+          innerBg={ringInnerBg}
+          checkColor={ringCheckColor}
+        />
+      )}
+
       <p className="punch-result__message">{message}</p>
+      {meta && <p className="punch-result__meta">{meta}</p>}
 
       {kind === 'not-enrolled' && (
         <Link to={enrollTo} className="btn-primary punch-result__action">

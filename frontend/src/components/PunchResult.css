@@ -1,35 +1,77 @@
-/* FE-PUNCH-3 — shared punch result banner. Reuses base.css tokens.
-   Color-coded by outcome; legible at a glance; actions in thumb reach. */
+/* FE-PUNCH-3 / FE-REBRAND-7 — shared punch result.
+   Valtech: success is the ONE hero moment (prismatic spectrum ring). The other
+   outcomes are flat, monochrome, and signalled by a coloured left accent — no
+   pastel fills, no rounding. */
 
 .punch-result {
   display: flex;
   flex-direction: column;
+  align-items: center;
   margin-top: var(--space-lg);
-  padding: var(--space-md);
-  border-radius: var(--radius);
+  padding: var(--space-lg) var(--space-md);
+  border-radius: 0;
   text-align: center;
 }
 
+/* ----- Success: spectrum ring + light headline ---------------------------- */
 .punch-result--success {
-  background: #dcfce7;
-  color: #166534;
+  background: transparent;
+  color: var(--val-black);
 }
 
-/* Recognition/timing outcomes are warnings, not hard errors. */
+.punch-result__ring {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--val-spectrum);
+  margin-bottom: var(--space-md);
+}
+
+.punch-result__ring-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.punch-result--success .punch-result__message {
+  font-family: var(--font-display);
+  font-weight: 300;
+  letter-spacing: -0.015em;
+  font-size: 30px;
+  line-height: 1.05;
+}
+
+.punch-result__meta {
+  margin: var(--space-sm) 0 0;
+  color: var(--val-graphite);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----- Non-success outcomes: flat card + left accent ---------------------- */
+.punch-result--not-recognized,
+.punch-result--too-soon,
+.punch-result--not-enrolled,
+.punch-result--error {
+  align-items: stretch;
+  text-align: left;
+  background: var(--val-white);
+  color: var(--val-black);
+  border: 1px solid var(--val-stone);
+}
+
 .punch-result--not-recognized,
 .punch-result--too-soon {
-  background: #fef9c3;
-  color: #854d0e;
+  border-left: 3px solid var(--val-orange);
 }
 
 .punch-result--not-enrolled {
-  background: #e0f2fe;
-  color: #075985;
+  border-left: 3px solid var(--val-graphite);
 }
 
 .punch-result--error {
-  background: #fee2e2;
-  color: #991b1b;
+  border-left: 3px solid var(--val-signal-red);
 }
 
 .punch-result__message {
@@ -47,13 +89,20 @@
   margin-top: var(--space-md);
 }
 
-/* Secondary text action (retry / dismiss). */
+/* Secondary text action (retry / dismiss) — Valtech tertiary link. */
 .punch-result__dismiss {
   margin-top: var(--space-sm);
   background: none;
   border: none;
-  color: inherit;
+  color: var(--val-black);
   text-decoration: underline;
+  text-underline-offset: 3px;
   cursor: pointer;
   min-height: var(--tap-target);
+  font-family: var(--font-body);
+  font-weight: 600;
+}
+
+.punch-result__dismiss:hover {
+  color: var(--val-signal-red);
 }

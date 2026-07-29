@@ -58,12 +58,26 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography,
 } from '@mui/material';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { empresa as relatorioEmpresa } from '../api/relatorio.js';
 import { downloadCsv } from '../lib/csv.js';
+import LabeledField from '../components/LabeledField.jsx';
+import { valtech } from '../theme.js';
+
+// Black header row, white eyebrow labels.
+const headCellSx = {
+  color: valtech.white,
+  textTransform: 'uppercase',
+  letterSpacing: '0.08em',
+  fontSize: 11,
+  fontWeight: 500,
+  borderBottom: 'none',
+};
+
+// Overtime signalled with an orange chip (square, black text).
+const overtimeChipSx = { bgcolor: valtech.orange, color: valtech.black, border: 'none' };
 
 // Sum a numeric field across a list of day objects, tolerating missing values.
 function sumDays(dias, field) {
@@ -170,10 +184,10 @@ export default function ManagerReportPage() {
         sx={{ mb: 3 }}
       >
         <Box>
-          <Typography variant="h4" component="h1" fontWeight={700}>
+          <Typography variant="h1" component="h1">
             Relatório da empresa
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
             Horas trabalhadas por colaborador no período.
           </Typography>
         </Box>
@@ -190,23 +204,21 @@ export default function ManagerReportPage() {
           <Box component="form" onSubmit={handleSearch}>
             <Stack spacing={2}>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                <TextField
+                <LabeledField
                   id="data_inicio"
                   label="Data início"
                   type="date"
                   value={dataInicio}
                   onChange={(e) => setDataInicio(e.target.value)}
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
+                  sx={{ flex: 1 }}
                 />
-                <TextField
+                <LabeledField
                   id="data_fim"
                   label="Data fim"
                   type="date"
                   value={dataFim}
                   onChange={(e) => setDataFim(e.target.value)}
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
+                  sx={{ flex: 1 }}
                 />
               </Stack>
 
@@ -254,11 +266,11 @@ export default function ManagerReportPage() {
         <TableContainer component={Card} variant="outlined">
           <Table aria-label="Horas por colaborador">
             <TableHead>
-              <TableRow>
-                <TableCell>Colaborador</TableCell>
-                <TableCell align="right">Horas trabalhadas</TableCell>
-                <TableCell align="right">Hora extra</TableCell>
-                <TableCell align="center">Excedeu limite</TableCell>
+              <TableRow sx={{ bgcolor: valtech.black }}>
+                <TableCell sx={headCellSx}>Colaborador</TableCell>
+                <TableCell align="right" sx={headCellSx}>Horas trabalhadas</TableCell>
+                <TableCell align="right" sx={headCellSx}>Hora extra</TableCell>
+                <TableCell align="center" sx={headCellSx}>Excedeu limite</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -279,11 +291,15 @@ export default function ManagerReportPage() {
                       align="right"
                       sx={{ fontVariantNumeric: 'tabular-nums' }}
                     >
-                      {formatMinutes(overtime)}
+                      {exceeded && overtime > 0 ? (
+                        <Chip size="small" label={formatMinutes(overtime)} sx={overtimeChipSx} />
+                      ) : (
+                        formatMinutes(overtime)
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       {exceeded ? (
-                        <Chip size="small" color="warning" label="Sim" />
+                        <Chip size="small" label="Sim" sx={overtimeChipSx} />
                       ) : (
                         <Typography variant="body2" color="text.secondary">
                           Não

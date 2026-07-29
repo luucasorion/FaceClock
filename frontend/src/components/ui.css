@@ -59,16 +59,19 @@
 }
 
 /* ----- ErrorBanner --------------------------------------------------------- */
+/* Valtech: flat white surface, hairline border + a 3px signal-red left accent
+   (the "urgent" signal), black text. No pink fill, no rounding. */
 .ui-error {
   display: flex;
   align-items: center;
   gap: var(--space-md);
   margin: 0 0 var(--space-md);
   padding: var(--space-md);
-  border-radius: var(--radius);
-  background: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #f5c2c2;
+  border-radius: 0;
+  background: var(--val-white);
+  color: var(--val-black);
+  border: 1px solid var(--val-stone);
+  border-left: 3px solid var(--val-signal-red);
   font-size: 0.95rem;
 }
 
@@ -81,13 +84,19 @@
   flex: 0 0 auto;
   min-height: var(--tap-target);
   padding: 0 var(--space-md);
-  border: 1px solid currentColor;
-  border-radius: var(--radius);
-  background: transparent;
-  color: inherit;
+  border: 1px solid var(--val-black);
+  border-radius: 0;
+  background: var(--val-white);
+  color: var(--val-black);
   font-weight: 600;
   cursor: pointer;
   touch-action: manipulation;
+  transition: background 180ms cubic-bezier(0.2, 0, 0, 1), color 180ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.ui-error__retry:hover {
+  background: var(--val-black);
+  color: var(--val-white);
 }
 
 /* ----- Toast --------------------------------------------------------------- */
@@ -100,18 +109,19 @@
   max-width: calc(var(--shell-max-width) - 2 * var(--space-md));
   width: calc(100% - 2 * var(--space-md));
   padding: var(--space-md);
-  border-radius: var(--radius);
-  background: var(--color-text);
-  color: #ffffff;
+  border-radius: 0;
+  background: var(--val-black);
+  color: var(--val-white);
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
   text-align: center;
   font-weight: 600;
 }
 
+/* Status signalled by a 3px left accent, not a coloured fill (stays monochrome). */
 .ui-toast--success {
-  background: #166534;
+  border-left: 3px solid var(--val-lime);
 }
 
 .ui-toast--error {
-  background: #991b1b;
+  border-left: 3px solid var(--val-signal-red);
 }

@@ -43,10 +43,11 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography,
 } from '@mui/material';
+import LabeledField from '../components/LabeledField.jsx';
 import ProfileForm from '../components/ProfileForm.jsx';
+import { valtech } from '../theme.js';
 import Spinner from '../components/Spinner.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import ErrorBanner from '../components/ErrorBanner.jsx';
@@ -198,10 +199,10 @@ export default function ProfilePage() {
         sx={{ mb: 3 }}
       >
         <Box>
-          <Typography variant="h4" component="h1" fontWeight={700}>
+          <Typography variant="h1" component="h1">
             Meu perfil
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
             Seus dados e histórico de pontos.
           </Typography>
         </Box>
@@ -248,23 +249,21 @@ export default function ProfilePage() {
             <Box component="form" onSubmit={handleSearch}>
               <Stack spacing={2}>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                  <TextField
+                  <LabeledField
                     id="data_inicio"
                     label="Data início"
                     type="date"
                     value={dataInicio}
                     onChange={(e) => setDataInicio(e.target.value)}
-                    InputLabelProps={{ shrink: true }}
-                    fullWidth
+                    sx={{ flex: 1 }}
                   />
-                  <TextField
+                  <LabeledField
                     id="data_fim"
                     label="Data fim"
                     type="date"
                     value={dataFim}
                     onChange={(e) => setDataFim(e.target.value)}
-                    InputLabelProps={{ shrink: true }}
-                    fullWidth
+                    sx={{ flex: 1 }}
                   />
                 </Stack>
 
@@ -308,9 +307,13 @@ export default function ProfilePage() {
             <TableContainer component={Card} variant="outlined">
               <Table size="small">
                 <TableHead>
-                  <TableRow>
-                    <TableCell>Tipo</TableCell>
-                    <TableCell align="right">Data / hora</TableCell>
+                  <TableRow sx={{ bgcolor: valtech.black }}>
+                    <TableCell sx={{ color: valtech.white, textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: 11, fontWeight: 500, borderBottom: 'none' }}>
+                      Tipo
+                    </TableCell>
+                    <TableCell align="right" sx={{ color: valtech.white, textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: 11, fontWeight: 500, borderBottom: 'none' }}>
+                      Data / hora
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>

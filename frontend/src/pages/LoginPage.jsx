@@ -17,9 +17,9 @@ import {
   Card,
   CardContent,
   Stack,
-  TextField,
   Typography,
 } from '@mui/material';
+import LabeledField from '../components/LabeledField.jsx';
 import { useAuth } from '../auth/AuthContext.jsx';
 import * as authApi from '../api/auth.js';
 import { ApiError } from '../api/client.js';
@@ -76,10 +76,10 @@ export default function LoginPage() {
   return (
     <Box component="main" sx={{ width: '100%', mt: 2 }}>
       <Box component="header" sx={{ textAlign: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" fontWeight={700}>
+        <Typography variant="h1" component="h1">
           Entrar
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
           Acesse sua conta FaceClock
         </Typography>
       </Box>
@@ -96,7 +96,7 @@ export default function LoginPage() {
 
               {error && <Alert severity="error">{error}</Alert>}
 
-              <TextField
+              <LabeledField
                 id="login"
                 name="login"
                 label="Login"
@@ -105,10 +105,9 @@ export default function LoginPage() {
                 value={form.login}
                 onChange={onChange}
                 required
-                fullWidth
               />
 
-              <TextField
+              <LabeledField
                 id="senha"
                 name="senha"
                 label="Senha"
@@ -117,7 +116,6 @@ export default function LoginPage() {
                 value={form.senha}
                 onChange={onChange}
                 required
-                fullWidth
               />
 
               <Button

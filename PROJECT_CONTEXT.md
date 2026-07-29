@@ -145,3 +145,5 @@ Tracked as [GitHub Issues](https://github.com/luucasorion/FaceClock/issues):
 - **Architecture:** ARCH-1 (`FacialService` → infra) · ARCH-2 (domain exceptions) ·
   ARCH-3 (repository contracts) · ARCH-4 (centralized DI) · REVIEW-1/2/4 (deepen the punch and
   report modules).
+- **Frontend:** FE-REBRAND-0..11 — rebrand the SPA to the Valtech Design System (pure restyle;
+  epic [#28](https://github.com/luucasorion/FaceClock/issues/28)). Decision: [ADR 0010](docs/adr/0010-adopt-valtech-design-system.md); handoff: `docs/design/frontend-redesign/`.

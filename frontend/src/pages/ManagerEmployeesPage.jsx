@@ -26,6 +26,21 @@ import Spinner from '../components/Spinner.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import ErrorBanner from '../components/ErrorBanner.jsx';
 import { isAtivo, statusLabel } from '../lib/status.js';
+import { valtech } from '../theme.js';
+
+// Status chip: Ativo = lime fill / black text; Inativo = white / stone border /
+// graphite text. Both square (chip radius is 0 from the theme).
+const chipSx = (active) =>
+  active
+    ? { bgcolor: valtech.lime, color: valtech.black, border: 'none' }
+    : { bgcolor: valtech.white, color: valtech.graphite, border: `1px solid ${valtech.stone}` };
+
+// A black line check for the gerente boolean column (or an em dash when false).
+const CheckMark = () => (
+  <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Sim">
+    <path d="M4 12.5l5 5L20 6.5" />
+  </svg>
+);
 
 // Column model for the DataGrid. Sortable by default; the grid handles sort/
 // filter client-side. `gerente` (boolean) and `status` render as readable text.
@@ -44,8 +59,7 @@ const COLUMNS = [
         <Chip
           size="small"
           label={statusLabel(params.value)}
-          color={active ? 'success' : 'default'}
-          variant={active ? 'filled' : 'outlined'}
+          sx={chipSx(active)}
         />
       );
     },
@@ -57,6 +71,14 @@ const COLUMNS = [
     minWidth: 100,
     type: 'boolean',
     valueGetter: (value) => Boolean(value),
+    renderCell: (params) =>
+      params.value ? (
+        <Box sx={{ display: 'flex', alignItems: 'center', height: '100%', color: valtech.black }}>
+          <CheckMark />
+        </Box>
+      ) : (
+        <Box sx={{ color: valtech.graphite }}>—</Box>
+      ),
   },
 ];
 
@@ -105,10 +127,10 @@ export default function ManagerEmployeesPage() {
         sx={{ mb: 3 }}
       >
         <Box>
-          <Typography variant="h4" component="h1" fontWeight={700}>
+          <Typography variant="h1" component="h1">
             Meus colaboradores
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
             Colaboradores da sua empresa. Toque em um para abrir a ficha.
           </Typography>
         </Box>
@@ -145,7 +167,25 @@ export default function ManagerEmployeesPage() {
             // the grid scrolls internally if columns overflow.
             width: '100%',
             bgcolor: 'background.paper',
+            border: `1px solid ${valtech.stone}`,
+            borderRadius: 0,
+            // Black header row with white eyebrow labels.
+            '& .MuiDataGrid-columnHeaders': { borderRadius: 0 },
+            '& .MuiDataGrid-columnHeader': { bgcolor: valtech.black },
+            '& .MuiDataGrid-columnHeaderTitle': {
+              color: valtech.white,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              fontSize: 11,
+              fontWeight: 500,
+            },
+            '& .MuiDataGrid-columnSeparator': { display: 'none' },
+            '& .MuiDataGrid-iconButtonContainer .MuiSvgIcon-root, & .MuiDataGrid-sortIcon, & .MuiDataGrid-menuIconButton .MuiSvgIcon-root':
+              { color: valtech.white },
+            // Hairline-separated body rows.
+            '& .MuiDataGrid-cell': { borderColor: valtech.innerDivider },
             '& .MuiDataGrid-row': { cursor: 'pointer' },
+            '& .MuiDataGrid-row:hover': { bgcolor: valtech.bone },
           }}
           aria-label="Colaboradores da empresa"
         />

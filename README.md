@@ -1,74 +1,172 @@
-# FaceClock
+<div align="center">
 
-![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
-![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?logo=sqlalchemy&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)
-![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black)
-![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
-![MUI](https://img.shields.io/badge/MUI-007FFF?logo=mui&logoColor=white)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/logo/faceclock-logo-white.png">
+  <source media="(prefers-color-scheme: light)" srcset="assets/logo/faceclock-logo-black.png">
+  <img alt="FaceClock" src="assets/logo/faceclock-logo-black.png" width="520">
+</picture>
 
-Facial-recognition time clock — collaborators punch in/out with their face, managers get
-company-scoped attendance, worked-hours, and overtime reports. Attendance is **identity-bound**,
-so it resists proxy punching and cuts HR reconciliation.
+<br>
+<br>
 
-## Technology Stack and Features
+**Ponto de trabalho vinculado à identidade — batido com o rosto, não emprestável.**
 
-- ⚡ [**FastAPI**](https://fastapi.tiangolo.com) for the Python backend API.
-    - 🗄️ [**SQLAlchemy**](https://www.sqlalchemy.org) as the Python ORM.
-    - 🧾 [**Pydantic**](https://docs.pydantic.dev), used by FastAPI, for request/response schemas and settings.
-    - 💾 [**SQLite**](https://www.sqlite.org) as the SQL database.
-    - 🧠 [**DeepFace**](https://github.com/serengil/deepface) (ArcFace) for server-side face embedding and recognition.
-- 🚀 [**React**](https://react.dev) for the frontend.
-    - ⚡ Built with [**Vite**](https://vite.dev) as a single-page app.
-    - 🎨 [**MUI**](https://mui.com) components for a responsive, mobile-first UI.
-    - 📷 In-browser camera capture — frames are uploaded as bytes; embeddings are computed server-side and images are never persisted on device (NFR05).
-- 🏛️ **Clean architecture** — `presentation → application → domain`, with `infra` at the edges. See [ADR 0002](docs/adr/0002-clean-architecture-layering.md).
-- 🔐 **JWT authentication** with role-based access — a `gerente` claim gates manager actions; access is company-scoped (BR03/BR06).
-- 👤 **Secure password hashing** by default (bcrypt, NFR04); embeddings and hashes never leak in responses or logs.
-- 🕒 **Punch rules enforced** — 0.65 recognition threshold (BR01) and a 5-minute minimum interval (BR02).
-- 📊 **Attendance reports** — self history + daily summary, and a manager company report with worked-hours/overtime (JSON/CSV).
-- 📐 **Decisions recorded as ADRs** and work tracked in **GitHub Issues** — see below.
+<br>
 
-## Screenshots
+[![Python 3](https://img.shields.io/badge/Python-3-3776AB?logo=python&logoColor=white)](https://www.python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009485?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![React + Vite](https://img.shields.io/badge/React%20%2B%20Vite-1c1e21?logo=react&logoColor=61DAFB)](https://react.dev)
+[![DeepFace · ArcFace](https://img.shields.io/badge/DeepFace-ArcFace-1c1e21)](https://github.com/serengil/deepface)
+[![Clean Architecture](https://img.shields.io/badge/arquitetura-clean-000000)](docs/adr/0002-clean-architecture-layering.md)
+[![Valtech Design System](https://img.shields.io/badge/design-Valtech%20DS-FF5959)](docs/adr/0010-adopt-valtech-design-system.md)
+[![Licença: TBD](https://img.shields.io/badge/licen%C3%A7a-TBD-lightgrey)](#licença)
 
-<!-- Add screenshots to docs/img/ and reference them here, e.g. ![Kiosk punch](docs/img/kiosk.png) -->
+<br>
 
-Key screens: kiosk/totem punch · employee punch home · biometric enrollment · profile & history ·
-manager "My Employees" · manager company report. _(Screenshots to be added under `docs/img/`.)_
+[**Como usar**](#como-usar) ·
+[**Como funciona**](#como-funciona) ·
+[**Arquitetura**](#arquitetura) ·
+[**Telas**](#telas) ·
+[**Documentação**](#documentação) ·
+[**Wiki**](https://github.com/luucasorion/FaceClock/wiki)
 
-## How To Use It
+</div>
 
-### 1. Clone
+---
+
+FaceClock é um sistema de **registro de ponto por reconhecimento facial**. Colaboradores batem
+entrada/saída com o rosto; gestores obtêm relatórios de frequência, horas trabalhadas e horas extras
+no escopo da empresa. Como o registro é **vinculado à identidade** (embedding facial no servidor), ele
+dificulta a batida por terceiros e reduz a conciliação de RH.
+
+> O reconhecimento acontece **no servidor**: os frames são enviados como bytes, o embedding é
+> calculado com DeepFace/ArcFace e **as imagens nunca são persistidas no dispositivo** (NFR05).
+> Senhas (bcrypt), embeddings e tokens nunca vazam em respostas ou logs (NFR04/NFR05).
+
+## Telas
+
+<div align="center">
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/design/frontend-redesign/screens/kiosk-01-idle.png" width="230" alt="Totem — ocioso"><br><sub>Totem · relógio ao vivo</sub></td>
+    <td align="center"><img src="docs/design/frontend-redesign/screens/mobile-03-punch-home.png" width="230" alt="Ponto do colaborador"><br><sub>Ponto do colaborador</sub></td>
+    <td align="center"><img src="docs/design/frontend-redesign/screens/mobile-05-success.png" width="230" alt="Ponto registrado"><br><sub>Confirmação · anel espectro</sub></td>
+  </tr>
+</table>
+
+<em>Protótipos hi-fi do rebrand <strong>Valtech Design System</strong> — telas completas (totem, mobile e desktop) e o guia visual no <a href="https://github.com/luucasorion/FaceClock/wiki">Wiki</a>.</em>
+
+</div>
+
+## Funcionalidades
+
+- ✅ **Ponto por reconhecimento facial** — fluxo autenticado (identidade pelo token) e fluxo quiosque/cego (correspondência 1:N).
+- ✅ **Regras de ponto aplicadas** — limiar de reconhecimento **0,65** (BR01) e intervalo mínimo de **5 min** (BR02), definidos em fonte única.
+- ✅ **Autenticação JWT + papéis** — a claim `gerente` habilita ações de gestor; acesso limitado ao escopo da empresa (BR03/BR06).
+- ✅ **Relatórios de frequência** — histórico próprio + resumo diário; relatório da empresa com horas trabalhadas/extras (JSON/CSV).
+- ✅ **Segurança por padrão** — bcrypt nas senhas; embeddings/hashes/tokens nunca expostos.
+- ✅ **Frontend mobile-first** — SPA React + Vite + MUI, em rebrand para o Valtech Design System.
+
+<details>
+<summary><strong>Stack completa</strong></summary>
+
+<br>
+
+| Camada | Tecnologia |
+|---|---|
+| API | [FastAPI](https://fastapi.tiangolo.com) (Python) |
+| ORM / BD | [SQLAlchemy](https://www.sqlalchemy.org) + [SQLite](https://www.sqlite.org) |
+| Schemas / config | [Pydantic](https://docs.pydantic.dev) |
+| Reconhecimento facial | [DeepFace](https://github.com/serengil/deepface) (ArcFace), no servidor |
+| Frontend | [React](https://react.dev) + [Vite](https://vite.dev) + [MUI](https://mui.com) |
+| Auth | JWT (claims `sub`/`cpf`/`empresa_id`/`gerente`) |
+
+</details>
+
+## Como funciona
+
+1. **Cadastro (enrollment)** — o embedding facial do colaborador é registrado no servidor por um
+   endpoint dedicado; o fluxo de ponto assume cadastro prévio ([ADR 0003](docs/adr/0003-defer-rf13-dedicated-enrollment.md)).
+2. **Ponto** — dois fluxos, ambos aplicando BR01 (limiar) e BR02 (intervalo):
+   - autenticado — `POST /ponto/`, identidade a partir do bearer token;
+   - quiosque/cego — `POST /ponto/embarcado`, identidade por correspondência facial 1:N.
+3. **Autenticação e papéis** — o login por senha emite um JWT; papel e escopo da empresa são lidos
+   do token ([ADR 0004](docs/adr/0004-role-authz-from-jwt-claim.md)).
+4. **Relatórios** — histórico próprio/resumo diário para colaboradores; horas trabalhadas + extras
+   da empresa para gestores, no escopo da empresa (BR06).
+
+## Arquitetura
+
+**Clean architecture** — as dependências apontam **para dentro**: `presentation → application →
+domain`, com `infra` implementando os contratos do domínio nas bordas
+([ADR 0002](docs/adr/0002-clean-architecture-layering.md)).
+
+```mermaid
+flowchart TB
+    subgraph presentation["presentation"]
+        C["Controllers HTTP<br/>schemas · DI"]
+    end
+    subgraph application["application"]
+        UC["Use cases<br/>regras de negócio + serviços"]
+    end
+    subgraph domain["domains"]
+        M["Modelos / entidades<br/>contratos · exceções"]
+    end
+    subgraph infra["infra"]
+        R["Repositórios · BD<br/>JWT · DeepFace"]
+    end
+
+    C --> UC
+    UC --> M
+    R -. implementa .-> M
+    C -. Depends .-> R
+
+    classDef pres fill:#000,color:#fff,stroke:#000;
+    classDef app fill:#4C4C49,color:#fff,stroke:#4C4C49;
+    classDef dom fill:#F3F2EF,color:#000,stroke:#D1D3CA;
+    classDef inf fill:#fff,color:#000,stroke:#D1D3CA;
+    class C pres; class UC app; class M dom; class R inf;
+```
+
+As convenções do FastAPI seguem o [template full-stack oficial](https://github.com/fastapi/full-stack-fastapi-template),
+adaptado à nossa divisão em camadas ([ADR 0001](docs/adr/0001-align-with-fastapi-template-conventions.md)).
+
+```
+presentation/   controllers HTTP, schemas de requisição/resposta, DI
+application/     casos de uso (regras de negócio) + serviços
+domains/         entidades / modelos (e futuros contratos, exceções)
+infra/           repositórios, BD, segurança (JWT), tecnologia externa
+main.py          app FastAPI + wiring do router
+frontend/        SPA React + Vite
+```
+
+## Como usar
+
+**1. Clonar**
 
 ```bash
 git clone https://github.com/luucasorion/FaceClock.git
 cd FaceClock
 ```
 
-### 2. Backend
-
-From the repo root:
+**2. Backend** — a partir da raiz do repositório:
 
 ```bash
 pip install -r requirements.txt
 python main.py
 ```
 
-The API serves on `http://localhost:8000`, with interactive docs at `http://localhost:8000/docs`.
+A API é servida em `http://localhost:8000`, com a documentação interativa em `http://localhost:8000/docs`.
 
-### 3. Frontend
-
-From `frontend/`:
+**3. Frontend** — a partir de `frontend/`:
 
 ```bash
 npm install
 npm run dev
 ```
 
-### 4. Configure
-
-The backend loads a `.env` from the repo root. Configure at least:
+**4. Configurar** — o backend carrega um `.env` da raiz do repositório. Configure ao menos:
 
 ```dotenv
 JWT_SECRET=change_me
@@ -77,45 +175,30 @@ HOST=0.0.0.0
 PORT=8000
 ```
 
-⚠️ **Change `JWT_SECRET` before any non-local use** — the default is insecure. Generate a strong one:
+> ⚠️ **Altere o `JWT_SECRET` antes de qualquer uso fora do ambiente local** — o padrão é inseguro.
+> Gere um forte com `python -c "import secrets; print(secrets.token_urlsafe(32))"`.
+>
+> O CORS está atualmente como `allow_origins=["*"]` e o tráfego deve ser HTTPS para dados
+> biométricos/credenciais (NFR06). Restrinja as origens e termine o TLS antes de implantar.
 
-```bash
-python -c "import secrets; print(secrets.token_urlsafe(32))"
-```
+## Documentação
 
-> Note: CORS is currently `allow_origins=["*"]` and traffic must be HTTPS for biometric/credential
-> data (NFR06). Narrow origins and terminate TLS before deploying.
+| Doc | O que cobre |
+|---|---|
+| [`CLAUDE.md`](CLAUDE.md) | Regras / convenções do projeto (arquitetura, camadas, guardrails) |
+| [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md) | Requisitos do produto + status de implementação |
+| [`docs/adr/`](docs/adr/) | Decisões de arquitetura — [0002 clean architecture](docs/adr/0002-clean-architecture-layering.md) · [0009 gitflow-lite](docs/adr/0009-gitflow-lite-branching.md) · [0010 Valtech DS](docs/adr/0010-adopt-valtech-design-system.md) |
+| [Wiki](https://github.com/luucasorion/FaceClock/wiki) | Guia de frontend, Design System e todas as telas (Valtech DS) |
+| [Design (handoff)](docs/design/frontend-redesign/) | Fonte da verdade visual: tokens, specs por tela, protótipo e assets |
+| [`assets/`](assets/) | Marca do repositório — logo (claro/escuro) e banner social (1280×640) |
+| [GitHub Issues](https://github.com/luucasorion/FaceClock/issues) | Backlog (labels `P2`/`P3` + domínio); rebrand no épico [#28](https://github.com/luucasorion/FaceClock/issues/28) |
 
-## How It Works
+## Fluxo de trabalho Git
 
-- **Enrollment** — a collaborator's face embedding is registered server-side via a dedicated endpoint; the punch flow assumes prior enrollment ([ADR 0003](docs/adr/0003-defer-rf13-dedicated-enrollment.md)).
-- **Punch** — two flows: authenticated (`POST /ponto/`, identity from the bearer token) and kiosk/blind (`POST /ponto/embarcado`, identity by 1:N face match). Both enforce BR01 and BR02.
-- **Auth & roles** — password login issues a JWT (`sub`/`cpf`/`empresa_id`/`gerente`); role and company scope are read from the token ([ADR 0004](docs/adr/0004-role-authz-from-jwt-claim.md)).
-- **Reports** — self history/daily summary for collaborators; company worked-hours + overtime for managers, company-scoped (BR06).
+Gitflow-lite ([ADR 0009](docs/adr/0009-gitflow-lite-branching.md)): `main` = produção, `dev` =
+integração (padrão). Nunca comite direto em `main`/`dev` — crie uma branch (`feat/…`, `fix/…`,
+`docs/…`, `chore/…`) e abra PR para `dev`. Commits seguem [Conventional Commits](https://www.conventionalcommits.org).
 
-## Project Structure
+## Licença
 
-```
-presentation/   HTTP controllers, request/response schemas, DI
-application/     use cases (business rules) + services
-domains/         entities / models (and future contracts, exceptions)
-infra/           repositories, DB, security (JWT), external tech
-main.py          FastAPI app + router wiring
-frontend/        React + Vite SPA
-```
-
-FastAPI conventions follow the [official full-stack template](https://github.com/fastapi/full-stack-fastapi-template),
-adapted to our layering — [ADR 0001](docs/adr/0001-align-with-fastapi-template-conventions.md).
-
-## Documentation
-
-- **Project rules / conventions** — [`CLAUDE.md`](CLAUDE.md)
-- **Product requirements + status** — [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md)
-- **Architecture decisions** — [`docs/adr/`](docs/adr/)
-- **Git workflow** — Gitflow-lite, [ADR 0009](docs/adr/0009-gitflow-lite-branching.md)
-- **Backlog** — [GitHub Issues](https://github.com/luucasorion/FaceClock/issues) (`P2`/`P3` + domain labels)
-- **Archived task files** — [`docs/archive/`](docs/archive/)
-
-## License
-
-No license has been specified yet. Add a `LICENSE` file to define usage terms.
+**TBD.** Nenhuma licença foi especificada ainda. Adicione um arquivo `LICENSE` para definir os termos de uso.
